@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ${ADE_BENCH_BUILD_CONTEXT_DIR}
+      dockerfile: Dockerfile
+    image: ${ADE_BENCH_CLIENT_IMAGE_NAME}
+    container_name: ${ADE_BENCH_CLIENT_CONTAINER_NAME}
+    command: ["sh", "-c", "sleep infinity"]
+    environment:
+      - TEST_DIR=${ADE_BENCH_TEST_DIR}
+      - DBT_PROFILES_DIR=/root/.dbt
+      - DBT_PROJECT_DIR=/dbt_project
+      - DATABASE_TYPE=postgres
+      - DATABASE_HOST=database
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=${ADE_BENCH_DB_NAME}
+      - DATABASE_USER=${ADE_BENCH_DB_USER}
+      - DATABASE_PASSWORD=${ADE_BENCH_DB_PASSWORD}
+    volumes:
+      - ${ADE_BENCH_LOGS_PATH}:${ADE_BENCH_CONTAINER_LOGS_PATH}
+      - ${ADE_BENCH_DBT_PROJECT_PATH}:/dbt_project
+    networks:
+      - ade-network
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: postgres:15-alpine
+    container_name: ${ADE_BENCH_NAME_PREFIX}__database
+    environment:
+      - POSTGRES_DB=${ADE_BENCH_DB_NAME}
+      - POSTGRES_USER=${ADE_BENCH_DB_USER}
+      - POSTGRES_PASSWORD=${ADE_BENCH_DB_PASSWORD}
+    volumes:
+      - ${ADE_BENCH_DATA_PATH}:/docker-entrypoint-initdb.d
+    networks:
+      - ade-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ADE_BENCH_DB_USER} -d ${ADE_BENCH_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  ade-network:
+    name: ${ADE_BENCH_NAME_PREFIX}__network
+    driver: bridge

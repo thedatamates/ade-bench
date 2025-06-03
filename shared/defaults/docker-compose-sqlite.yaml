@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ${ADE_BENCH_BUILD_CONTEXT_DIR}
+      dockerfile: Dockerfile
+    image: ${ADE_BENCH_CLIENT_IMAGE_NAME}
+    container_name: ${ADE_BENCH_CLIENT_CONTAINER_NAME}
+    command: ["sh", "-c", "sleep infinity"]
+    environment:
+      - TEST_DIR=${ADE_BENCH_TEST_DIR}
+      - DBT_PROFILES_DIR=/root/.dbt
+      - DBT_PROJECT_DIR=/dbt_project
+      - DATABASE_TYPE=sqlite
+      - DATABASE_PATH=/data/${ADE_BENCH_DB_NAME}.db
+    volumes:
+      - ${ADE_BENCH_LOGS_PATH}:${ADE_BENCH_CONTAINER_LOGS_PATH}
+      - ${ADE_BENCH_DBT_PROJECT_PATH}:/dbt_project
+      - ${ADE_BENCH_DATA_PATH}:/data
+    networks:
+      - ade-network
+
+networks:
+  ade-network:
+    name: ${ADE_BENCH_NAME_PREFIX}__network
+    driver: bridge

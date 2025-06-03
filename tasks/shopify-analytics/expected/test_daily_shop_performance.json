@@ -1,0 +1,13 @@
+[
+  {
+    "date": "2024-01-07",
+    "total_orders": 150,
+    "total_order_revenue": 15000.00,
+    "abandoned_checkouts_count": 20,
+    "abandoned_checkouts_value": 2000.00,
+    "fulfilled_orders": 140,
+    "unfulfilled_orders": 5,
+    "partially_fulfilled_orders": 5,
+    "avg_order_value": 100.00
+  }
+]

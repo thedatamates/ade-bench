@@ -1,0 +1,6 @@
+dataset_name: "ADE-Bench Core v1.0"
+description: "Core benchmarking tasks for data analysts using dbt and SQL"
+dataset_path: "tasks"
+
+task_ids:
+  - shopify-analytics

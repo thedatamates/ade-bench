@@ -1,0 +1,22 @@
+task_id: shopify-analytics
+title: Shopify Product and Shop Performance Analytics
+description: |
+  Create two tables: one that pulls together product data like total sales, refunds, discounts, and taxes, and another that tracks daily shop performance, including orders, abandoned checkouts, and fulfillment statuses.
+
+difficulty: easy
+category: data-transformation
+tags:
+  - dbt
+  - aggregation
+  - joins
+  - e-commerce
+  - analytics
+timeout_seconds: 500
+test_type: sql
+db_type: duckdb
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: shopify
+  type: duckdb

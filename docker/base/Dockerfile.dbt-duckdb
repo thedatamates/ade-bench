@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    tmux \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dbt with duckdb adapter
+RUN pip install --no-cache-dir \
+    dbt-core==1.7.0 \
+    dbt-duckdb==1.7.0 \
+    duckdb==0.9.2 \
+    pandas==2.1.4
+
+# Create directories
+RUN mkdir -p /root/.dbt /dbt_project /logs /tests /data
+
+# Set up dbt profiles for duckdb
+RUN echo "config:\n  send_anonymous_usage_stats: false\n\ndefault:\n  outputs:\n    dev:\n      type: duckdb\n      path: /data/analytics.duckdb\n  target: dev" > /root/.dbt/profiles.yml
+
+WORKDIR /dbt_project
+
+# Set environment variables
+ENV DBT_PROFILES_DIR=/root/.dbt
+ENV PYTHONUNBUFFERED=1
+
+CMD ["sleep", "infinity"]
