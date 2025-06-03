@@ -1,61 +1,53 @@
-"""Configuration management for ADE-Bench."""
-
 import os
-from pathlib import Path
-from typing import Optional
 
+# import streamlit as st
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
 
-class Config(BaseModel):
-    """Main configuration for ADE-Bench."""
-    
-    # API Keys
-    anthropic_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("ANTHROPIC_API_KEY"))
-    openai_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
-    
-    # S3 Configuration
-    s3_bucket_name: Optional[str] = Field(default_factory=lambda: os.getenv("S3_BUCKET_NAME"))
-    aws_access_key_id: Optional[str] = Field(default_factory=lambda: os.getenv("AWS_ACCESS_KEY_ID"))
-    aws_secret_access_key: Optional[str] = Field(default_factory=lambda: os.getenv("AWS_SECRET_ACCESS_KEY"))
-    aws_region: str = Field(default_factory=lambda: os.getenv("AWS_REGION", "us-east-1"))
-    
-    # Database Configuration
-    database_url: Optional[str] = Field(default_factory=lambda: os.getenv("DATABASE_URL"))
-    
-    # Docker Configuration
-    docker_default_platform: str = Field(default_factory=lambda: os.getenv("DOCKER_DEFAULT_PLATFORM", "linux/amd64"))
-    
-    # Logging
-    log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
-    
-    # Paths
-    project_root: Path = Field(default_factory=lambda: Path(__file__).parent.parent)
-    
+class Config:
+    # Try to get from streamlit secrets first, then environment variables
+    @staticmethod
+    def get_setting(key, default=None):
+        # Check Streamlit secrets
+        # if os.path.exists(".streamlit/secrets.toml"):
+        #     if key.lower() in st.secrets:
+        #         return st.secrets[key.lower()]
+
+        # # Check environment variables (converting to uppercase)
+        # env_val = os.environ.get(key.upper())
+        # if env_val is not None:
+        #     return env_val
+
+        return default
+
+    # AWS Settings
     @property
-    def tasks_dir(self) -> Path:
-        """Path to tasks directory."""
-        return self.project_root / "tasks"
-    
+    def aws_region(self):
+        return self.get_setting("aws_region", "us-west-2")
+
     @property
-    def experiments_dir(self) -> Path:
-        """Path to experiments directory."""
-        return self.project_root / "experiments"
-    
+    def s3_bucket_name(self):
+        return self.get_setting("s3_bucket_name")
+
+    # Database Settings
     @property
-    def shared_dir(self) -> Path:
-        """Path to shared resources directory."""
-        return self.project_root / "shared"
-    
+    def db_host(self):
+        return self.get_setting("db_host")
+
     @property
-    def docker_dir(self) -> Path:
-        """Path to docker configurations directory."""
-        return self.project_root / "docker"
+    def db_name(self):
+        return self.get_setting("db_name")
+
+    @property
+    def db_user(self):
+        return self.get_setting("db_user")
+
+    @property
+    def db_password(self):
+        return self.get_setting("db_password")
 
 
-# Global config instance
 config = Config()
