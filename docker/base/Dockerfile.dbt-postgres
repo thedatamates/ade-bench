@@ -16,10 +16,7 @@ RUN pip install --no-cache-dir \
     pandas==2.1.4
 
 # Create directories
-RUN mkdir -p /root/.dbt /dbt_project /logs /tests /data
-
-# Set up dbt profiles template for postgres
-RUN echo "config:\n  send_anonymous_usage_stats: false\n\ndefault:\n  outputs:\n    dev:\n      type: postgres\n      host: database\n      port: 5432\n      user: \${DATABASE_USER}\n      pass: \${DATABASE_PASSWORD}\n      dbname: \${DATABASE_NAME}\n      schema: public\n      threads: 4\n      keepalives_idle: 0\n  target: dev" > /root/.dbt/profiles.yml
+RUN mkdir -p /root/.dbt /dbt_project /logs /tests
 
 WORKDIR /dbt_project
 

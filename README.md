@@ -28,7 +28,6 @@ Each task contains:
 - `task.yaml` - Task metadata and configuration
 - `Dockerfile` - Container setup with dbt and database
 - `dbt_project/` - dbt project files
-- `data/` - Seed data for databases
 - `tests/` - SQL validation queries
 - `expected/` - Expected query results
 

@@ -16,10 +16,7 @@ RUN pip install --no-cache-dir \
     pandas==2.1.4
 
 # Create directories
-RUN mkdir -p /root/.dbt /dbt_project /logs /tests /data
-
-# Set up dbt profiles for sqlite
-RUN echo "config:\n  send_anonymous_usage_stats: false\n\ndefault:\n  outputs:\n    dev:\n      type: sqlite\n      threads: 1\n      database: /data/analytics.db\n      schema: main\n      schemas_and_paths:\n        main: /data/analytics.db\n      schema_directory: /data\n  target: dev" > /root/.dbt/profiles.yml
+RUN mkdir -p /root/.dbt /dbt_project /logs /tests
 
 WORKDIR /dbt_project
 
