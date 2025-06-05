@@ -16,7 +16,7 @@ uv sync
 
 ```bash
 # Run the benchmark harness
-uv run scripts_python/run_harness.py --agent terminus --model-name anthropic/claude-3-5-sonnet --dataset-config datasets/ade-bench-core.yaml
+uv run scripts_python/run_harness.py --agent claude-code --model-name claude-sonnet-4-20250514 --dataset-config datasets/ade-bench-core.yaml
 
 # Create a new task
 uv run wizard

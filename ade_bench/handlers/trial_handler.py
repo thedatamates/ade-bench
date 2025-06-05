@@ -68,7 +68,7 @@ class Task(BaseModel):
         default=60.0, description="Maximum timeout in seconds for each individual test"
     )
     test_scripts: list[str] = Field(
-        default=["setup-uv-pytest.sh", "run-uv-pytest.sh"],
+        default=["setup-dbt-test.sh", "run-dbt-test.sh"],
         description="List of test scripts to use for the task",
     )
     run_tests_in_same_shell: bool = Field(

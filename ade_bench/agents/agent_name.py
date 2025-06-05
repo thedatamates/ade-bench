@@ -8,3 +8,4 @@ class AgentName(Enum):
     # Non-abstract agents
     ORACLE = "oracle"
     CLAUDE_CODE = "claude-code"
+    MACRO = "macro"

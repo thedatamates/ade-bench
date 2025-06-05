@@ -3,6 +3,9 @@ from ade_bench.agents.base_agent import BaseAgent
 from ade_bench.agents.installed_agents.claude_code.claude_code_agent import (
     ClaudeCodeAgent,
 )
+from ade_bench.agents.installed_agents.macro.macro_agent import (
+    MacroAgent,
+)
 from ade_bench.agents.oracle_agent import OracleAgent
 
 
@@ -10,6 +13,8 @@ class AgentFactory:
     AGENT_NAME_TO_CLASS = {
         OracleAgent.NAME: OracleAgent,
         ClaudeCodeAgent.NAME: ClaudeCodeAgent,
+        MacroAgent.NAME: MacroAgent,
+        
     }
 
     @staticmethod

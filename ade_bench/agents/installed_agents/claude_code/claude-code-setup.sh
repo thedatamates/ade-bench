@@ -12,3 +12,4 @@ npm -v
 echo "installing claude code"
 npm install -g @anthropic-ai/claude-code
 echo "claude code installed"
+dbt deps
