@@ -10,6 +10,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 from ade_bench.utils.logger import logger
+from ade_bench.harness_models import DatabaseConfig
 
 
 class TaskDescription(BaseModel):
@@ -81,6 +82,11 @@ class Task(BaseModel):
         description="Instead of providing a Dockerfile and dependencies in the task, "
         "you can provide an environment name. This will use the environment with the "
         "given name from the shared environment directory.",
+    )
+    database: DatabaseConfig | None = Field(
+        default=None,
+        description="Database configuration for the task. Specifies whether to use "
+        "a shared database or local task-specific database.",
     )
 
     @property

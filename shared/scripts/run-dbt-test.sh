@@ -1,9 +1,9 @@
 #! /bin/bash
 dbt deps
-pwd
-ls
+# remove any existing singular tests and add solution tests
+rm -rf tests
 mkdir tests
-cp /tests/test_* tests
-ls
-ls tests
-dbt test
+cp /tests/* tests
+
+# run dbt data tests for evaluation
+dbt test --select "test_type:singular"

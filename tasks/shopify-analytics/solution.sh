@@ -1,17 +1,4 @@
 #!/bin/bash
-# Solution script for shopify-analytics task
-
-echo "Starting Shopify analytics task solution..."
-
-# Navigate to dbt project
-cd /dbt_project
-
-# First, we need to copy the database to the right location for dbt
-cp /data/shopify.duckdb /data/analytics.duckdb
-
-# Create the models directory if it doesn't exist
-mkdir -p models
-
 # Create the product_performance model
 cat > models/product_performance.sql << 'EOF'
 {{
@@ -135,12 +122,7 @@ where coalesce(do.date, ac.date) is not null
 order by date desc
 EOF
 
-# Install dbt packages if needed
-echo "Installing dbt packages..."
 dbt deps
 
 # Run dbt to create the models
-echo "Running dbt to create models..."
 dbt run --select product_performance daily_shop_performance
-
-echo "Solution completed!"

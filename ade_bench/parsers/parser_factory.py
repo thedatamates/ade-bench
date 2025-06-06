@@ -2,15 +2,18 @@ from enum import Enum
 
 from ade_bench.parsers.base_parser import BaseParser
 from ade_bench.parsers.pytest_parser import PytestParser
+from ade_bench.parsers.dbt_parser import DbtParser
 
 
 class ParserName(Enum):
     PYTEST = "pytest"
+    DBT = "dbt"
 
 
 class ParserFactory:
     PARSER_NAME_TO_CLASS = {
         ParserName.PYTEST: PytestParser,
+        ParserName.DBT: DbtParser,
     }
 
     @staticmethod

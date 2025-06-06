@@ -31,5 +31,3 @@ mkdir /var/log/macro-agent
 chmod +x /usr/local/bin/macro
 
 echo "installed macro binary"
-dbt deps
-dbt test

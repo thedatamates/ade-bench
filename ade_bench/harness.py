@@ -329,6 +329,57 @@ class Harness:
             cleanup=self._cleanup,
             build_context_dir=trial_handler.input_path,
         ) as terminal:
+            # Copy database to container if specified
+            if trial_handler.task.database is not None:
+                db_config = trial_handler.task.database
+
+                if db_config.source == "shared" and db_config.name and db_config.type:
+                    # Copy shared database
+                    shared_db_path = (
+                        Path(__file__).parent.parent / "shared" / "databases" /
+                        db_config.type / f"{db_config.name}.{db_config.type}"
+                    )
+
+                    if not shared_db_path.exists():
+                        # Try alternate extensions for sqlite
+                        if db_config.type == "sqlite":
+                            for ext in ["db", "sqlite", "sqlite3"]:
+                                alt_path = shared_db_path.with_suffix(f".{ext}")
+                                if alt_path.exists():
+                                    shared_db_path = alt_path
+                                    break
+
+                    if shared_db_path.exists():
+                        self._logger.debug(f"Copying shared database {shared_db_path} to container")
+                        terminal.copy_to_container(
+                            paths=shared_db_path,
+                            container_dir="/app",
+                            container_filename=shared_db_path.name
+                        )
+                    else:
+                        self._logger.warning(f"Shared database not found: {shared_db_path}")
+
+                elif db_config.source == "local" and db_config.path:
+                    # Copy local database from task directory
+                    local_db_path = trial_handler.input_path / db_config.path
+                    if local_db_path.exists():
+                        self._logger.debug(f"Copying local database {local_db_path} to container")
+                        if local_db_path.is_dir():
+                            # Copy entire directory
+                            terminal.copy_to_container(
+                                paths=local_db_path,
+                                container_dir="/app"
+                            )
+                        else:
+                            # Copy single file
+                            terminal.copy_to_container(
+                                paths=local_db_path,
+                                container_dir="/app",
+                                container_filename=local_db_path.name
+                            )
+                    else:
+                        self._logger.warning(f"Local database not found: {local_db_path}")
+
             session = terminal.create_session(
                 "agent"
             )

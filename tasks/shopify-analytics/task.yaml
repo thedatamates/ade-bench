@@ -15,7 +15,7 @@ tags:
   - e-commerce
   - analytics
 timeout_seconds: 500
-test_type: sql
+parser_name: dbt
 db_type: duckdb
 
 # Use shared database instead of local data files
