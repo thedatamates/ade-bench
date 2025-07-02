@@ -57,7 +57,8 @@ logs/
 *.duckdb
 *.duckdb.wal
 
-# Temporary files
+# Temporary and dev files
+dev2/
 tmp/
 temp/
 .tmp/
