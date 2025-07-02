@@ -1,19 +1,17 @@
-task_id: template
-title: Template
+task_id: analytics_engineering
+title: Fix a simple syntax error
 descriptions:
   - key: base
     description: |-
-      Do some stuff.
+      Fix the error in the obt_product_inventory.sql file.
 author_name: test
 author_email: test
 difficulty: easy
-category: data-transformation
+category: debug
 tags:
   - dbt
-  - aggregation
-  - joins
-  - e-commerce
-  - analytics
+  - debugging
+  - syntax-error
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
@@ -21,11 +19,11 @@ db_type: duckdb
 # Use shared database instead of local data files
 database:
   source: shared
-  name: template
+  name: analytics_engineering
   type: duckdb
 
 # Use shared project instead of local project
 project:
   source: shared
-  name: activity
+  name: analytics_engineering
   type: dbt

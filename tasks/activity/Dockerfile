@@ -12,9 +12,4 @@ RUN pip install --no-cache-dir \
 # Set up workspace
 WORKDIR /app
 
-COPY ./dbt_project /app
-
-# Copy test files
-#COPY ./tests /app/tests
-
 CMD ["bash"] 

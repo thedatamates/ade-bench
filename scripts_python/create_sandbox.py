@@ -6,6 +6,7 @@ Script to create a sandbox environment from a task.
 import os
 import sys
 import shutil
+import yaml
 from pathlib import Path
 
 
@@ -49,27 +50,67 @@ def wipe_sandbox_directory():
         return False
 
 
-def copy_dbt_project_contents(task_name):
-    """Copy the contents of the dbt_project directory from the task to sandbox."""
-    task_dbt_project = Path("tasks") / task_name / "dbt_project"
+def get_project_config(task_name):
+    """Get the project configuration from task.yaml."""
+    task_yaml_path = Path("tasks") / task_name / "task.yaml"
+    
+    if not task_yaml_path.exists():
+        print(f"Error: task.yaml not found for task '{task_name}'")
+        return None
+    
+    try:
+        with open(task_yaml_path, 'r') as f:
+            task_data = yaml.safe_load(f)
+        
+        # Check if project configuration exists
+        if 'project' not in task_data:
+            print(f"Error: No project configuration found in task '{task_name}'")
+            return None
+        
+        project_config = task_data['project']
+        
+        # Validate project configuration
+        if project_config.get('source') != 'shared':
+            print(f"Error: Task '{task_name}' does not use a shared project")
+            return None
+        
+        if 'name' not in project_config:
+            print(f"Error: No project name specified in task '{task_name}'")
+            return None
+        
+        return project_config
+    except Exception as e:
+        print(f"Error reading task.yaml: {e}")
+        return None
+
+
+def copy_project_contents(task_name):
+    """Copy the contents of the shared project to sandbox."""
+    project_config = get_project_config(task_name)
+    if not project_config:
+        return False
+    
+    project_name = project_config['name']
+    project_type = project_config.get('type', 'dbt')  # Default to dbt if not specified
+    shared_project_dir = Path("shared/projects") / project_type / project_name
     sandbox_dir = Path("dev/sandbox")
     
-    if not task_dbt_project.exists():
-        print(f"Error: dbt_project directory not found in task '{task_name}'")
+    if not shared_project_dir.exists():
+        print(f"Error: Shared project '{project_name}' not found at {shared_project_dir}")
         return False
     
     try:
-        # Copy all contents from task's dbt_project to sandbox
-        for item in task_dbt_project.iterdir():
+        # Copy all contents from shared project to sandbox
+        for item in shared_project_dir.iterdir():
             if item.is_file():
                 shutil.copy2(item, sandbox_dir)
             elif item.is_dir():
                 shutil.copytree(item, sandbox_dir / item.name)
         
-        print(f"✓ Copied dbt_project contents to sandbox")
+        print(f"✓ Copied shared project '{project_name}' contents to sandbox")
         return True
     except Exception as e:
-        print(f"Error copying dbt_project contents: {e}")
+        print(f"Error copying project contents: {e}")
         return False
 
 
@@ -119,8 +160,8 @@ def main():
     if not wipe_sandbox_directory():
         sys.exit(1)
     
-    # Step 3: Copy dbt_project contents only
-    if not copy_dbt_project_contents(task_name):
+    # Step 3: Copy shared project contents
+    if not copy_project_contents(task_name):
         sys.exit(1)
     
     # Step 4: Find and copy DuckDB file

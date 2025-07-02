@@ -380,6 +380,38 @@ class Harness:
                     else:
                         self._logger.warning(f"Local database not found: {local_db_path}")
 
+            # Copy project to container if specified
+            if trial_handler.task.project is not None:
+                project_config = trial_handler.task.project
+
+                if project_config.source == "shared" and project_config.name:
+                    # Copy shared project
+                    shared_project_path = (
+                        Path(__file__).parent.parent / "shared" / "projects" /
+                        project_config.type / project_config.name
+                    )
+
+                    if shared_project_path.exists():
+                        self._logger.debug(f"Copying shared project {shared_project_path} to container")
+                        terminal.copy_to_container(
+                            paths=shared_project_path,
+                            container_dir="/app"
+                        )
+                    else:
+                        self._logger.warning(f"Shared project not found: {shared_project_path}")
+
+                elif project_config.source == "local":
+                    # Copy local project from task directory
+                    local_project_path = trial_handler.input_path / "dbt_project"
+                    if local_project_path.exists():
+                        self._logger.debug(f"Copying local project {local_project_path} to container")
+                        terminal.copy_to_container(
+                            paths=local_project_path,
+                            container_dir="/app"
+                        )
+                    else:
+                        self._logger.warning(f"Local project not found: {local_project_path}")
+
             session = terminal.create_session(
                 "agent"
             )

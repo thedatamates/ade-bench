@@ -12,4 +12,7 @@ RUN pip install --no-cache-dir \
 # Set up workspace
 WORKDIR /app
 
+# Note: dbt project will be copied dynamically by the harness
+# based on the dbt_project configuration in task.yaml
+
 CMD ["bash"] 

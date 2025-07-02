@@ -3,4 +3,5 @@ description: "Core benchmarking tasks for data analysts using dbt and SQL"
 dataset_path: "tasks"
 
 task_ids:
-  - analytics_engineering
+  - analytics_engineering001
+  - analytics_engineering002
