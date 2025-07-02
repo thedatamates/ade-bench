@@ -1,10 +1,14 @@
+#!/bin/bash
+
+# Remove a comma
+cat > models/analytics_obt/obt_product_inventory.sql << 'EOF'
 WITH source AS (
     SELECT
         p.product_id,
         p.product_code,
         p.product_name,
         p.description,
-        p.supplier_company,
+        p.supplier_company
         p.standard_cost,
         p.list_price,
         p.reorder_level,
@@ -30,3 +34,7 @@ ON p.product_id = i.product_id
 
 SELECT *
 FROM source
+EOF
+
+dbt deps
+dbt run

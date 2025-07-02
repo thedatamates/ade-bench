@@ -5,3 +5,4 @@ dataset_path: "tasks"
 task_ids:
   - analytics_engineering001
   - analytics_engineering002
+  - analytics_engineering003

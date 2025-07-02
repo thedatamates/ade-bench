@@ -7,10 +7,10 @@ WITH source AS (
         p.product_code,
         p.product_name,
         p.description,
-        p.supplier_company
-        p.standard_cost
-        p.list_price
-        p.reorder_level
+        p.supplier_company,
+        p.standard_cost,
+        p.list_price,
+        p.reorder_level,
         p.target_level,
         p.quantity_per_unit,
         p.discontinued,
@@ -34,9 +34,6 @@ ON p.product_id = i.product_id
 SELECT *
 FROM source
 EOF
-
-dbt deps
-dbt run
 
 # Run dbt to create the models
 dbt run --select obt_product_inventory

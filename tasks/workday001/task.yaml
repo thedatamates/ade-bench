@@ -21,7 +21,7 @@ db_type: duckdb
 # Use shared database instead of local data files
 database:
   source: shared
-  name: template
+  name: workday
   type: duckdb
 
 # Use shared project instead of local project

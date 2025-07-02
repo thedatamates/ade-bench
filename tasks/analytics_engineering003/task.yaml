@@ -1,9 +1,9 @@
-task_id: analytics_engineering001
-title: A dummy task that doesn't need to do anything to pass. 
+task_id: analytics_engineering003
+title: Fix a simple syntax error
 descriptions:
   - key: base
     description: |-
-      Nothing is broken. Do nothing.
+      Fix the error in the obt_product_inventory.sql file.
 author_name: test
 author_email: test
 difficulty: easy
