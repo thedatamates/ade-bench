@@ -1,0 +1,27 @@
+task_id: analytics_engineering001
+title: A dummy task that doesn't need to do anything to pass. It how many columns are in the project, and passes the test if the same number is returned.
+descriptions:
+  - key: base
+    description: |-
+      This is a dbt project. Do not make any changes.
+author_name: test
+author_email: test
+difficulty: easy
+category: diagnostic
+tags:
+  - dbt
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: analytics_engineering
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: analytics_engineering
+  type: dbt

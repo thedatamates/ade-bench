@@ -306,6 +306,58 @@ class Harness:
 
         return result, FailureMode.NONE
 
+    def _run_setup_script(
+        self,
+        terminal: Terminal,
+        session: TmuxSession,
+        trial_handler: TrialHandler,
+    ) -> None:
+        """Run setup.sh script if it exists in the task directory."""
+        setup_script_path = trial_handler.input_path / "setup.sh"
+        
+        if not setup_script_path.exists():
+            self._logger.debug(f"No setup script found at {setup_script_path}")
+            return
+            
+        self._logger.info(f"Running setup script: {setup_script_path}")
+        
+        try:
+            # Copy setup script to container (following oracle agent pattern)
+            session.copy_to_container(
+                setup_script_path,
+                container_dir="/app",
+                container_filename="setup.sh",
+            )
+            
+            # Run the setup script (following oracle agent pattern)
+            session.send_keys(
+                ["bash /app/setup.sh", "Enter"],
+                max_timeout_sec=300,  # 5 minute timeout for setup script
+                block=True,
+            )
+            
+            self._logger.info("Setup script completed successfully")
+            
+        except TimeoutError:
+            self._logger.warning(
+                f"Setup script timed out for task {trial_handler.task_id}"
+            )
+        except Exception as e:
+            self._logger.error(
+                f"Error running setup script for task {trial_handler.task_id}: {e}"
+            )
+        finally:
+            # Clean up: remove the setup script from container
+            try:
+                session.send_keys(
+                    ["rm -f /app/setup.sh", "Enter"],
+                    max_timeout_sec=30,
+                    block=True,
+                )
+                self._logger.debug("Setup script cleaned up from container")
+            except Exception as cleanup_error:
+                self._logger.warning(f"Failed to cleanup setup script: {cleanup_error}")
+
     def _run_trial(
         self,
         trial_handler: TrialHandler,
@@ -380,9 +432,44 @@ class Harness:
                     else:
                         self._logger.warning(f"Local database not found: {local_db_path}")
 
+            # Copy project to container if specified
+            if trial_handler.task.project is not None:
+                project_config = trial_handler.task.project
+
+                if project_config.source == "shared" and project_config.name:
+                    # Copy shared project
+                    shared_project_path = (
+                        Path(__file__).parent.parent / "shared" / "projects" /
+                        project_config.type / project_config.name
+                    )
+
+                    if shared_project_path.exists():
+                        self._logger.debug(f"Copying shared project {shared_project_path} to container")
+                        terminal.copy_to_container(
+                            paths=shared_project_path,
+                            container_dir="/app"
+                        )
+                    else:
+                        self._logger.warning(f"Shared project not found: {shared_project_path}")
+
+                elif project_config.source == "local":
+                    # Copy local project from task directory
+                    local_project_path = trial_handler.input_path / "dbt_project"
+                    if local_project_path.exists():
+                        self._logger.debug(f"Copying local project {local_project_path} to container")
+                        terminal.copy_to_container(
+                            paths=local_project_path,
+                            container_dir="/app"
+                        )
+                    else:
+                        self._logger.warning(f"Local project not found: {local_project_path}")
+
             session = terminal.create_session(
                 "agent"
             )
+
+            # Run setup script if it exists
+            self._run_setup_script(terminal, session, trial_handler)
 
             pre_agent_pane = session.capture_pane(capture_entire=True)
             trial_handler.pre_agent_pane_path.write_text(pre_agent_pane)

@@ -23,3 +23,9 @@ database:
   source: shared
   name: shopify
   type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: shopify_analytics
+  type: dbt

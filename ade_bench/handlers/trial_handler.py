@@ -10,7 +10,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 from ade_bench.utils.logger import logger
-from ade_bench.harness_models import DatabaseConfig
+from ade_bench.harness_models import DatabaseConfig, ProjectConfig
 
 
 class TaskDescription(BaseModel):
@@ -87,6 +87,11 @@ class Task(BaseModel):
         default=None,
         description="Database configuration for the task. Specifies whether to use "
         "a shared database or local task-specific database.",
+    )
+    project: ProjectConfig | None = Field(
+        default=None,
+        description="Project configuration for the task. Specifies whether to use "
+        "a shared project or local task-specific project.",
     )
 
     @property

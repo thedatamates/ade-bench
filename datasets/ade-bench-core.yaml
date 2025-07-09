@@ -3,4 +3,8 @@ description: "Core benchmarking tasks for data analysts using dbt and SQL"
 dataset_path: "tasks"
 
 task_ids:
-  - shopify-analytics
+  - analytics_engineering001
+  - analytics_engineering002
+  - analytics_engineering003
+  - analytics_engineering004
+  - empty001

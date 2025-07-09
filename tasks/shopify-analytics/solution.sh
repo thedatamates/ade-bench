@@ -107,18 +107,18 @@ daily_orders as (
 )
 
 select 
-    coalesce(do.date, ac.date) as date,
-    coalesce(do.total_orders, 0) as total_orders,
-    round(coalesce(do.total_order_revenue, 0), 2) as total_order_revenue,
+    coalesce(o.date, ac.date) as date,
+    coalesce(o.total_orders, 0) as total_orders,
+    round(coalesce(o.total_order_revenue, 0), 2) as total_order_revenue,
     coalesce(ac.abandoned_count, 0) as abandoned_checkouts_count,
     round(coalesce(ac.abandoned_value, 0), 2) as abandoned_checkouts_value,
-    coalesce(do.fulfilled_orders, 0) as fulfilled_orders,
-    coalesce(do.unfulfilled_orders, 0) as unfulfilled_orders,
-    coalesce(do.partially_fulfilled_orders, 0) as partially_fulfilled_orders,
-    round(coalesce(do.avg_order_value, 0), 2) as avg_order_value
-from daily_orders do
-full outer join abandoned_checkouts ac on do.date = ac.date
-where coalesce(do.date, ac.date) is not null
+    coalesce(o.fulfilled_orders, 0) as fulfilled_orders,
+    coalesce(o.unfulfilled_orders, 0) as unfulfilled_orders,
+    coalesce(o.partially_fulfilled_orders, 0) as partially_fulfilled_orders,
+    round(coalesce(o.avg_order_value, 0), 2) as avg_order_value
+from daily_orders o
+full outer join abandoned_checkouts ac on o.date = ac.date
+where coalesce(o.date, ac.date) is not null
 order by date desc
 EOF
 

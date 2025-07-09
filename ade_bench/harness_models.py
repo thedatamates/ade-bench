@@ -151,6 +151,14 @@ class DatabaseConfig(BaseModel):
     path: Optional[str] = None  # For local databases
 
 
+class ProjectConfig(BaseModel):
+    """Configuration for task project."""
+    
+    source: str = Field(default="local", pattern="^(local|shared)$")
+    name: Optional[str] = None  # For shared projects
+    type: str = Field(default="dbt", pattern="^(dbt|other)$")  # Project type
+
+
 class TaskMetadata(BaseModel):
     """Metadata for a task."""
     
@@ -164,6 +172,7 @@ class TaskMetadata(BaseModel):
     test_type: str = "sql"
     db_type: str = "duckdb"
     database: Optional[DatabaseConfig] = None
+    project: Optional[ProjectConfig] = None
 
 class TerminalCommand(BaseModel):
     command: str
