@@ -1,19 +1,15 @@
-task_id: template
-title: Template
+task_id: analytics_engineering004
+title: Creates a new model that modifies a staging model.
 descriptions:
   - key: base
     description: |-
-      Do some stuff.
+      Create a model called "dim_customer" that renames id to customer_id, and makes that row a unique primary key.
 author_name: test
 author_email: test
 difficulty: easy
-category: data-transformation
+category: model_creation
 tags:
   - dbt
-  - aggregation
-  - joins
-  - e-commerce
-  - analytics
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
@@ -21,11 +17,11 @@ db_type: duckdb
 # Use shared database instead of local data files
 database:
   source: shared
-  name: template
+  name: analytics_engineering
   type: duckdb
 
 # Use shared project instead of local project
 project:
   source: shared
-  name: activity
+  name: analytics_engineering
   type: dbt

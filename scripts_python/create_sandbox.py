@@ -50,8 +50,8 @@ def wipe_sandbox_directory():
         return False
 
 
-def get_project_config(task_name):
-    """Get the project configuration from task.yaml."""
+def get_task_config(task_name):
+    """Get the task configuration from task.yaml."""
     task_yaml_path = Path("tasks") / task_name / "task.yaml"
     
     if not task_yaml_path.exists():
@@ -62,26 +62,60 @@ def get_project_config(task_name):
         with open(task_yaml_path, 'r') as f:
             task_data = yaml.safe_load(f)
         
-        # Check if project configuration exists
-        if 'project' not in task_data:
-            print(f"Error: No project configuration found in task '{task_name}'")
-            return None
-        
-        project_config = task_data['project']
-        
-        # Validate project configuration
-        if project_config.get('source') != 'shared':
-            print(f"Error: Task '{task_name}' does not use a shared project")
-            return None
-        
-        if 'name' not in project_config:
-            print(f"Error: No project name specified in task '{task_name}'")
-            return None
-        
-        return project_config
+        return task_data
     except Exception as e:
         print(f"Error reading task.yaml: {e}")
         return None
+
+
+def get_project_config(task_name):
+    """Get the project configuration from task.yaml."""
+    task_data = get_task_config(task_name)
+    if not task_data:
+        return None
+    
+    # Check if project configuration exists
+    if 'project' not in task_data:
+        print(f"Error: No project configuration found in task '{task_name}'")
+        return None
+    
+    project_config = task_data['project']
+    
+    # Validate project configuration
+    if project_config.get('source') != 'shared':
+        print(f"Error: Task '{task_name}' does not use a shared project")
+        return None
+    
+    if 'name' not in project_config:
+        print(f"Error: No project name specified in task '{task_name}'")
+        return None
+    
+    return project_config
+
+
+def get_database_config(task_name):
+    """Get the database configuration from task.yaml."""
+    task_data = get_task_config(task_name)
+    if not task_data:
+        return None
+    
+    # Check if database configuration exists
+    if 'database' not in task_data:
+        print(f"Error: No database configuration found in task '{task_name}'")
+        return None
+    
+    database_config = task_data['database']
+    
+    # Validate database configuration
+    if database_config.get('source') != 'shared':
+        print(f"Error: Task '{task_name}' does not use a shared database")
+        return None
+    
+    if 'name' not in database_config:
+        print(f"Error: No database name specified in task '{task_name}'")
+        return None
+    
+    return database_config
 
 
 def copy_project_contents(task_name):
@@ -116,6 +150,11 @@ def copy_project_contents(task_name):
 
 def find_and_copy_duckdb_file(task_name):
     """Find the associated DuckDB file in shared/databases/duckdb and copy it to sandbox."""
+    database_config = get_database_config(task_name)
+    if not database_config:
+        return False
+    
+    database_name = database_config['name']
     duckdb_dir = Path("shared/databases/duckdb")
     sandbox_dir = Path("dev/sandbox")
     
@@ -123,11 +162,11 @@ def find_and_copy_duckdb_file(task_name):
         print(f"Error: DuckDB directory not found at {duckdb_dir}")
         return False
     
-    # Look for the .duckdb file with the same name as the task
-    duckdb_file = duckdb_dir / f"{task_name}.duckdb"
+    # Look for the .duckdb file with the database name from task config
+    duckdb_file = duckdb_dir / f"{database_name}.duckdb"
     
     if not duckdb_file.exists():
-        print(f"Error: DuckDB file '{task_name}.duckdb' not found in shared/databases/duckdb")
+        print(f"Error: DuckDB file '{database_name}.duckdb' not found in shared/databases/duckdb")
         return False
     
     try:

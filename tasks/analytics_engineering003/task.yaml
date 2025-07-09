@@ -1,12 +1,12 @@
 task_id: analytics_engineering003
-title: Fix a simple syntax error
+title: Identical to analytics_engineering001, but the error is not identified.
 descriptions:
   - key: base
     description: |-
-      Fix the error in the obt_product_inventory.sql file.
+      Fix the error in this dbt project.
 author_name: test
 author_email: test
-difficulty: easy
+difficulty: medium
 category: debug
 tags:
   - dbt

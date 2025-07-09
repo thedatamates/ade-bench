@@ -1,9 +1,9 @@
 task_id: analytics_engineering002
-title: Fix a simple syntax error
+title: Fix a simple syntax error that's been identified by the user.
 descriptions:
   - key: base
     description: |-
-      Fix the error in the obt_product_inventory.sql file.
+      Fix the syntax error in the obt_product_inventory.sql file.
 author_name: test
 author_email: test
 difficulty: easy
