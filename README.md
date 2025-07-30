@@ -8,9 +8,7 @@ ADE-Bench (Analytics and Data Engineering Benchmark) is a framework for evaluati
 
 ## Installation
 
-```bash
-uv sync
-```
+Fuck if I know.
 
 ## Usage
 
@@ -18,8 +16,11 @@ uv sync
 # Run the benchmark harness
 uv run scripts_python/run_harness.py --agent claude-code --model-name claude-sonnet-4-20250514 --dataset-config datasets/ade-bench-core.yaml
 
-# Create a new task
-uv run wizard
+# View logs of results
+uv run scripts_python/view_logs.py
+
+# Extract the details of all the tasks in the benchmark
+uv run scripts_python/extract_task_details.py
 ```
 
 ## Task Structure
@@ -27,9 +28,9 @@ uv run wizard
 Each task contains:
 - `task.yaml` - Task metadata and configuration
 - `Dockerfile` - Container setup with dbt and database
-- `dbt_project/` - dbt project files
 - `tests/` - SQL validation queries
-- `expected/` - Expected query results
+- `setup.sh` – A script that runs before the agent is given the task, for modifying files and source data.
+- `solution.sh` – The oracle solution script that directly modifies files. 
 
 ## Development
 
