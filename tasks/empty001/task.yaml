@@ -1,6 +1,6 @@
 task_id: empty001
 status: ready
-title: Fix a simple syntax error
+title: Create a new dbt project. 
 descriptions:
   - key: base
     description: |-
