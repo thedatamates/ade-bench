@@ -1,0 +1,32 @@
+task_id: analytics_engineering007
+status: dev
+title: Fix broken models caused by data types changing.
+descriptions:
+  - key: base
+    description: |-
+      The id field in the "products" table is now a string. This has broken several models. Update them so that they work with product ids that are strings.
+  - key: medium
+    description: |-
+      The project is broken. Fix it.
+author_name: test
+author_email: test
+difficulty: medium
+category: schema_change
+tags:
+  - dbt
+  - data_issue
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: analytics_engineering
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: analytics_engineering
+  type: dbt
