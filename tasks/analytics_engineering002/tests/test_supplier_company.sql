@@ -10,4 +10,6 @@ with matches as (
     )
 )
 
-select * from matches where cols != 3
+select * 
+from matches 
+where cols != 3

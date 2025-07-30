@@ -1,4 +1,5 @@
 task_id: empty001
+status: ready
 title: Fix a simple syntax error
 descriptions:
   - key: base

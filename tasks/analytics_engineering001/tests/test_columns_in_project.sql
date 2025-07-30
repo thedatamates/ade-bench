@@ -4,4 +4,6 @@ with matches as (
   where table_catalog not in ('temp','localmemdb','_duckdb_ui')
 )
 
-select * from matches where column_count != 545
+select * 
+from matches 
+where column_count != 545

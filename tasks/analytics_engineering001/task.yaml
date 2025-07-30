@@ -1,4 +1,5 @@
 task_id: analytics_engineering001
+status: ready
 title: A dummy task that doesn't need to do anything to pass. It how many columns are in the project, and passes the test if the same number is returned.
 descriptions:
   - key: base

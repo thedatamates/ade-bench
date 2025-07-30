@@ -1,62 +1,39 @@
 #!/bin/bash
-# Create the product_performance model
-mkdir -p models/warehouse
-
 # Create the obt_product_inventory model
-cat > models/warehouse/dim_customer.sql << 'EOF'
+cat > models/warehouse/obt_product_inventory.sql << 'EOF'
 WITH source AS (
-SELECT
-    id as customer_id,
-    company,
-    last_name,
-    first_name,
-    email_address,
-    job_title,
-    business_phone,
-    home_phone,
-    mobile_phone,
-    fax_number,
-    address,
-    city,
-    state_province,
-    zip_postal_code,
-    country_region,
-    web_page,
-    notes,
-    attachments,
-    get_current_timestamp() as insertion_timestamp,
-FROM {{ ref('stg_customer') }}
-),
-
-unique_source AS (
-    SELECT *,
-            row_number() OVER(PARTITION BY customer_id ORDER BY customer_id) AS row_number
-    FROM source
+    SELECT
+        p.product_id,
+        p.product_code,
+        p.product_name,
+        p.description,
+        p.supplier_company,
+        p.standard_cost,
+        p.list_price,
+        p.reorder_level,
+        p.target_level,
+        p.quantity_per_unit,
+        p.discontinued,
+        p.minimum_reorder_quantity,
+        p.category,
+        i.inventory_id,
+        i.transaction_type,
+        i.transaction_created_date,
+        i.transaction_modified_date,
+        i.product_id AS ipd,
+        i.quantity,
+        i.purchase_order_id,
+        i.customer_order_id,
+        i.comments,
+        get_current_timestamp() AS insertion_timestamp,
+FROM {{ ref('fact_inventory') }} i
+LEFT JOIN {{ ref('dim_products') }} p
+ON p.product_id = i.product_id
 )
 
-SELECT
-    customer_id,
-    company,
-    last_name,
-    first_name,
-    email_address,
-    job_title,
-    business_phone,
-    home_phone,
-    mobile_phone,
-    fax_number,
-    address,
-    city,
-    state_province,
-    zip_postal_code,
-    country_region,
-    web_page,
-    notes,
-    attachments,
-    insertion_timestamp
-FROM unique_source
-WHERE row_number = 1
+SELECT *
+FROM source
 EOF
 
 # Run dbt to create the models
-dbt run --select dim_customer
+dbt run --select obt_product_inventory

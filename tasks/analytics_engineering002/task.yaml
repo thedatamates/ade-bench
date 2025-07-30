@@ -1,9 +1,13 @@
 task_id: analytics_engineering002
-title: Fix a simple syntax error that's been identified by the user.
+status: ready
+title: Fix a simple syntax error in a single model. 
 descriptions:
   - key: base
     description: |-
       Fix the syntax error in the obt_product_inventory.sql file.
+  - key: medium
+    description: |-
+      Fix the error in this dbt project.
 author_name: test
 author_email: test
 difficulty: easy

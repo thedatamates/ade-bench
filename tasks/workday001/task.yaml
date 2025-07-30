@@ -1,4 +1,5 @@
-task_id: template
+task_id: workday001
+status: open
 title: Template
 descriptions:
   - key: base
