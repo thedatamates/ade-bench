@@ -1,4 +1,5 @@
 task_id: template
+status: dev
 title: Template
 descriptions:
   - key: base
@@ -23,3 +24,9 @@ database:
   source: shared
   name: template
   type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: template
+  type: dbt

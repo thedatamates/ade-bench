@@ -1,5 +1,5 @@
 task_id: analytics_engineering007
-status: dev
+status: ready
 title: Fix broken models caused by data types changing.
 descriptions:
   - key: base
