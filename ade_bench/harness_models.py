@@ -159,6 +159,14 @@ class ProjectConfig(BaseModel):
     type: str = Field(default="dbt", pattern="^(dbt|other)$")  # Project type
 
 
+class SolutionSeedConfig(BaseModel):
+    """Configuration for a single solution seed."""
+    
+    table_name: str
+    include_columns: Optional[List[str]] = None
+    exclude_columns: Optional[List[str]] = None
+
+
 class TaskMetadata(BaseModel):
     """Metadata for a task."""
     

@@ -10,7 +10,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 from ade_bench.utils.logger import logger
-from ade_bench.harness_models import DatabaseConfig, ProjectConfig
+from ade_bench.harness_models import DatabaseConfig, ProjectConfig, SolutionSeedConfig
 
 
 class TaskDescription(BaseModel):
@@ -93,10 +93,28 @@ class Task(BaseModel):
         description="Project configuration for the task. Specifies whether to use "
         "a shared project or local task-specific project.",
     )
+    solution_seeds: list[str | dict] = Field(
+        default=[],
+        description="List of solution seeds. Can be table names (strings) or configurations (dicts) with table_name and optional include_columns/exclude_columns.",
+    )
 
     @property
     def task_description_dict(self) -> dict[str, str]:
         return {task.key: task.description for task in self.descriptions}
+    
+    def get_solution_seed_configs(self) -> list[SolutionSeedConfig]:
+        """Parse solution_seeds into SolutionSeedConfig objects."""
+        configs = []
+        for item in self.solution_seeds:
+            if isinstance(item, str):
+                # Simple table name
+                configs.append(SolutionSeedConfig(table_name=item))
+            elif isinstance(item, dict):
+                # Configuration dict
+                configs.append(SolutionSeedConfig.model_validate(item))
+            else:
+                raise ValueError(f"Invalid solution_seed item: {item}")
+        return configs
 
     @classmethod
     def from_yaml(cls, path: Path) -> "Task":

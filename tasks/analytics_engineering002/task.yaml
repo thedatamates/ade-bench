@@ -22,7 +22,9 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - obt_product_inventory
+  - table_name: obt_product_inventory
+    exclude_columns:
+      - insertion_timestamp
 
 # Use shared database instead of local data files
 database:

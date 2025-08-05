@@ -21,12 +21,22 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - fact_sales
-  - fact_inventory
-  - dim_products
-  - obt_product_inventory
-  - obt_sales_overview
-  
+  - table_name: fact_sales
+    exclude_columns:
+      - insertion_timestamp
+  - table_name: fact_inventory
+    exclude_columns:
+      - insertion_timestamp
+  - table_name: dim_products
+    exclude_columns:
+      - insertion_timestamp
+  - table_name: obt_product_inventory
+    exclude_columns:
+      - insertion_timestamp
+  - table_name: obt_sales_overview
+    exclude_columns:
+      - insertion_timestamp
+
 # Use shared database instead of local data files
 database:
   source: shared

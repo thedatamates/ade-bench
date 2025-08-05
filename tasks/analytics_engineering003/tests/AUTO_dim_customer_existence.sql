@@ -1,4 +1,5 @@
-{% set table_name = 'intercom__threads' %}
+{% set table_name = 'dim_customer' %}
+
 
 
 -------------------------------------

@@ -18,7 +18,9 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - fact_inventory
+  - table_name: fact_inventory
+    exclude_columns:
+      - insertion_timestamp
 
 # Use shared database instead of local data files
 database:

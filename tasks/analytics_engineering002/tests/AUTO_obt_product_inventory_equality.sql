@@ -1,17 +1,12 @@
 -- Define columns to compare
-{% set table_name = 'intercom__threads' %}
+{% set table_name = 'obt_product_inventory' %}
 
-{% set cols_to_compare = [
-    'conversation_created_at',
-    'total_conversation_parts',
-    'first_contact_reply_at',
-    'first_assignment_at',
-    'first_admin_response_at',
-    'first_reopen_at',
-    'last_assignment_at',
-    'last_contact_reply_at',
-    'total_assignments',
-    'total_reopens'
+{% set cols_to_include = [
+    
+] %}
+
+{% set cols_to_exclude = [
+    'insertion_timestamp'
 ] %}
 
 
@@ -32,6 +27,7 @@
     {{ dbt_utils.test_equality(
         model=ref(answer_key),
         compare_model=ref(table_name),
-        compare_columns=cols_to_compare
+        compare_columns=cols_to_include,
+        exclude_columns=cols_to_exclude
     ) }}
 {% endif %}

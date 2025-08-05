@@ -30,6 +30,7 @@ from ade_bench.terminal.terminal import Terminal, spin_up_terminal
 from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.dataset import Dataset
 from ade_bench.utils.logger import logger
+from ade_bench.utils.test_generator import generate_solution_tests
 
 
 class Harness:
@@ -179,6 +180,10 @@ class Harness:
         )
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
+        # Generate solution tests if needed
+        if trial_handler.task.solution_seeds:
+            self._generate_solution_tests(trial_handler)
+        
         # Copy test-related files
         terminal.copy_to_container(
             paths=[
@@ -228,6 +233,29 @@ class Harness:
             return FailureMode.TEST_TIMEOUT
 
         return FailureMode.NONE
+
+    def _generate_solution_tests(self, trial_handler: TrialHandler) -> None:
+        """Generate solution tests for tables specified in solution_seeds.
+        
+        Args:
+            trial_handler: The trial handler containing task configuration
+        """
+        if not trial_handler.task.solution_seeds:
+            return
+            
+        self._logger.info(f"Generating solution tests for {trial_handler.task_id}")
+        
+        # Ensure test directory exists
+        test_dir = trial_handler.test_dir
+        test_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Generate tests for each solution seed
+        for config in trial_handler.task.get_solution_seed_configs():
+            try:
+                generate_solution_tests(config.table_name, test_dir, config)
+                self._logger.info(f"Generated tests for {config.table_name}")
+            except Exception as e:
+                self._logger.error(f"Failed to generate tests for {config.table_name}: {e}")
 
     def _parse_results(
         self,

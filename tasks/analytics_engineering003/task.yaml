@@ -17,7 +17,10 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - dim_customer
+  - table_name: dim_customer
+    exclude_columns:
+      - insertion_timestamp
+
 
 # Use shared database instead of local data files
 database:

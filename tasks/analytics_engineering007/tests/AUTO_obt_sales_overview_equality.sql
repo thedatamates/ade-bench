@@ -1,29 +1,12 @@
 -- Define columns to compare
-{% set table_name = 'obt_product_inventory' %}
+{% set table_name = 'obt_sales_overview' %}
 
-{% set cols_to_compare = [
-    'product_id',
-    'product_code',
-    'product_name',
-    'description',
-    'supplier_company',
-    'standard_cost',
-    'list_price',
-    'reorder_level',
-    'target_level',
-    'quantity_per_unit',
-    'discontinued',
-    'minimum_reorder_quantity',
-    'category',
-    'inventory_id',
-    'transaction_type',
-    'transaction_created_date',
-    'transaction_modified_date',
-    'ipd',
-    'quantity',
-    'purchase_order_id',
-    'customer_order_id',
-    'comments'
+{% set cols_to_include = [
+    
+] %}
+
+{% set cols_to_exclude = [
+    'insertion_timestamp'
 ] %}
 
 
@@ -44,6 +27,7 @@
     {{ dbt_utils.test_equality(
         model=ref(answer_key),
         compare_model=ref(table_name),
-        compare_columns=cols_to_compare
+        compare_columns=cols_to_include,
+        exclude_columns=cols_to_exclude
     ) }}
 {% endif %}

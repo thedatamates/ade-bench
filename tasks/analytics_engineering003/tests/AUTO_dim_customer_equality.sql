@@ -1,25 +1,12 @@
 -- Define columns to compare
 {% set table_name = 'dim_customer' %}
 
-{% set cols_to_compare = [
-    'customer_id',
-    'company',
-    'last_name',
-    'first_name',
-    'email_address',
-    'job_title',
-    'business_phone',
-    'home_phone',
-    'mobile_phone',
-    'fax_number',
-    'address',
-    'city',
-    'state_province',
-    'zip_postal_code',
-    'country_region',
-    'web_page',
-    'notes',
-    'attachments'
+{% set cols_to_include = [
+    
+] %}
+
+{% set cols_to_exclude = [
+    'insertion_timestamp'
 ] %}
 
 
@@ -40,6 +27,7 @@
     {{ dbt_utils.test_equality(
         model=ref(answer_key),
         compare_model=ref(table_name),
-        compare_columns=cols_to_compare
+        compare_columns=cols_to_include,
+        exclude_columns=cols_to_exclude
     ) }}
 {% endif %}
