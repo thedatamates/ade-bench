@@ -1,5 +1,5 @@
 task_id: analytics_engineering007
-status: ready
+status: migrate
 title: Fix broken models caused by data types changing.
 descriptions:
   - key: base
@@ -19,6 +19,14 @@ timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
+# Tables to compare for solution
+solution_seeds:
+  - fact_sales
+  - fact_inventory
+  - dim_products
+  - obt_product_inventory
+  - obt_sales_overview
+  
 # Use shared database instead of local data files
 database:
   source: shared

@@ -250,6 +250,10 @@ class TrialHandler:
         return self.input_path / "tests"
 
     @property
+    def seeds_dir(self) -> Path:
+        return self.input_path / "seeds"
+
+    @property
     def run_tests_path(self) -> Path:
         task_run_tests_path = self.input_path / "run-tests.sh"
 

@@ -179,6 +179,45 @@ def find_and_copy_duckdb_file(task_name):
         return False
 
 
+def copy_task_scripts(task_name):
+    """Copy setup.sh and solution.sh files from task directory to sandbox."""
+    task_dir = Path("tasks") / task_name
+    sandbox_dir = Path("dev/sandbox")
+    
+    scripts_copied = []
+    
+    # Copy setup.sh if it exists
+    setup_script = task_dir / "setup.sh"
+    if setup_script.exists():
+        try:
+            shutil.copy2(setup_script, sandbox_dir)
+            scripts_copied.append("setup.sh")
+        except Exception as e:
+            print(f"Error copying setup.sh: {e}")
+            return False
+    else:
+        print("Warning: setup.sh not found in task directory")
+    
+    # Copy solution.sh if it exists
+    solution_script = task_dir / "solution.sh"
+    if solution_script.exists():
+        try:
+            shutil.copy2(solution_script, sandbox_dir)
+            scripts_copied.append("solution.sh")
+        except Exception as e:
+            print(f"Error copying solution.sh: {e}")
+            return False
+    else:
+        print("Warning: solution.sh not found in task directory")
+    
+    if scripts_copied:
+        print(f"✓ Copied task scripts to sandbox: {', '.join(scripts_copied)}")
+    else:
+        print("Warning: No task scripts found to copy")
+    
+    return True
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python create_sandbox.py <task_name>")
@@ -205,6 +244,10 @@ def main():
     
     # Step 4: Find and copy DuckDB file
     if not find_and_copy_duckdb_file(task_name):
+        sys.exit(1)
+    
+    # Step 5: Copy task scripts (setup.sh and solution.sh)
+    if not copy_task_scripts(task_name):
         sys.exit(1)
     
     print("-" * 50)

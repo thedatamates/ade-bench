@@ -52,6 +52,7 @@ class Harness:
         exclude_task_ids: set[str] | None = None,
         n_attempts: int = 1,
         dataset_config: Path | None = None,
+        create_seed: bool = False,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -88,6 +89,7 @@ class Harness:
         self._n_tasks = n_tasks
         self._task_ids = task_ids
         self._exclude_task_ids = exclude_task_ids
+        self._create_seed = create_seed
 
         self._output_path = output_path
         self._agent_name = agent_name
@@ -177,6 +179,7 @@ class Harness:
         )
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
+        # Copy test-related files
         terminal.copy_to_container(
             paths=[
                 trial_handler.post_agent_pane_path,
@@ -186,6 +189,13 @@ class Harness:
             ],
             container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
         )
+        
+        # Copy seeds directory if it exists
+        if trial_handler.seeds_dir.exists():
+            terminal.copy_to_container(
+                paths=[trial_handler.seeds_dir],
+                container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
+            )
 
     def _run_tests(
         self,
@@ -528,6 +538,10 @@ class Harness:
                 )
                 asciinema_handler.merge_markers()
 
+            # Extract CSV files if requested
+            if self._create_seed:
+                self._extract_csv_files(terminal, trial_handler)
+
             # If the test failed, but the agent didn't, use the test failure mode
             if (
                 test_failure_mode != FailureMode.NONE
@@ -554,6 +568,75 @@ class Harness:
             self._logger.debug(f"Unresolved task {trial_handler.task_id}")
 
         return results
+
+    def _extract_csv_files(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
+        """Extract CSV files from the database after agent execution."""
+        # Read task.yaml to get tables to extract
+        task_yaml_path = trial_handler.input_path / "task.yaml"
+        if not task_yaml_path.exists():
+            self._logger.warning(f"task.yaml not found for {trial_handler.task_id}")
+            return
+        
+        import yaml
+        with open(task_yaml_path, 'r') as f:
+            task_config = yaml.safe_load(f)
+        
+        # Check if there are tables to extract
+        tables_to_extract = task_config.get('solution_seeds', [])
+        if not tables_to_extract:
+            self._logger.info(f"No tables to extract for {trial_handler.task_id}")
+            return
+        
+        self._logger.info(f"Extracting tables for {trial_handler.task_id}: {tables_to_extract}")
+        
+        # Create output directory
+        task_seeds_dir = trial_handler.input_path / "seeds"
+        task_seeds_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Get database type and name
+        db_type = task_config.get('db_type', 'duckdb')
+        db_name = task_config.get('database', {}).get('name', '')
+        
+        # Use docker cp command to copy database file
+        try:
+            import tempfile
+            import os
+            import subprocess
+            
+            # Create temp directory for database file
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_db_path = os.path.join(temp_dir, f"{db_name}.duckdb")
+                
+                # Copy database file from container using docker cp
+                container_name = terminal.container.name
+                db_path = f"/app/{db_name}.duckdb"
+                
+                result = subprocess.run([
+                    "docker", "cp", f"{container_name}:{db_path}", temp_db_path
+                ], capture_output=True, text=True)
+                
+                if result.returncode != 0:
+                    self._logger.error(f"Failed to copy database: {result.stderr}")
+                    return
+                
+                # Extract tables using Python
+                import duckdb
+                con = duckdb.connect(temp_db_path)
+                
+                for table_name in tables_to_extract:
+                    try:
+                        # Query the table and save as CSV
+                        df = con.execute(f"SELECT * FROM {table_name}").df()
+                        csv_path = task_seeds_dir / f"solution__{table_name}.csv"
+                        df.to_csv(csv_path, index=False)
+                        self._logger.info(f"Exported {table_name} to soluton__{csv_path}")
+                    except Exception as e:
+                        self._logger.error(f"Failed to export table {table_name}: {e}")
+                
+                con.close()
+            
+        except Exception as e:
+            self._logger.error(f"Failed to extract tables for {trial_handler.task_id}: {e}")
 
     def _write_results(self, results: BenchmarkResults) -> None:
         self._results_output_path.write_text(results.model_dump_json(indent=4))

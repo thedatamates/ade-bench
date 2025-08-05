@@ -1,5 +1,5 @@
 task_id: analytics_engineering006
-status: ready
+status: migrate
 title: Creates two layers of new models.
 descriptions:
   - key: base
@@ -15,6 +15,12 @@ tags:
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - fact_inventory
+  - obt_product_inventory
+  - dim_products
 
 # Use shared database instead of local data files
 database:

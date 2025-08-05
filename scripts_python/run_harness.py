@@ -132,6 +132,11 @@ if __name__ == "__main__":
         default=1,
         help="Number of attempts to make for each task.",
     )
+    parser.add_argument(
+        "--create-seed",
+        action="store_true",
+        help="Extract specified tables as CSV files after harness run completes",
+    )
     args = parser.parse_args()
 
     agent_kwargs = {}
@@ -158,6 +163,7 @@ if __name__ == "__main__":
         exclude_task_ids=set(args.exclude_task_ids) if args.exclude_task_ids else None,
         n_attempts=args.n_attempts,
         dataset_config=args.dataset_config,
+        create_seed=args.create_seed,
     )
 
     results = harness.run()

@@ -26,7 +26,7 @@ class DockerComposeEnvVars(EnvModel):
 class DockerComposeManager:
     CONTAINER_LOGS_PATH = "/logs"
     CONTAINER_TEST_DIR = Path("/tests")
-    CONTAINER_TEST_DIR = CONTAINER_TEST_DIR
+    CONTAINER_SEEDS_DIR = Path("/seeds")
 
     def __init__(
         self,

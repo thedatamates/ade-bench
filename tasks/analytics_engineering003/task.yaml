@@ -15,6 +15,10 @@ timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
+# Tables to compare for solution
+solution_seeds:
+  - dim_customer
+
 # Use shared database instead of local data files
 database:
   source: shared

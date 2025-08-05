@@ -1,0 +1,103 @@
+product_id,product_code,product_name,description,supplier_company,standard_cost,list_price,reorder_level,target_level,quantity_per_unit,discontinued,minimum_reorder_quantity,category,inventory_id,transaction_type,transaction_created_date,transaction_modified_date,ipd,quantity,purchase_order_id,customer_order_id,comments,insertion_timestamp
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,45,1,2006-03-22,3/22/2006 16:04:12,19,20,,,,2025-08-05 15:14:43.348000-04:00
+51,NWTDFN-51,Northwind Traders Dried Apples,,Supplier B,39.75,53.0,10,40,50 - 300 g pkgs.,0,10,Dried Fruit & Nuts,51,1,2006-03-22,3/22/2006 16:04:38,51,40,,,,2025-08-05 15:14:43.348000-04:00
+5,NWTO-5,Northwind Traders Olive Oil,,Supplier J,16.0125,21.35,10,40,36 boxes,0,10,Oil,56,1,2006-03-22,3/22/2006 16:05:14,5,40,,,,2025-08-05 15:14:43.348000-04:00
+81,NWTB-81,Northwind Traders Green Tea,,Supplier C,2.0,2.99,100,125,20 bags per box,0,25,Beverages,72,1,2006-03-24,3/24/2006 10:41:30,81,200,,,,2025-08-05 15:14:43.348000-04:00
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,111,1,2006-04-04,4/4/2006 11:02:56,19,10,,,,2025-08-05 15:14:43.348000-04:00
+17,NWTCFV-17,Northwind Traders Fruit Cocktail,,Supplier F,29.25,39.0,10,40,15.25 OZ,0,10,Canned Fruit & Vegetables,120,2,2006-04-04,4/4/2006 11:36:21,17,40,,,,2025-08-05 15:14:43.348000-04:00
+56,NWTP-56,Northwind Traders Gnocchi,,Supplier A,28.5,38.0,30,120,24 - 250 g pkgs.,0,30,Pasta,136,3,2006-04-25,4/25/2006 17:04:57,56,110,,,,2025-08-05 15:14:43.348000-04:00
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,50,1,2006-03-22,3/22/2006 16:04:31,48,100,,,,2025-08-05 15:14:43.348000-04:00
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,74,1,2006-03-24,3/24/2006 10:53:13,48,100,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,107,1,2006-04-04,4/4/2006 11:02:17,34,300,,,,2025-08-05 15:14:43.348000-04:00
+80,NWTDFN-80,Northwind Traders Dried Plums,,Supplier B,3.0,3.5,50,75,1 lb bag,0,25,Dried Fruit & Nuts,35,1,2006-03-22,3/22/2006 16:02:28,80,75,,,,2025-08-05 15:14:43.348000-04:00
+52,NWTG-52,Northwind Traders Long Grain Rice,,Supplier A,5.25,7.0,25,100,16 - 2 kg boxes,0,25,Grains,37,1,2006-03-22,3/22/2006 16:03:04,52,100,,,,2025-08-05 15:14:43.348000-04:00
+3,NWTCO-3,Northwind Traders Syrup,,Supplier J,7.5,10.0,25,100,12 - 550 ml bottles,0,25,Condiments,54,1,2006-03-22,3/22/2006 16:05:07,3,100,,,,2025-08-05 15:14:43.348000-04:00
+81,NWTB-81,Northwind Traders Green Tea,,Supplier C,2.0,2.99,100,125,20 bags per box,0,25,Beverages,62,1,2006-03-22,3/22/2006 16:06:03,81,125,,,,2025-08-05 15:14:43.348000-04:00
+7,NWTDFN-7,Northwind Traders Dried Pears,,Supplier B,22.5,30.0,10,40,12 - 1 lb pkgs.,0,10,Dried Fruit & Nuts,64,2,2006-03-22,3/22/2006 16:08:59,7,10,,,,2025-08-05 15:14:43.348000-04:00
+4,NWTCO-4,Northwind Traders Cajun Seasoning,,Supplier J,16.5,22.0,10,40,48 - 6 oz jars,0,10,Condiments,85,2,2006-03-24,4/4/2006 11:41:14,4,10,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,96,3,2006-03-30,3/30/2006 16:46:34,34,12,,,,2025-08-05 15:14:43.348000-04:00
+77,NWTCO-77,Northwind Traders Mustard,,Supplier J,9.75,13.0,15,60,12 boxes,0,15,Condiments,53,1,2006-03-22,3/22/2006 16:04:45,77,60,,,,2025-08-05 15:14:43.348000-04:00
+72,NWTD-72,Northwind Traders Mozzarella,,Supplier E,26.1,34.8,10,40,24 - 200 g pkgs.,0,10,Dairy `dl_northwind`.`products`,113,1,2006-04-04,4/4/2006 11:03:12,72,50,,,,2025-08-05 15:14:43.348000-04:00
+81,NWTB-81,Northwind Traders Green Tea,,Supplier C,2.0,2.99,100,125,20 bags per box,0,25,Beverages,87,3,2006-03-24,3/24/2006 14:49:20,81,50,,,,2025-08-05 15:14:43.348000-04:00
+40,NWTCM-40,Northwind Traders Crab Meat,,Supplier G,13.8,18.4,30,120,24 - 4 oz tins,0,30,Canned Meat,95,2,2006-03-24,4/4/2006 11:06:13,40,30,,,,2025-08-05 15:14:43.348000-04:00
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,99,2,2006-04-03,4/3/2006 13:50:15,48,10,,,,2025-08-05 15:14:43.348000-04:00
+57,NWTP-57,Northwind Traders Ravioli,,Supplier A,14.625,19.5,20,80,24 - 250 g pkgs.,0,20,Pasta,100,1,2006-04-04,4/4/2006 11:00:54,57,100,,,,2025-08-05 15:14:43.348000-04:00
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,123,2,2006-04-04,4/4/2006 11:37:49,48,40,,,,2025-08-05 15:14:43.348000-04:00
+8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,133,2,2006-04-04,4/4/2006 11:42:26,8,3,,,,2025-08-05 15:14:43.348000-04:00
+1,NWTB-1,Northwind Traders Chai,,Supplier D,13.5,18.0,10,40,10 boxes x 20 bags,0,10,Beverages,59,1,2006-03-22,3/22/2006 16:05:47,1,40,,,,2025-08-05 15:14:43.348000-04:00
+80,NWTDFN-80,Northwind Traders Dried Plums,,Supplier B,3.0,3.5,50,75,1 lb bag,0,25,Dried Fruit & Nuts,66,2,2006-03-22,3/22/2006 16:08:59,80,10,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,102,1,2006-04-04,4/4/2006 11:01:14,34,50,,,,2025-08-05 15:14:43.348000-04:00
+7,NWTDFN-7,Northwind Traders Dried Pears,,Supplier B,22.5,30.0,10,40,12 - 1 lb pkgs.,0,10,Dried Fruit & Nuts,119,2,2006-04-04,4/4/2006 11:35:54,7,30,,,,2025-08-05 15:14:43.348000-04:00
+40,NWTCM-40,Northwind Traders Crab Meat,,Supplier G,13.8,18.4,30,120,24 - 4 oz tins,0,30,Canned Meat,127,2,2006-04-04,4/4/2006 11:39:29,40,40,,,,2025-08-05 15:14:43.348000-04:00
+21,NWTBGM-21,Northwind Traders Scones,,Supplier A,7.5,10.0,5,20,24 pkgs. x 4 pieces,0,5,Baked Goods & Mixes,47,1,2006-03-22,3/22/2006 16:04:20,21,20,,,,2025-08-05 15:14:43.348000-04:00
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,49,1,2006-03-22,3/22/2006 16:04:28,41,40,,,,2025-08-05 15:14:43.348000-04:00
+5,NWTO-5,Northwind Traders Olive Oil,,Supplier J,16.0125,21.35,10,40,36 boxes,0,10,Oil,93,2,2006-03-24,4/4/2006 11:06:13,5,25,,,,2025-08-05 15:14:43.348000-04:00
+72,NWTD-72,Northwind Traders Mozzarella,,Supplier E,26.1,34.8,10,40,24 - 200 g pkgs.,0,10,Dairy `dl_northwind`.`products`,131,2,2006-04-04,4/4/2006 11:41:45,72,40,,,,2025-08-05 15:14:43.348000-04:00
+8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,42,1,2006-03-22,3/22/2006 16:03:54,8,40,,,,2025-08-05 15:14:43.348000-04:00
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,70,2,2006-03-22,3/24/2006 10:59:41,48,10,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,108,2,2006-04-04,4/4/2006 11:08:14,34,300,,,"Fill Back Ordered product, Order #47",2025-08-05 15:14:43.348000-04:00
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,124,2,2006-04-04,4/4/2006 11:38:11,48,40,,,,2025-08-05 15:14:43.348000-04:00
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,125,2,2006-04-04,4/4/2006 11:38:32,41,10,,,,2025-08-05 15:14:43.348000-04:00
+8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,128,2,2006-04-04,4/4/2006 11:39:53,8,20,,,,2025-08-05 15:14:43.348000-04:00
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,81,2,2006-03-24,3/24/2006 11:02:02,19,30,,,"Fill Back Ordered product, Order #33",2025-08-05 15:14:43.348000-04:00
+21,NWTBGM-21,Northwind Traders Scones,,Supplier A,7.5,10.0,5,20,24 pkgs. x 4 pieces,0,5,Baked Goods & Mixes,92,2,2006-03-24,4/4/2006 11:06:56,21,20,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,97,3,2006-03-30,3/30/2006 17:23:27,34,10,,,,2025-08-05 15:14:43.348000-04:00
+3,NWTCO-3,Northwind Traders Syrup,,Supplier J,7.5,10.0,25,100,12 - 550 ml bottles,0,25,Condiments,132,2,2006-04-04,4/4/2006 11:42:26,3,50,,,,2025-08-05 15:14:43.348000-04:00
+4,NWTCO-4,Northwind Traders Cajun Seasoning,,Supplier J,16.5,22.0,10,40,48 - 6 oz jars,0,10,Condiments,55,1,2006-03-22,3/22/2006 16:05:11,4,40,,,,2025-08-05 15:14:43.348000-04:00
+1,NWTB-1,Northwind Traders Chai,,Supplier D,13.5,18.0,10,40,10 boxes x 20 bags,0,10,Beverages,67,2,2006-03-22,3/22/2006 16:10:27,1,15,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,83,2,2006-03-24,3/24/2006 11:03:00,34,100,,,"Fill Back Ordered product, Order #30",2025-08-05 15:14:43.348000-04:00
+40,NWTCM-40,Northwind Traders Crab Meat,,Supplier G,13.8,18.4,30,120,24 - 4 oz tins,0,30,Canned Meat,91,2,2006-03-24,4/4/2006 11:09:24,40,50,,,,2025-08-05 15:14:43.348000-04:00
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,110,2,2006-04-04,4/4/2006 11:41:14,19,10,,,"Fill Back Ordered product, Order #42",2025-08-05 15:14:43.348000-04:00
+51,NWTDFN-51,Northwind Traders Dried Apples,,Supplier B,39.75,53.0,10,40,50 - 300 g pkgs.,0,10,Dried Fruit & Nuts,118,2,2006-04-04,4/4/2006 11:35:54,51,30,,,,2025-08-05 15:14:43.348000-04:00
+4,NWTCO-4,Northwind Traders Cajun Seasoning,,Supplier J,16.5,22.0,10,40,48 - 6 oz jars,0,10,Condiments,122,2,2006-04-04,4/4/2006 11:37:09,4,30,,,,2025-08-05 15:14:43.348000-04:00
+56,NWTP-56,Northwind Traders Gnocchi,,Supplier A,28.5,38.0,30,120,24 - 250 g pkgs.,0,30,Pasta,38,1,2006-03-22,3/22/2006 16:03:09,56,120,,,,2025-08-05 15:14:43.348000-04:00
+7,NWTDFN-7,Northwind Traders Dried Pears,,Supplier B,22.5,30.0,10,40,12 - 1 lb pkgs.,0,10,Dried Fruit & Nuts,41,1,2006-03-22,3/22/2006 16:03:47,7,40,,,,2025-08-05 15:14:43.348000-04:00
+66,NWTS-66,Northwind Traders Tomato Sauce,,Supplier H,12.75,17.0,20,80,24 - 8 oz jars,0,20,Sauces,58,1,2006-03-22,3/22/2006 16:05:32,66,80,,,,2025-08-05 15:14:43.348000-04:00
+81,NWTB-81,Northwind Traders Green Tea,,Supplier C,2.0,2.99,100,125,20 bags per box,0,25,Beverages,73,2,2006-03-24,3/24/2006 10:41:42,81,200,,,"Fill Back Ordered product, Order #40",2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,82,1,2006-03-24,3/24/2006 10:54:58,34,100,,,,2025-08-05 15:14:43.348000-04:00
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,94,2,2006-03-24,4/4/2006 11:06:13,41,30,,,,2025-08-05 15:14:43.348000-04:00
+8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,105,1,2006-04-04,4/4/2006 11:01:55,8,25,,,,2025-08-05 15:14:43.348000-04:00
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,109,1,2006-04-04,4/4/2006 11:02:37,19,25,,,,2025-08-05 15:14:43.348000-04:00
+72,NWTD-72,Northwind Traders Mozzarella,,Supplier E,26.1,34.8,10,40,24 - 200 g pkgs.,0,10,Dairy `dl_northwind`.`products`,36,1,2006-03-22,3/22/2006 16:02:48,72,40,,,,2025-08-05 15:14:43.348000-04:00
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,69,2,2006-03-22,3/24/2006 11:00:55,19,20,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,98,3,2006-03-30,3/30/2006 17:24:33,34,1,,,,2025-08-05 15:14:43.348000-04:00
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,116,2,2006-04-04,4/4/2006 11:09:24,41,50,,,"Fill Back Ordered product, Order #45",2025-08-05 15:14:43.348000-04:00
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,78,1,2006-03-24,3/24/2006 10:54:04,41,200,,,,2025-08-05 15:14:43.348000-04:00
+8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,106,2,2006-04-04,4/4/2006 11:07:37,8,25,,,"Fill Back Ordered product, Order #48",2025-08-05 15:14:43.348000-04:00
+40,NWTCM-40,Northwind Traders Crab Meat,,Supplier G,13.8,18.4,30,120,24 - 4 oz tins,0,30,Canned Meat,48,1,2006-03-22,3/22/2006 16:04:24,40,120,,,,2025-08-05 15:14:43.348000-04:00
+65,NWTS-65,Northwind Traders Hot Pepper Sauce,,Supplier H,15.7875,21.05,10,40,32 - 8 oz bottles,0,10,Sauces,57,1,2006-03-22,3/22/2006 16:05:26,65,40,,,,2025-08-05 15:14:43.348000-04:00
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,80,1,2006-03-24,3/24/2006 10:54:33,19,30,,,,2025-08-05 15:14:43.348000-04:00
+80,NWTDFN-80,Northwind Traders Dried Plums,,Supplier B,3.0,3.5,50,75,1 lb bag,0,25,Dried Fruit & Nuts,86,3,2006-03-24,3/24/2006 14:49:16,80,20,,,,2025-08-05 15:14:43.348000-04:00
+81,NWTB-81,Northwind Traders Green Tea,,Supplier C,2.0,2.99,100,125,20 bags per box,0,25,Beverages,90,3,2006-03-24,3/24/2006 14:50:18,81,25,,,,2025-08-05 15:14:43.348000-04:00
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,112,2,2006-04-04,4/4/2006 11:07:37,19,25,,,"Fill Back Ordered product, Order #48",2025-08-05 15:14:43.348000-04:00
+57,NWTP-57,Northwind Traders Ravioli,,Supplier A,14.625,19.5,20,80,24 - 250 g pkgs.,0,20,Pasta,39,1,2006-03-22,3/22/2006 16:03:14,57,80,,,,2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,60,1,2006-03-22,3/22/2006 16:05:51,34,60,,,,2025-08-05 15:14:43.348000-04:00
+80,NWTDFN-80,Northwind Traders Dried Plums,,Supplier B,3.0,3.5,50,75,1 lb bag,0,25,Dried Fruit & Nuts,63,2,2006-03-22,3/24/2006 11:03:00,80,30,,,,2025-08-05 15:14:43.348000-04:00
+8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,71,2,2006-03-22,3/24/2006 10:57:38,8,17,,,,2025-08-05 15:14:43.348000-04:00
+1,NWTB-1,Northwind Traders Chai,,Supplier D,13.5,18.0,10,40,10 boxes x 20 bags,0,10,Beverages,88,3,2006-03-24,3/24/2006 14:50:09,1,25,,,,2025-08-05 15:14:43.348000-04:00
+57,NWTP-57,Northwind Traders Ravioli,,Supplier A,14.625,19.5,20,80,24 - 250 g pkgs.,0,20,Pasta,101,2,2006-04-04,4/4/2006 11:08:49,57,100,,,"Fill Back Ordered product, Order #46",2025-08-05 15:14:43.348000-04:00
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,117,2,2006-04-04,4/4/2006 11:05:04,34,87,,,,2025-08-05 15:14:43.348000-04:00
+80,NWTDFN-80,Northwind Traders Dried Plums,,Supplier B,3.0,3.5,50,75,1 lb bag,0,25,Dried Fruit & Nuts,129,2,2006-04-04,4/4/2006 11:40:16,80,15,,,,2025-08-05 15:14:43.348000-04:00
+17,NWTCFV-17,Northwind Traders Fruit Cocktail,,Supplier F,29.25,39.0,10,40,15.25 OZ,0,10,Canned Fruit & Vegetables,44,1,2006-03-22,3/22/2006 16:04:07,17,40,,,,2025-08-05 15:14:43.348000-04:00
+51,NWTDFN-51,Northwind Traders Dried Apples,,Supplier B,39.75,53.0,10,40,50 - 300 g pkgs.,0,10,Dried Fruit & Nuts,65,2,2006-03-22,3/22/2006 16:08:59,51,10,,,,2025-08-05 15:14:43.348000-04:00
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,75,2,2006-03-24,3/24/2006 10:55:46,48,100,,,"Fill Back Ordered product, Order #39",2025-08-05 15:14:43.348000-04:00
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,79,2,2006-03-24,3/24/2006 10:58:40,41,200,,,"Fill Back Ordered product, Order #36",2025-08-05 15:14:43.348000-04:00
+72,NWTD-72,Northwind Traders Mozzarella,,Supplier E,26.1,34.8,10,40,24 - 200 g pkgs.,0,10,Dairy `dl_northwind`.`products`,114,2,2006-04-04,4/4/2006 11:08:49,72,50,,,"Fill Back Ordered product, Order #46",2025-08-05 15:14:43.348000-04:00
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,115,1,2006-04-04,4/4/2006 11:03:38,41,50,,,,2025-08-05 15:14:43.348000-04:00
+52,NWTG-52,Northwind Traders Long Grain Rice,,Supplier A,5.25,7.0,25,100,16 - 2 kg boxes,0,25,Grains,135,2,2006-04-04,4/4/2006 11:43:08,52,40,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,40,1,2006-03-22,3/22/2006 16:03:40,6,100,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,43,1,2006-03-22,3/22/2006 16:04:02,14,40,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,130,2,2006-04-04,4/4/2006 11:40:38,74,20,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,126,2,2006-04-04,4/4/2006 11:38:53,43,5,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,46,1,2006-03-22,3/22/2006 16:04:17,20,40,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,61,1,2006-03-22,3/22/2006 16:06:00,43,100,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,52,1,2006-03-22,3/22/2006 16:04:41,74,20,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,134,2,2006-04-04,4/4/2006 11:43:08,20,40,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,76,1,2006-03-24,3/24/2006 10:53:36,43,300,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,89,3,2006-03-24,3/24/2006 14:50:14,43,25,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,68,2,2006-03-22,3/22/2006 16:10:27,43,20,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,121,2,2006-04-04,4/4/2006 11:36:47,6,90,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,77,2,2006-03-24,3/24/2006 10:56:57,43,300,,,"Fill Back Ordered product, Order #38",2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,84,2,2006-03-24,4/4/2006 11:41:14,6,10,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,103,1,2006-04-04,4/4/2006 11:01:35,43,250,,,,2025-08-05 15:14:43.348000-04:00
+,,,,,,,,,,,,,104,3,2006-04-04,4/4/2006 11:01:37,43,300,,,"Fill Back Ordered product, Order #41",2025-08-05 15:14:43.348000-04:00

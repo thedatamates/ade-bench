@@ -1,5 +1,5 @@
 task_id: intercom001
-status: dev
+status: ready
 title: Create a model for intercom converastion threads.
 descriptions:
   - key: base
@@ -28,6 +28,10 @@ tags:
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - intercom__threads
 
 # Use shared database instead of local data files
 database:
