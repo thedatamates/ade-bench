@@ -1,5 +1,5 @@
 task_id: analytics_engineering005
-status: migrate
+status: ready
 title: Create a model that dedupes inventory records.
 descriptions:
   - key: base

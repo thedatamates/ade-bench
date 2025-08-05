@@ -1,5 +1,5 @@
 task_id: analytics_engineering004
-status: migrate
+status: ready
 title: Creates a new model that does a simple join that combines two existing models together.
 descriptions:
   - key: base

@@ -1,5 +1,5 @@
 task_id: analytics_engineering006
-status: migrate
+status: ready
 title: Creates two layers of new models.
 descriptions:
   - key: base
