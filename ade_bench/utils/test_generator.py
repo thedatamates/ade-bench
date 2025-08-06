@@ -114,10 +114,6 @@ def generate_solution_tests(
     # Ensure test directory exists
     test_dir.mkdir(parents=True, exist_ok=True)
     
-    # Remove existing AUTO tests for this table
-    for auto_test in test_dir.glob(f"AUTO_*.sql"):
-        auto_test.unlink()
-    
     # Generate equality test
     equality_content = generate_equality_test(table_name, config)
     equality_path = test_dir / f"AUTO_{table_name}_equality.sql"

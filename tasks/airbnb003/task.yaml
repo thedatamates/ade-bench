@@ -1,10 +1,10 @@
-task_id: template
+task_id: airbnb003
 status: dev
-title: Template
+title: Update dbt models to be views
 descriptions:
   - key: base
     description: |-
-      Do some stuff.
+      Update the all the source models to be views.
 author_name: test
 author_email: test
 difficulty: easy
@@ -20,17 +20,19 @@ parser_name: dbt
 db_type: duckdb
 
 # Tables to compare for solution
-# solution_seeds:
-#   - template__model
+solution_seeds:
+  - src_hosts
+  - src_listings
+  - src_reviews
 
 # Use shared database instead of local data files
 database:
   source: shared
-  name: template
+  name: airbnb
   type: duckdb
 
 # Use shared project instead of local project
 project:
   source: shared
-  name: template
+  name: airbnb
   type: dbt

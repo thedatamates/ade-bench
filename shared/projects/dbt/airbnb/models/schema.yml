@@ -1,0 +1,20 @@
+version: 2
+models:
+
+### FACT ###
+  - name: fct_reviews
+    columns: 
+      - name: REVIEW_SENTIMENT
+        tests:
+          - accepted_values:
+              values: ['positive','negative','neutral']
+              quote: true
+      - name: LISTING_ID
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_listings')
+              field: LISTING_ID
+          - relationships:
+              to: ref('dim_listings_hosts')
+              field: LISTING_ID

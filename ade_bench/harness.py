@@ -249,6 +249,10 @@ class Harness:
         test_dir = trial_handler.test_dir
         test_dir.mkdir(parents=True, exist_ok=True)
         
+        # Remove existing AUTO tests
+        for auto_test in test_dir.glob("AUTO_*.sql"):
+            auto_test.unlink()
+        
         # Generate tests for each solution seed
         for config in trial_handler.task.get_solution_seed_configs():
             try:
