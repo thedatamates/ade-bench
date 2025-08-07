@@ -1,0 +1,25 @@
+
+
+seeds:
+  intercom:
+    solution__intercom__conversation_metrics:
+      +column_types:
+        conversation_id: integer
+        conversation_created_at: timestamp
+        total_conversation_parts: bigint
+        first_contact_reply_at: timestamp
+        first_assignment_at: timestamp
+        first_admin_response_at: timestamp
+        first_reopen_at: timestamp
+        last_assignment_at: timestamp
+        last_contact_reply_at: timestamp
+        last_admin_response_at: timestamp
+        last_reopen_at: timestamp
+        total_reopens: hugeint
+        total_assignments: hugeint
+        first_close_at: timestamp
+        last_close_at: timestamp
+        time_to_first_assignment_minutes: decimal(18,2)
+        time_to_first_response_minutes: decimal(18,2)
+        time_to_first_close_minutes: decimal(18,2)
+        time_to_last_close_minutes: decimal(18,2)

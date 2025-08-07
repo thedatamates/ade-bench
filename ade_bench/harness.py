@@ -642,11 +642,27 @@ class Harness:
             task_config = yaml.safe_load(f)
         
         # Check if there are tables to extract
-        tables_to_extract = task_config.get('solution_seeds', [])
-        if not tables_to_extract:
+        solution_seeds = task_config.get('solution_seeds', [])
+        if not solution_seeds:
             self._logger.info(f"No tables to extract for {trial_handler.task_id}")
             return
         
+        # Extract table names from solution_seeds (all items are dictionaries)
+        tables_to_extract = []
+        for item in solution_seeds:
+            if isinstance(item, dict):
+                table_name = item.get('table_name')
+                if table_name:
+                    tables_to_extract.append(table_name)
+                else:
+                    self._logger.warning(f"Invalid solution_seed item (missing table_name): {item}")
+            else:
+                self._logger.warning(f"Invalid solution_seed item type (expected dict): {type(item)}")
+
+        if not tables_to_extract:
+            self._logger.info(f"No valid tables to extract for {trial_handler.task_id}")
+            return
+
         self._logger.info(f"Extracting tables for {trial_handler.task_id}: {tables_to_extract}")
         
         # Create output directory
@@ -693,11 +709,11 @@ class Harness:
                         if schema_info:
                             all_schemas.append(schema_info)
                         
-                        # Extract CSV data
-                        df = con.execute(f"SELECT * FROM {table_name}").df()
+                        # Extract CSV data using DuckDB's COPY command
                         csv_path = task_seeds_dir / f"solution__{table_name}.csv"
-                        df.to_csv(csv_path, index=False)
-                        self._logger.info(f"Exported {table_name} to soluton__{csv_path}")
+                        copy_query = f"COPY {table_name} TO '{csv_path}' (HEADER, DELIMITER ',');"
+                        con.execute(copy_query)
+                        self._logger.info(f"Exported {table_name} to {csv_path}")
                     except Exception as e:
                         self._logger.error(f"Failed to export table {table_name}: {e}")
                 
@@ -728,6 +744,7 @@ class Harness:
                         }
                     
                     with open(no_op_path, 'w') as f:
+                        f.write('\n\n')  # Add two blank lines at the start
                         yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)
                     
                     self._logger.info(f"Generated _no-op.txt file: {no_op_path}")

@@ -21,8 +21,8 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - src_hosts
-  - src_listings
+  - table_name: src_hosts
+  - table_name: src_listings
   # - src_reviews
 
 # Use shared database instead of local data files

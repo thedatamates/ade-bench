@@ -31,8 +31,10 @@ class DbtParser(BaseParser):
                 results[test_name] = UnitTestStatus.FAILED
         
         # Also check the summary line to ensure we got all tests
-        summary_match = re.search(self.TEST_SUMMARY_PATTERN, content)
-        if summary_match:
+        summary_matches = list(re.finditer(self.TEST_SUMMARY_PATTERN, content))
+        if summary_matches:
+            # Use the last occurrence of the summary line
+            summary_match = summary_matches[-1]
             pass_count = int(summary_match.group(1)) + 1 # include compile test
             error_count = int(summary_match.group(3))
             total_count = int(summary_match.group(5)) + 1 # include compile test

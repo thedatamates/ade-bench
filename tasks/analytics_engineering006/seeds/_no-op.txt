@@ -1,0 +1,58 @@
+
+
+seeds:
+  analytics_engineering:
+    solution__fact_inventory:
+      +column_types:
+        inventory_id: integer
+        transaction_type: integer
+        transaction_created_date: date
+        transaction_modified_date: varchar
+        product_id: integer
+        quantity: integer
+        purchase_order_id: integer
+        customer_order_id: integer
+        comments: varchar
+        insertion_timestamp: timestamp with time zone
+    solution__obt_product_inventory:
+      +column_types:
+        product_id: integer
+        product_code: varchar
+        product_name: varchar
+        description: integer
+        supplier_company: varchar
+        standard_cost: double
+        list_price: double
+        reorder_level: integer
+        target_level: integer
+        quantity_per_unit: varchar
+        discontinued: integer
+        minimum_reorder_quantity: integer
+        category: varchar
+        inventory_id: integer
+        transaction_type: integer
+        transaction_created_date: date
+        transaction_modified_date: varchar
+        ipd: integer
+        quantity: integer
+        purchase_order_id: integer
+        customer_order_id: integer
+        comments: varchar
+        insertion_timestamp: timestamp with time zone
+    solution__dim_products:
+      +column_types:
+        product_id: integer
+        product_code: varchar
+        product_name: varchar
+        description: integer
+        supplier_company: varchar
+        standard_cost: double
+        list_price: double
+        reorder_level: integer
+        target_level: integer
+        quantity_per_unit: varchar
+        discontinued: integer
+        minimum_reorder_quantity: integer
+        category: varchar
+        attachments: integer
+        insertion_timestamp: timestamp with time zone

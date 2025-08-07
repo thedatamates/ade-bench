@@ -1,0 +1,141 @@
+
+
+seeds:
+  analytics_engineering:
+    solution__fact_sales:
+      +column_types:
+        order_id: integer
+        product_id: varchar
+        customer_id: integer
+        employee_id: integer
+        shipper_id: integer
+        quantity: integer
+        unit_price: double
+        discount: integer
+        status_id: integer
+        date_allocated: integer
+        purchase_order_id: integer
+        inventory_id: integer
+        order_date: date
+        shipped_date: varchar
+        paid_date: varchar
+        insertion_timestamp: timestamp with time zone
+    solution__fact_inventory:
+      +column_types:
+        inventory_id: integer
+        transaction_type: integer
+        transaction_created_date: date
+        transaction_modified_date: varchar
+        product_id: varchar
+        quantity: integer
+        purchase_order_id: integer
+        customer_order_id: integer
+        comments: varchar
+        insertion_timestamp: timestamp with time zone
+    solution__dim_products:
+      +column_types:
+        product_id: varchar
+        product_code: varchar
+        product_name: varchar
+        description: integer
+        supplier_company: varchar
+        standard_cost: double
+        list_price: double
+        reorder_level: integer
+        target_level: integer
+        quantity_per_unit: varchar
+        discontinued: integer
+        minimum_reorder_quantity: integer
+        category: varchar
+        attachments: integer
+        insertion_timestamp: timestamp with time zone
+    solution__obt_product_inventory:
+      +column_types:
+        product_id: varchar
+        product_code: varchar
+        product_name: varchar
+        description: integer
+        supplier_company: varchar
+        standard_cost: double
+        list_price: double
+        reorder_level: integer
+        target_level: integer
+        quantity_per_unit: varchar
+        discontinued: integer
+        minimum_reorder_quantity: integer
+        category: varchar
+        inventory_id: integer
+        transaction_type: integer
+        transaction_created_date: date
+        transaction_modified_date: varchar
+        ipd: varchar
+        quantity: integer
+        purchase_order_id: integer
+        customer_order_id: integer
+        comments: varchar
+        insertion_timestamp: timestamp with time zone
+    solution__obt_sales_overview:
+      +column_types:
+        customer_id: integer
+        customer_company: varchar
+        customer_last_name: varchar
+        customer_first_name: varchar
+        customer_email_address: integer
+        customer_job_title: varchar
+        customer_business_phone: varchar
+        customer_home_phone: integer
+        customer_mobile_phone: integer
+        customer_fax_number: varchar
+        customer_address: varchar
+        customer_city: varchar
+        customer_state_province: varchar
+        customer_zip_postal_code: integer
+        customer_country_region: varchar
+        customer_web_page: integer
+        customer_notes: integer
+        customer_attachments: integer
+        employee_id: integer
+        employee_company: varchar
+        employee_last_name: varchar
+        employee_first_name: varchar
+        employee_email_address: varchar
+        employee_job_title: varchar
+        employee_business_phone: varchar
+        employee_home_phone: varchar
+        employee_mobile_phone: integer
+        employee_fax_number: varchar
+        employee_address: varchar
+        employee_city: varchar
+        employee_state_province: varchar
+        employee_zip_postal_code: integer
+        employee_country_region: varchar
+        employee_web_page: varchar
+        employee_notes: varchar
+        employee_attachments: integer
+        product_id: varchar
+        product_code: varchar
+        product_name: varchar
+        description: integer
+        supplier_company: varchar
+        standard_cost: double
+        list_price: double
+        reorder_level: integer
+        target_level: integer
+        quantity_per_unit: varchar
+        discontinued: integer
+        minimum_reorder_quantity: integer
+        category: varchar
+        attachments: integer
+        order_id: integer
+        shipper_id: integer
+        quantity: integer
+        unit_price: double
+        discount: integer
+        status_id: integer
+        date_allocated: integer
+        purchase_order_id: integer
+        inventory_id: integer
+        order_date: date
+        shipped_date: varchar
+        paid_date: varchar
+        insertion_timestamp: timestamp with time zone

@@ -1,0 +1,25 @@
+
+
+seeds:
+  analytics_engineering:
+    solution__dim_customer:
+      +column_types:
+        customer_id: integer
+        company: varchar
+        last_name: varchar
+        first_name: varchar
+        email_address: integer
+        job_title: varchar
+        business_phone: varchar
+        home_phone: integer
+        mobile_phone: integer
+        fax_number: varchar
+        address: varchar
+        city: varchar
+        state_province: varchar
+        zip_postal_code: integer
+        country_region: varchar
+        web_page: integer
+        notes: integer
+        attachments: integer
+        insertion_timestamp: timestamp with time zone

@@ -1,0 +1,16 @@
+
+
+seeds:
+  analytics_engineering:
+    solution__fact_inventory:
+      +column_types:
+        inventory_id: integer
+        transaction_type: integer
+        transaction_created_date: date
+        transaction_modified_date: varchar
+        product_id: integer
+        quantity: integer
+        purchase_order_id: integer
+        customer_order_id: integer
+        comments: varchar
+        insertion_timestamp: timestamp with time zone

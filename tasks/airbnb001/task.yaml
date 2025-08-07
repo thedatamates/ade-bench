@@ -27,11 +27,11 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - dim_listings_hosts
-  - daily_agg_reviews
-  - mom_agg_reviews
-  - monthly_agg_reviews
-  - wow_agg_reviews
+  - table_name: dim_listings_hosts
+  - table_name: daily_agg_reviews
+  - table_name: mom_agg_reviews
+  - table_name: monthly_agg_reviews
+  - table_name: wow_agg_reviews
 
 # Use shared database instead of local data files
 database:

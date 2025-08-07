@@ -31,7 +31,7 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - intercom__threads
+  - table_name: intercom__threads
 
 # Use shared database instead of local data files
 database:

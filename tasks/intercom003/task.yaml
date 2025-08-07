@@ -42,7 +42,7 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - intercom__conversation_metrics
+  - table_name: intercom__conversation_metrics
 
 # Use shared database instead of local data files
 database:
