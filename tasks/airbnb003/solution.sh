@@ -15,7 +15,7 @@ EOF
 cat <<EOF | cat - models/source/src_listings.sql > tmp && mv tmp models/source/src_listings.sql
 {{
 	config(
-		materialized="table" ,
+		materialized="view" ,
 		alias="src_listings" ,
 		schema="main" ,
 		unique_key="LISTING_ID"
@@ -27,7 +27,7 @@ EOF
 cat <<EOF | cat - models/source/src_reviews.sql > tmp && mv tmp models/source/src_reviews.sql
 {{
 	config(
-		materialized="table" ,
+		materialized="view" ,
 		alias="src_reviews" ,
 		schema="main" ,
 		unique_key="LISTING_ID"

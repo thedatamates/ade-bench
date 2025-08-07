@@ -23,7 +23,7 @@ db_type: duckdb
 solution_seeds:
   - src_hosts
   - src_listings
-  - src_reviews
+  # - src_reviews
 
 # Use shared database instead of local data files
 database:

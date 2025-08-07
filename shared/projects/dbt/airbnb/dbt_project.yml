@@ -2,7 +2,7 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'dbt_airbnb'
+name: 'airbnb'
 version: '1.0.0'
 config-version: 2
 
@@ -35,7 +35,7 @@ models:
 
 
 seeds:
-  dbt_airbnb:
+  airbnb:
     RAW_LISTINGS:
       +column_types:
         PRICE: "STRING"

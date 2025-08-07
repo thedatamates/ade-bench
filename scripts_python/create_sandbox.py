@@ -68,6 +68,54 @@ def get_task_config(task_name):
         return None
 
 
+def copy_item(source_path, dest_path, item_name, create_dest_dir=False):
+    """Generic function to copy files or directories."""
+    if not source_path.exists():
+        print(f"Warning: {item_name} not found at {source_path}")
+        return True
+    
+    try:
+        if create_dest_dir:
+            dest_path.mkdir(parents=True, exist_ok=True)
+        
+        if source_path.is_file():
+            shutil.copy2(source_path, dest_path)
+        elif source_path.is_dir():
+            if dest_path.exists():
+                # Copy contents into existing directory
+                for item in source_path.iterdir():
+                    if item.is_file():
+                        shutil.copy2(item, dest_path)
+                    elif item.is_dir():
+                        shutil.copytree(item, dest_path / item.name)
+            else:
+                # Copy entire directory
+                shutil.copytree(source_path, dest_path)
+        
+        print(f"✓ Copied {item_name} to sandbox")
+        return True
+    except Exception as e:
+        print(f"Error copying {item_name}: {e}")
+        return False
+
+
+def copy_project_contents(task_name):
+    """Copy shared project contents to sandbox."""
+    project_config = get_project_config(task_name)
+    if not project_config:
+        return False
+    
+    project_name = project_config['name']
+    shared_project_dir = Path("shared/projects/dbt") / project_name
+    
+    if not shared_project_dir.exists():
+        print(f"Error: Shared project directory '{shared_project_dir}' not found")
+        return False
+    
+    sandbox_dir = Path("dev/sandbox")
+    return copy_item(shared_project_dir, sandbox_dir, f"project '{project_name}'")
+
+
 def get_project_config(task_name):
     """Get the project configuration from task.yaml."""
     task_data = get_task_config(task_name)
@@ -118,38 +166,8 @@ def get_database_config(task_name):
     return database_config
 
 
-def copy_project_contents(task_name):
-    """Copy the contents of the shared project to sandbox."""
-    project_config = get_project_config(task_name)
-    if not project_config:
-        return False
-    
-    project_name = project_config['name']
-    project_type = project_config.get('type', 'dbt')  # Default to dbt if not specified
-    shared_project_dir = Path("shared/projects") / project_type / project_name
-    sandbox_dir = Path("dev/sandbox")
-    
-    if not shared_project_dir.exists():
-        print(f"Error: Shared project '{project_name}' not found at {shared_project_dir}")
-        return False
-    
-    try:
-        # Copy all contents from shared project to sandbox
-        for item in shared_project_dir.iterdir():
-            if item.is_file():
-                shutil.copy2(item, sandbox_dir)
-            elif item.is_dir():
-                shutil.copytree(item, sandbox_dir / item.name)
-        
-        print(f"✓ Copied shared project '{project_name}' contents to sandbox")
-        return True
-    except Exception as e:
-        print(f"Error copying project contents: {e}")
-        return False
-
-
-def find_and_copy_duckdb_file(task_name):
-    """Find the associated DuckDB file in shared/databases/duckdb and copy it to sandbox."""
+def copy_database_file(task_name):
+    """Copy the database file to sandbox."""
     database_config = get_database_config(task_name)
     if not database_config:
         return False
@@ -158,10 +176,6 @@ def find_and_copy_duckdb_file(task_name):
     duckdb_dir = Path("shared/databases/duckdb")
     sandbox_dir = Path("dev/sandbox")
     
-    if not duckdb_dir.exists():
-        print(f"Error: DuckDB directory not found at {duckdb_dir}")
-        return False
-    
     # Look for the .duckdb file with the database name from task config
     duckdb_file = duckdb_dir / f"{database_name}.duckdb"
     
@@ -169,53 +183,36 @@ def find_and_copy_duckdb_file(task_name):
         print(f"Error: DuckDB file '{database_name}.duckdb' not found in shared/databases/duckdb")
         return False
     
-    try:
-        # Copy the file to sandbox
-        shutil.copy2(duckdb_file, sandbox_dir)
-        print(f"✓ Copied {duckdb_file.name} to sandbox")
-        return True
-    except Exception as e:
-        print(f"Error copying DuckDB file: {e}")
-        return False
+    return copy_item(duckdb_file, sandbox_dir, f"database '{database_name}.duckdb'")
 
 
-def copy_task_scripts(task_name):
-    """Copy setup.sh and solution.sh files from task directory to sandbox."""
+def copy_task_files(task_name):
+    """Copy various task files to sandbox."""
     task_dir = Path("tasks") / task_name
     sandbox_dir = Path("dev/sandbox")
     
-    scripts_copied = []
+    # Define what to copy
+    items_to_copy = [
+        (task_dir / "setup.sh", sandbox_dir, "setup.sh"),
+        (task_dir / "solution.sh", sandbox_dir, "solution.sh"),
+        (task_dir / "seeds", sandbox_dir / "seeds", "seeds directory"),
+        (task_dir / "tests", sandbox_dir / "tests", "tests directory"),
+    ]
     
-    # Copy setup.sh if it exists
-    setup_script = task_dir / "setup.sh"
-    if setup_script.exists():
-        try:
-            shutil.copy2(setup_script, sandbox_dir)
-            scripts_copied.append("setup.sh")
-        except Exception as e:
-            print(f"Error copying setup.sh: {e}")
-            return False
-    else:
-        print("Warning: setup.sh not found in task directory")
+    success = True
+    for source, dest, name in items_to_copy:
+        if not copy_item(source, dest, name, create_dest_dir=(name.endswith("directory"))):
+            success = False
     
-    # Copy solution.sh if it exists
-    solution_script = task_dir / "solution.sh"
-    if solution_script.exists():
-        try:
-            shutil.copy2(solution_script, sandbox_dir)
-            scripts_copied.append("solution.sh")
-        except Exception as e:
-            print(f"Error copying solution.sh: {e}")
-            return False
-    else:
-        print("Warning: solution.sh not found in task directory")
+    return success
+
+
+def copy_shared_scripts():
+    """Copy shared scripts to sandbox."""
+    script_path = Path("shared/scripts/seed-schema.sh")
+    sandbox_dir = Path("dev/sandbox")
     
-    if scripts_copied:
-        print(f"✓ Copied task scripts to sandbox: {', '.join(scripts_copied)}")
-    else:
-        print("Warning: No task scripts found to copy")
-    
-    return True
+    return copy_item(script_path, sandbox_dir, "seed-schema.sh script")
 
 
 def main():
@@ -242,12 +239,16 @@ def main():
     if not copy_project_contents(task_name):
         sys.exit(1)
     
-    # Step 4: Find and copy DuckDB file
-    if not find_and_copy_duckdb_file(task_name):
+    # Step 4: Copy database file
+    if not copy_database_file(task_name):
         sys.exit(1)
     
-    # Step 5: Copy task scripts (setup.sh and solution.sh)
-    if not copy_task_scripts(task_name):
+    # Step 5: Copy task files (scripts, seeds, tests)
+    if not copy_task_files(task_name):
+        sys.exit(1)
+    
+    # Step 6: Copy shared scripts
+    if not copy_shared_scripts():
         sys.exit(1)
     
     print("-" * 50)

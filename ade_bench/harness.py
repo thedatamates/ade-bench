@@ -601,8 +601,36 @@ class Harness:
 
         return results
 
+    def _extract_table_schema(self, con, table_name: str) -> dict:
+        """Extract schema information from a database table."""
+        try:
+            # Use information_schema to get table schema - more robust than DESCRIBE
+            schema_query = f"""
+                SELECT column_name, data_type 
+                FROM information_schema.columns 
+                WHERE table_name = '{table_name}'
+                ORDER BY ordinal_position
+            """
+            schema_result = con.execute(schema_query).fetchall()
+            
+            columns = []
+            for row in schema_result:
+                col_name, col_type = row
+                columns.append({
+                    "name": col_name,
+                    "type": col_type.lower()  # Use DuckDB type directly
+                })
+            
+            return {
+                "name": f"solution__{table_name}",
+                "columns": columns
+            }
+        except Exception as e:
+            self._logger.error(f"Failed to extract schema for table {table_name}: {e}")
+            return None
+
     def _extract_csv_files(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
-        """Extract CSV files from the database after agent execution."""
+        """Extract CSV files and schema file from the database after agent execution."""
         # Read task.yaml to get tables to extract
         task_yaml_path = trial_handler.input_path / "task.yaml"
         if not task_yaml_path.exists():
@@ -655,15 +683,54 @@ class Harness:
                 import duckdb
                 con = duckdb.connect(temp_db_path)
                 
+                # Collect all schema information
+                all_schemas = []
+                
                 for table_name in tables_to_extract:
                     try:
-                        # Query the table and save as CSV
+                        # Extract schema
+                        schema_info = self._extract_table_schema(con, table_name)
+                        if schema_info:
+                            all_schemas.append(schema_info)
+                        
+                        # Extract CSV data
                         df = con.execute(f"SELECT * FROM {table_name}").df()
                         csv_path = task_seeds_dir / f"solution__{table_name}.csv"
                         df.to_csv(csv_path, index=False)
                         self._logger.info(f"Exported {table_name} to soluton__{csv_path}")
                     except Exception as e:
                         self._logger.error(f"Failed to export table {table_name}: {e}")
+                
+                # Write schema information to _no-op.txt file
+                # Has to be a txt file because dbt reads yml files as config.
+                if all_schemas:
+                    no_op_path = task_seeds_dir / "_no-op.txt"
+                    
+                    # Get project name from task config
+                    project_name = task_config.get('project', {}).get('name', 'default')
+                    
+                    # Create the seeds section in proper YAML format
+                    seeds_content = {
+                        'seeds': {
+                            project_name: {}
+                        }
+                    }
+                    
+                    # Add column types for each table
+                    for schema in all_schemas:
+                        table_name = schema['name']
+                        column_types = {}
+                        for col in schema['columns']:
+                            column_types[col['name']] = col['type']
+                        
+                        seeds_content['seeds'][project_name][table_name] = {
+                            '+column_types': column_types
+                        }
+                    
+                    with open(no_op_path, 'w') as f:
+                        yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)
+                    
+                    self._logger.info(f"Generated _no-op.txt file: {no_op_path}")
                 
                 con.close()
             
