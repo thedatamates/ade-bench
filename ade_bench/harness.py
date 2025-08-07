@@ -702,7 +702,7 @@ class Harness:
                         self._logger.error(f"Failed to export table {table_name}: {e}")
                 
                 # Write schema information to _no-op.txt file
-                # Has to be a txt file because dbt reads yml files as config.
+                # Has to be a txt file because dbt reads yml files as config
                 if all_schemas:
                     no_op_path = task_seeds_dir / "_no-op.txt"
                     
