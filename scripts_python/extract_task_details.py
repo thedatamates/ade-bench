@@ -71,6 +71,9 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
         # Extract descriptions
         descriptions = task_config.get('descriptions', [])
         
+        # Extract notes
+        notes = clean_text_for_spreadsheet(task_config.get('notes', ''))
+        
         if not descriptions:
             # If no descriptions, create one row with empty key and description
             task_details.append({
@@ -81,6 +84,7 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
                 'database_name': database_name,
                 'key': '',
                 'description': '',
+                'notes': notes,
                 'difficulty': difficulty,
                 'category': category,
                 'tags': clean_text_for_spreadsheet(', '.join(tags) if tags else '')
@@ -99,6 +103,7 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
                     'database_name': database_name,
                     'key': key,
                     'description': description,
+                    'notes': notes,
                     'difficulty': difficulty,
                     'category': category,
                     'tags': clean_text_for_spreadsheet(', '.join(tags) if tags else '')
@@ -159,6 +164,7 @@ def main():
         'key',
         'title',
         'description',
+        'notes',
         'difficulty',
         'tags'
     ]

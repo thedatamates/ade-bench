@@ -1,38 +1,31 @@
-task_id: template
-status: dev
-title: Template
+task_id: airbnb004
+status: ready
+title: Add a primary key to a dbt model.
 notes: |-
-  [dev notes]
+  - This needs to figure out a way to check if the primary key is derived and not just a row_count or something.
 descriptions:
   - key: base
     description: |-
-      Do some stuff.
+      Add a primary key to the fct_reviews table. 
 author_name: test
 author_email: test
-difficulty: easy
+difficulty: medium
 category: data-transformation
 tags:
   - dbt
-  - aggregation
-  - joins
-  - e-commerce
-  - analytics
+  - macros  
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
-# Tables to compare for solution
-# solution_seeds:
-#   - template__model
-
 # Use shared database instead of local data files
 database:
   source: shared
-  name: template
+  name: airbnb
   type: duckdb
 
 # Use shared project instead of local project
 project:
   source: shared
-  name: template
+  name: airbnb
   type: dbt

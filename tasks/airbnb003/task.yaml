@@ -1,6 +1,8 @@
 task_id: airbnb003
-status: dev
+status: ready
 title: Update dbt models to be views
+notes: |-
+  I want to include a test to check for src_reviews but need to figure out how limit the table size.
 descriptions:
   - key: base
     description: |-
