@@ -1,5 +1,5 @@
 task_id: airbnb006
-status: dev
+status: ready
 title: Update misnamed CTEs.
 notes: |-
   Need to include fct_reviews in the solution seeds, but it's too big.
