@@ -1,0 +1,51 @@
+task_id: airbnb005
+status: dev
+title: Create an NPS model.
+notes: |-
+descriptions:
+  - key: base
+    description: |-
+      Create two NPS score tables for reviews using sentiment to determine promoters or detractors. Create these tables and columns:
+      
+      daily_agg_nps_reviews
+      - review_date
+      - nps_daily
+      - reviews_daily
+      - nps_28d (rolling 28 day aggregation)
+      - reviews_28d (rolling 28 day total)
+
+      listing_agg_nps_reviews
+      - listing_id
+      - listing_name
+      - room_type
+      - nps_total
+      - reviews_total
+
+      Materialize the first table incrementally and the second table as a table.
+author_name: test
+author_email: test
+difficulty: medium
+category: data-transformation
+tags:
+  - dbt
+  - macros  
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - table_name: daily_agg_nps_reviews
+  - table_name: listing_agg_nps_reviews
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: airbnb
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: airbnb
+  type: dbt

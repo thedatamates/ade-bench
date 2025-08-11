@@ -1,0 +1,18 @@
+
+
+seeds:
+  airbnb:
+    solution__daily_agg_nps_reviews:
+      +column_types:
+        REVIEW_DATE: timestamp
+        nps_daily: double
+        reviews_daily: bigint
+        nps_28d: double
+        reviews_28d: hugeint
+    solution__listing_agg_nps_reviews:
+      +column_types:
+        LISTING_ID: integer
+        LISTING_NAME: varchar
+        ROOM_TYPE: varchar
+        nps_total: double
+        reviews_total: bigint
