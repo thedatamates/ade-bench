@@ -1,0 +1,36 @@
+task_id: airbnb006
+status: dev
+title: Update misnamed CTEs.
+notes: |-
+  Need to include fct_reviews in the solution seeds, but it's too big.
+descriptions:
+  - key: base
+    description: |-
+      Update the CTEs in the models to be named correctly.
+author_name: test
+author_email: test
+difficulty: medium
+category: hygiene
+tags:
+  - dbt
+  - naming 
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - table_name: dim_listings
+  - table_name: dim_hosts
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: airbnb
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: airbnb
+  type: dbt
