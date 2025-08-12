@@ -195,6 +195,7 @@ def copy_task_files(task_name):
     items_to_copy = [
         (task_dir / "setup.sh", sandbox_dir, "setup.sh"),
         (task_dir / "solution.sh", sandbox_dir, "solution.sh"),
+        (task_dir / "setup", sandbox_dir / "setup", "setup directory"),
         (task_dir / "seeds", sandbox_dir / "seeds", "seeds directory"),
         (task_dir / "tests", sandbox_dir / "tests", "tests directory"),
         (task_dir / "solutions", sandbox_dir / "solutions", "solutions directory"),

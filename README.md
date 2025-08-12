@@ -30,6 +30,7 @@ Each task contains:
 - `Dockerfile` - Container setup with dbt and database
 - `tests/` - SQL validation queries
 - `setup.sh` – A script that runs before the agent is given the task, for modifying files and source data.
+- `setup/` – (Optional) Directory containing files that are copied to the container before setup.sh runs. These files can be used by the setup script for file manipulation, copying, or as templates. The setup directory is automatically cleaned up after the setup script completes.
 - `solution.sh` – The oracle solution script that directly modifies files.
 - `solutions/` – (Optional) Reference materials that are copied to `/solutions` in the container and can be used by setup.sh and solution.sh scripts.
 

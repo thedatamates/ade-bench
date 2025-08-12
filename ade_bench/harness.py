@@ -363,6 +363,7 @@ class Harness:
     ) -> None:
         """Run setup.sh script if it exists in the task directory."""
         setup_script_path = trial_handler.input_path / "setup.sh"
+        setup_dir_path = trial_handler.input_path / "setup"
         
         if not setup_script_path.exists():
             self._logger.debug(f"No setup script found at {setup_script_path}")
@@ -371,6 +372,14 @@ class Harness:
         self._logger.info(f"Running setup script: {setup_script_path}")
         
         try:
+            # Copy setup directory to container if it exists
+            if setup_dir_path.exists():
+                self._logger.info(f"Copying setup directory: {setup_dir_path}")
+                terminal.copy_to_container(
+                    paths=setup_dir_path,
+                    container_dir="/app",
+                )
+            
             # Copy setup script to container (following oracle agent pattern)
             session.copy_to_container(
                 setup_script_path,
@@ -396,16 +405,21 @@ class Harness:
                 f"Error running setup script for task {trial_handler.task_id}: {e}"
             )
         finally:
-            # Clean up: remove the setup script from container
+            # Clean up: remove the setup script and setup directory from container
             try:
-                session.send_keys(
-                    ["rm -f /app/setup.sh", "Enter"],
-                    max_timeout_sec=30,
-                    block=True,
-                )
-                self._logger.debug("Setup script cleaned up from container")
+                cleanup_commands = ["rm -f /app/setup.sh"]
+                if setup_dir_path.exists():
+                    cleanup_commands.append("rm -rf /app/setup")
+                
+                for command in cleanup_commands:
+                    session.send_keys(
+                        [command, "Enter"],
+                        max_timeout_sec=30,
+                        block=True,
+                    )
+                self._logger.debug("Setup files cleaned up from container")
             except Exception as cleanup_error:
-                self._logger.warning(f"Failed to cleanup setup script: {cleanup_error}")
+                self._logger.warning(f"Failed to cleanup setup files: {cleanup_error}")
 
     def _run_trial(
         self,
