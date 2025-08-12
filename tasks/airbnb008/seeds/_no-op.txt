@@ -1,0 +1,19 @@
+
+
+seeds:
+  airbnb:
+    solution__mom_agg_reviews:
+      +column_types:
+        REVIEW_TOTALS: bigint
+        REVIEW_SENTIMENT: varchar
+        AGGREGATION_DATE: timestamp
+        MOM: double
+        DATE_SENTIMENT_ID: varchar
+    solution__monthly_agg_reviews:
+      +column_types:
+        REVIEW_TOTALS: bigint
+        REVIEW_SENTIMENT: varchar
+        MONTH_YEAR: varchar
+        MONTH: bigint
+        YEAR: bigint
+        DATE_SENTIMENT_ID: varchar

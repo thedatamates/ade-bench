@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     task_group = parser.add_mutually_exclusive_group()
     task_group.add_argument(
-        "--task-ids",
+        "-t", "--tasks",
         type=str,
         nargs="+",
         help=("Task ID(s) to run. Cannot be used with --n-tasks or --dataset-config"),
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         "--n-tasks",
         type=int,
         help=(
-            "Number of tasks to run. Cannot be used with --task-ids or --dataset-config"
+            "Number of tasks to run. Cannot be used with --tasks or --dataset-config"
         ),
     )
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         help="Maximum number of tasks to run concurrently",
     )
     parser.add_argument(
-        "--exclude-task-ids",
+        "--exclude-tasks",
         type=str,
         nargs="+",
         help=(
@@ -155,12 +155,12 @@ if __name__ == "__main__":
         no_rebuild=args.no_rebuild,
         cleanup=args.cleanup,
         log_level=args.log_level,
-        task_ids=args.task_ids,
+        task_ids=args.tasks,
         n_tasks=args.n_tasks,
         max_episodes=args.max_episodes,
         upload_results=args.upload_results,
         n_concurrent_trials=args.n_concurrent_trials,
-        exclude_task_ids=set(args.exclude_task_ids) if args.exclude_task_ids else None,
+        exclude_task_ids=set(args.exclude_tasks) if args.exclude_tasks else None,
         n_attempts=args.n_attempts,
         dataset_config=args.dataset_config,
         create_seed=args.create_seed,
