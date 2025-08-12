@@ -1,0 +1,35 @@
+task_id: asana003
+status: ready
+title: Fix our data to match new Fivetran package.
+notes: |-
+  This is from a mismatch in the Fivetran Asana package, where the underlying data no longer matches the current package.
+descriptions:
+  - key: base
+    description: |-
+      This project is erroring because Fivetran updated their Asana package. Please modify our data to match this new package.
+author_name: test
+author_email: test
+difficulty: medium
+category: debug
+tags:
+  - dbt
+  - data
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - table_name: asana__task
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: asana
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: asana
+  type: dbt
