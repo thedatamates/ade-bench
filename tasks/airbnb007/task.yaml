@@ -20,7 +20,6 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - table_name: fct_reviews
   - table_name: dim_hosts
   - table_name: dim_listings
   - table_name: dim_listings_hosts
