@@ -1,5 +1,4 @@
 #! /bin/bash
-dbt deps
 # remove any existing singular tests and add solution tests
 rm -rf tests
 mkdir tests

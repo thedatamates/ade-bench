@@ -1,35 +1,35 @@
-task_id: airbnb008
-status: dev
-title: Fix a syntax error in the schema.yml file.
+task_id: asana001
+status: ready
+title: Fix an error from an update to the Fivetran asana package.
 notes: |-
-  The setup script doesn't work. 
+  This is from a mismatch in the Fivetran Asana package, where the underlying data no longer matches the current package.
 descriptions:
   - key: base
     description: |-
-      The project is broken.
+      This project is erroring. Please fix it without without modifying the underlying data.
 author_name: test
 author_email: test
 difficulty: easy
 category: debug
 tags:
   - dbt
+  - data
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - table_name: mom_agg_reviews
-  - table_name: monthly_agg_reviews
+  - table_name: asana__task
 
 # Use shared database instead of local data files
 database:
   source: shared
-  name: airbnb
+  name: asana
   type: duckdb
 
 # Use shared project instead of local project
 project:
   source: shared
-  name: airbnb
+  name: asana
   type: dbt

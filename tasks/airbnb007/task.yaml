@@ -2,7 +2,7 @@ task_id: airbnb007
 status: dev
 title: Create several models based on a schema.yml file.
 notes: |-
-  Need to make sure the agent doesn't have access to solutions directory. 
+  The setup script doesn't work. 
 descriptions:
   - key: base
     description: |-
