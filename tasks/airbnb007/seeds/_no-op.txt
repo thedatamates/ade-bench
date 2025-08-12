@@ -1,0 +1,55 @@
+
+
+seeds:
+  airbnb:
+    solution__fct_reviews:
+      +column_types:
+        LISTING_ID: integer
+        REVIEW_DATE: timestamp
+        REVIEWER_NAME: varchar
+        REVIEW_TEXT: varchar
+        REVIEW_SENTIMENT: varchar
+    solution__dim_hosts:
+      +column_types:
+        HOST_ID: integer
+        HOST_NAME: varchar
+        IS_SUPERHOST: varchar
+        CREATED_AT: timestamp
+        UPDATED_AT: timestamp
+    solution__dim_listings:
+      +column_types:
+        LISTING_ID: integer
+        LISTING_NAME: varchar
+        MINIMUM_NIGHTS: integer
+        HOST_ID: integer
+        ROOM_TYPE: varchar
+        PRICE: decimal(18,3)
+        CREATED_AT: timestamp
+        UPDATED_AT: timestamp
+    solution__dim_listings_hosts:
+      +column_types:
+        CREATED_AT: timestamp
+        UPDATED_AT: timestamp
+        LISTING_ID: integer
+        LISTING_NAME: varchar
+        ROOM_TYPE: varchar
+        MINIMUM_NIGHTS: integer
+        PRICE: decimal(18,3)
+        HOST_ID: integer
+        HOST_NAME: varchar
+        IS_SUPERHOST: varchar
+        LISTING_HOST_ID: varchar
+    solution__daily_agg_nps_reviews:
+      +column_types:
+        REVIEW_DATE: timestamp
+        nps_daily: double
+        reviews_daily: bigint
+        nps_28d: double
+        reviews_28d: hugeint
+    solution__listing_agg_nps_reviews:
+      +column_types:
+        LISTING_ID: integer
+        LISTING_NAME: varchar
+        ROOM_TYPE: varchar
+        nps_total: double
+        reviews_total: bigint

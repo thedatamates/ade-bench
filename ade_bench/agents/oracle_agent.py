@@ -77,6 +77,14 @@ class OracleAgent(BaseAgent):
         solution = self._solution_dict[task_description]
 
         if solution["type"] == "sh":
+            # Copy solutions directory if it exists
+            solutions_path = solution["path"].parent / "solutions"
+            if solutions_path.exists():
+                session.copy_to_container(
+                    solutions_path,
+                    container_dir="/oracle/solutions",
+                )
+            
             session.copy_to_container(
                 solution["path"],
                 container_dir="/oracle",

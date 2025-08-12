@@ -197,6 +197,7 @@ def copy_task_files(task_name):
         (task_dir / "solution.sh", sandbox_dir, "solution.sh"),
         (task_dir / "seeds", sandbox_dir / "seeds", "seeds directory"),
         (task_dir / "tests", sandbox_dir / "tests", "tests directory"),
+        (task_dir / "solutions", sandbox_dir / "solutions", "solutions directory"),
     ]
     
     success = True

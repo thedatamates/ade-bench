@@ -202,6 +202,13 @@ class Harness:
                 container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
             )
 
+        # Copy solutions directory if it exists
+        if trial_handler.solutions_dir.exists():
+            terminal.copy_to_container(
+                paths=[trial_handler.solutions_dir],
+                container_dir=str(DockerComposeManager.CONTAINER_SOLUTIONS_DIR),
+            )
+
     def _run_tests(
         self,
         terminal: Terminal,
