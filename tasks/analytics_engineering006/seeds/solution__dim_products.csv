@@ -1,41 +1,41 @@
 product_id,product_code,product_name,description,supplier_company,standard_cost,list_price,reorder_level,target_level,quantity_per_unit,discontinued,minimum_reorder_quantity,category,attachments,insertion_timestamp
-98,NWTSO-98,Northwind Traders Vegetable Soup,,Supplier F,1.0,1.89,100,200,,0,,Soups,,2025-08-07 13:58:14.261-04
-7,NWTDFN-7,Northwind Traders Dried Pears,,Supplier B,22.5,30.0,10,40,12 - 1 lb pkgs.,0,10,Dried Fruit & Nuts,,2025-08-07 13:58:14.261-04
-48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,,2025-08-07 13:58:14.261-04
-57,NWTP-57,Northwind Traders Ravioli,,Supplier A,14.625,19.5,20,80,24 - 250 g pkgs.,0,20,Pasta,,2025-08-07 13:58:14.261-04
-77,NWTCO-77,Northwind Traders Mustard,,Supplier J,9.75,13.0,15,60,12 boxes,0,15,Condiments,,2025-08-07 13:58:14.261-04
-80,NWTDFN-80,Northwind Traders Dried Plums,,Supplier B,3.0,3.5,50,75,1 lb bag,0,25,Dried Fruit & Nuts,,2025-08-07 13:58:14.261-04
-86,NWTBGM-86,Northwind Traders Cake Mix,,Supplier A,10.5,15.99,10,20,4 boxes,0,5,Baked Goods & Mixes,,2025-08-07 13:58:14.261-04
-90,NWTCFV-90,Northwind Traders Pineapple,,Supplier F,1.0,1.8,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-83,NWTCS-83,Northwind Traders Potato Chips,,Supplier I,0.5,1.8,30,200,,0,,"Chips, Snacks",,2025-08-07 13:58:14.261-04
-91,NWTCFV-91,Northwind Traders Cherry Pie Filling,,Supplier F,1.0,2.0,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-3,NWTCO-3,Northwind Traders Syrup,,Supplier J,7.5,10.0,25,100,12 - 550 ml bottles,0,25,Condiments,,2025-08-07 13:58:14.261-04
-41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,,2025-08-07 13:58:14.261-04
-82,NWTC-82,Northwind Traders Granola,,Supplier A,2.0,4.0,20,100,,0,,Cereal,,2025-08-07 13:58:14.261-04
-89,NWTCFV-89,Northwind Traders Peaches,,Supplier F,1.0,1.5,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-94,NWTCFV-94,Northwind Traders Peas,,Supplier F,1.0,1.5,10,40,14.5 OZ,0,,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-1,NWTB-1,Northwind Traders Chai,,Supplier D,13.5,18.0,10,40,10 boxes x 20 bags,0,10,Beverages,,2025-08-07 13:58:14.261-04
-5,NWTO-5,Northwind Traders Olive Oil,,Supplier J,16.0125,21.35,10,40,36 boxes,0,10,Oil,,2025-08-07 13:58:14.261-04
-17,NWTCFV-17,Northwind Traders Fruit Cocktail,,Supplier F,29.25,39.0,10,40,15.25 OZ,0,10,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-65,NWTS-65,Northwind Traders Hot Pepper Sauce,,Supplier H,15.7875,21.05,10,40,32 - 8 oz bottles,0,10,Sauces,,2025-08-07 13:58:14.261-04
-4,NWTCO-4,Northwind Traders Cajun Seasoning,,Supplier J,16.5,22.0,10,40,48 - 6 oz jars,0,10,Condiments,,2025-08-07 13:58:14.261-04
-40,NWTCM-40,Northwind Traders Crab Meat,,Supplier G,13.8,18.4,30,120,24 - 4 oz tins,0,30,Canned Meat,,2025-08-07 13:58:14.261-04
-51,NWTDFN-51,Northwind Traders Dried Apples,,Supplier B,39.75,53.0,10,40,50 - 300 g pkgs.,0,10,Dried Fruit & Nuts,,2025-08-07 13:58:14.261-04
-56,NWTP-56,Northwind Traders Gnocchi,,Supplier A,28.5,38.0,30,120,24 - 250 g pkgs.,0,30,Pasta,,2025-08-07 13:58:14.261-04
-72,NWTD-72,Northwind Traders Mozzarella,,Supplier E,26.1,34.8,10,40,24 - 200 g pkgs.,0,10,Dairy `dl_northwind`.`products`,,2025-08-07 13:58:14.261-04
-88,NWTCFV-88,Northwind Traders Pears,,Supplier F,1.0,1.3,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-85,NWTBGM-85,Northwind Traders Brownie Mix,,Supplier A,9.0,12.49,10,20,3 boxes,0,5,Baked Goods & Mixes,,2025-08-07 13:58:14.261-04
-96,NWTCM-96,Northwind Traders Smoked Salmon,,Supplier G,2.0,4.0,30,50,5 oz,0,,Canned Meat,,2025-08-07 13:58:14.261-04
-21,NWTBGM-21,Northwind Traders Scones,,Supplier A,7.5,10.0,5,20,24 pkgs. x 4 pieces,0,5,Baked Goods & Mixes,,2025-08-07 13:58:14.261-04
-87,NWTB-87,Northwind Traders Tea,,Supplier G,2.0,4.0,20,50,100 count per box,0,,Beverages,,2025-08-07 13:58:14.261-04
-95,NWTCM-95,Northwind Traders Tuna Fish,,Supplier G,0.5,2.0,30,50,5 oz,0,,Canned Meat,,2025-08-07 13:58:14.261-04
-99,NWTSO-99,Northwind Traders Chicken Soup,,Supplier F,1.0,1.95,100,200,,0,,Soups,,2025-08-07 13:58:14.261-04
-52,NWTG-52,Northwind Traders Long Grain Rice,,Supplier A,5.25,7.0,25,100,16 - 2 kg boxes,0,25,Grains,,2025-08-07 13:58:14.261-04
-81,NWTB-81,Northwind Traders Green Tea,,Supplier C,2.0,2.99,100,125,20 bags per box,0,25,Beverages,,2025-08-07 13:58:14.261-04
-92,NWTCFV-92,Northwind Traders Green Beans,,Supplier F,1.0,1.2,10,40,14.5 OZ,0,,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-97,NWTC-82,Northwind Traders Hot Cereal,,Supplier A,3.0,5.0,50,200,,0,,Cereal,,2025-08-07 13:58:14.261-04
-34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,,2025-08-07 13:58:14.261-04
-93,NWTCFV-93,Northwind Traders Corn,,Supplier F,1.0,1.2,10,40,14.5 OZ,0,,Canned Fruit & Vegetables,,2025-08-07 13:58:14.261-04
-8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,,2025-08-07 13:58:14.261-04
-19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,,2025-08-07 13:58:14.261-04
-66,NWTS-66,Northwind Traders Tomato Sauce,,Supplier H,12.75,17.0,20,80,24 - 8 oz jars,0,20,Sauces,,2025-08-07 13:58:14.261-04
+34,NWTB-34,Northwind Traders Beer,,Supplier D,10.5,14.0,15,60,24 - 12 oz bottles,0,15,Beverages,,2025-08-12 10:43:24.859-04
+93,NWTCFV-93,Northwind Traders Corn,,Supplier F,1.0,1.2,10,40,14.5 OZ,0,,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
+88,NWTCFV-88,Northwind Traders Pears,,Supplier F,1.0,1.3,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
+1,NWTB-1,Northwind Traders Chai,,Supplier D,13.5,18.0,10,40,10 boxes x 20 bags,0,10,Beverages,,2025-08-12 10:43:24.859-04
+98,NWTSO-98,Northwind Traders Vegetable Soup,,Supplier F,1.0,1.89,100,200,,0,,Soups,,2025-08-12 10:43:24.859-04
+5,NWTO-5,Northwind Traders Olive Oil,,Supplier J,16.0125,21.35,10,40,36 boxes,0,10,Oil,,2025-08-12 10:43:24.859-04
+17,NWTCFV-17,Northwind Traders Fruit Cocktail,,Supplier F,29.25,39.0,10,40,15.25 OZ,0,10,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
+65,NWTS-65,Northwind Traders Hot Pepper Sauce,,Supplier H,15.7875,21.05,10,40,32 - 8 oz bottles,0,10,Sauces,,2025-08-12 10:43:24.859-04
+85,NWTBGM-85,Northwind Traders Brownie Mix,,Supplier A,9.0,12.49,10,20,3 boxes,0,5,Baked Goods & Mixes,,2025-08-12 10:43:24.859-04
+96,NWTCM-96,Northwind Traders Smoked Salmon,,Supplier G,2.0,4.0,30,50,5 oz,0,,Canned Meat,,2025-08-12 10:43:24.859-04
+52,NWTG-52,Northwind Traders Long Grain Rice,,Supplier A,5.25,7.0,25,100,16 - 2 kg boxes,0,25,Grains,,2025-08-12 10:43:24.859-04
+81,NWTB-81,Northwind Traders Green Tea,,Supplier C,2.0,2.99,100,125,20 bags per box,0,25,Beverages,,2025-08-12 10:43:24.859-04
+92,NWTCFV-92,Northwind Traders Green Beans,,Supplier F,1.0,1.2,10,40,14.5 OZ,0,,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
+97,NWTC-82,Northwind Traders Hot Cereal,,Supplier A,3.0,5.0,50,200,,0,,Cereal,,2025-08-12 10:43:24.859-04
+83,NWTCS-83,Northwind Traders Potato Chips,,Supplier I,0.5,1.8,30,200,,0,,"Chips, Snacks",,2025-08-12 10:43:24.859-04
+91,NWTCFV-91,Northwind Traders Cherry Pie Filling,,Supplier F,1.0,2.0,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
+8,NWTS-8,Northwind Traders Curry Sauce,,Supplier H,30.0,40.0,10,40,12 - 12 oz jars,0,10,Sauces,,2025-08-12 10:43:24.859-04
+19,NWTBGM-19,Northwind Traders Chocolate Biscuits Mix,,Supplier A,6.9,9.2,5,20,10 boxes x 12 pieces,0,5,Baked Goods & Mixes,,2025-08-12 10:43:24.859-04
+66,NWTS-66,Northwind Traders Tomato Sauce,,Supplier H,12.75,17.0,20,80,24 - 8 oz jars,0,20,Sauces,,2025-08-12 10:43:24.859-04
+4,NWTCO-4,Northwind Traders Cajun Seasoning,,Supplier J,16.5,22.0,10,40,48 - 6 oz jars,0,10,Condiments,,2025-08-12 10:43:24.859-04
+40,NWTCM-40,Northwind Traders Crab Meat,,Supplier G,13.8,18.4,30,120,24 - 4 oz tins,0,30,Canned Meat,,2025-08-12 10:43:24.859-04
+51,NWTDFN-51,Northwind Traders Dried Apples,,Supplier B,39.75,53.0,10,40,50 - 300 g pkgs.,0,10,Dried Fruit & Nuts,,2025-08-12 10:43:24.859-04
+56,NWTP-56,Northwind Traders Gnocchi,,Supplier A,28.5,38.0,30,120,24 - 250 g pkgs.,0,30,Pasta,,2025-08-12 10:43:24.859-04
+72,NWTD-72,Northwind Traders Mozzarella,,Supplier E,26.1,34.8,10,40,24 - 200 g pkgs.,0,10,Dairy `dl_northwind`.`products`,,2025-08-12 10:43:24.859-04
+21,NWTBGM-21,Northwind Traders Scones,,Supplier A,7.5,10.0,5,20,24 pkgs. x 4 pieces,0,5,Baked Goods & Mixes,,2025-08-12 10:43:24.859-04
+87,NWTB-87,Northwind Traders Tea,,Supplier G,2.0,4.0,20,50,100 count per box,0,,Beverages,,2025-08-12 10:43:24.859-04
+95,NWTCM-95,Northwind Traders Tuna Fish,,Supplier G,0.5,2.0,30,50,5 oz,0,,Canned Meat,,2025-08-12 10:43:24.859-04
+99,NWTSO-99,Northwind Traders Chicken Soup,,Supplier F,1.0,1.95,100,200,,0,,Soups,,2025-08-12 10:43:24.859-04
+7,NWTDFN-7,Northwind Traders Dried Pears,,Supplier B,22.5,30.0,10,40,12 - 1 lb pkgs.,0,10,Dried Fruit & Nuts,,2025-08-12 10:43:24.859-04
+48,NWTCA-48,Northwind Traders Chocolate,,Supplier J,9.5625,12.75,25,100,10 pkgs,0,25,Candy,,2025-08-12 10:43:24.859-04
+57,NWTP-57,Northwind Traders Ravioli,,Supplier A,14.625,19.5,20,80,24 - 250 g pkgs.,0,20,Pasta,,2025-08-12 10:43:24.859-04
+77,NWTCO-77,Northwind Traders Mustard,,Supplier J,9.75,13.0,15,60,12 boxes,0,15,Condiments,,2025-08-12 10:43:24.859-04
+80,NWTDFN-80,Northwind Traders Dried Plums,,Supplier B,3.0,3.5,50,75,1 lb bag,0,25,Dried Fruit & Nuts,,2025-08-12 10:43:24.859-04
+86,NWTBGM-86,Northwind Traders Cake Mix,,Supplier A,10.5,15.99,10,20,4 boxes,0,5,Baked Goods & Mixes,,2025-08-12 10:43:24.859-04
+90,NWTCFV-90,Northwind Traders Pineapple,,Supplier F,1.0,1.8,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
+3,NWTCO-3,Northwind Traders Syrup,,Supplier J,7.5,10.0,25,100,12 - 550 ml bottles,0,25,Condiments,,2025-08-12 10:43:24.859-04
+41,NWTSO-41,Northwind Traders Clam Chowder,,Supplier F,7.2375,9.65,10,40,12 - 12 oz cans,0,10,Soups,,2025-08-12 10:43:24.859-04
+82,NWTC-82,Northwind Traders Granola,,Supplier A,2.0,4.0,20,100,,0,,Cereal,,2025-08-12 10:43:24.859-04
+89,NWTCFV-89,Northwind Traders Peaches,,Supplier F,1.0,1.5,10,40,15.25 OZ,0,,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
+94,NWTCFV-94,Northwind Traders Peas,,Supplier F,1.0,1.5,10,40,14.5 OZ,0,,Canned Fruit & Vegetables,,2025-08-12 10:43:24.859-04
