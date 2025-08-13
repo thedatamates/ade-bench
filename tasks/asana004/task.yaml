@@ -1,0 +1,37 @@
+task_id: asana004
+status: dev
+title: Break a model into a new intermediate model.
+notes: |-
+  project - contains references to project user agg, does not contain int_asana__project_user or var user
+  agg - should contain int_asana__project_user and var
+descriptions:
+  - key: base
+    description: |-
+      TODO
+author_name: test
+author_email: test
+difficulty: medium
+category: model-refactor
+tags:
+  - dbt
+  - data
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - table_name: asana__project
+  - table_name: int_asana__project_user_agg
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: asana
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: asana
+  type: dbt

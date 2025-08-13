@@ -1,8 +1,7 @@
 task_id: airbnb007
-status: dev
+status: ready
 title: Create several models based on a schema.yml file.
 notes: |-
-  The setup script doesn't work. 
 descriptions:
   - key: base
     description: |-
