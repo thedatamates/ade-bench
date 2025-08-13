@@ -1,5 +1,5 @@
-task_id: asana004
-status: dev
+task_id: asana005
+status: ready
 title: Break a model into a new intermediate model, and fix the data error in asana001.
 notes: |-
   This inclues the error from asana001. One task tells the agent to fix this. The hard one does not.
