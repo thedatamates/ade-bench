@@ -6,7 +6,7 @@ notes: |-
 descriptions:
   - key: base
     description: |-
-      This project is erroring. Please fix it without without modifying the underlying data.
+      This project is erroring. Please fix it without modifying the underlying data.
 author_name: test
 author_email: test
 difficulty: easy

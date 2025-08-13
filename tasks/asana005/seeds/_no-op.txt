@@ -1,0 +1,77 @@
+
+
+seeds:
+  asana:
+    solution__asana__project:
+      +column_types:
+        project_id: varchar
+        project_name: varchar
+        number_of_open_tasks: hugeint
+        number_of_assigned_open_tasks: hugeint
+        number_of_tasks_completed: hugeint
+        avg_close_time_days: double
+        avg_close_time_assigned_days: double
+        project_link: varchar
+        team_id: varchar
+        team_name: varchar
+        is_archived: boolean
+        created_at: timestamp
+        current_status: varchar
+        due_date: timestamp
+        last_modified_at: timestamp
+        owner_user_id: varchar
+        users_involved: varchar
+        number_of_users_involved: bigint
+        sections: varchar
+        notes: varchar
+        is_public: integer
+    solution__int_asana__project_user_agg:
+      +column_types:
+        project_id: varchar
+        users: varchar
+        number_of_users_involved: bigint
+    solution__asana__task:
+      +column_types:
+        task_id: varchar
+        assignee_user_id: varchar
+        is_completed: boolean
+        completed_at: timestamp
+        completed_by_user_id: integer
+        created_at: timestamp
+        due_date: timestamp
+        modified_at: timestamp
+        task_name: varchar
+        parent_task_id: integer
+        start_date: timestamp
+        task_description: varchar
+        is_liked: boolean
+        number_of_likes: integer
+        workspace_id: varchar
+        task_link: varchar
+        assignee_name: varchar
+        assignee_email: varchar
+        days_open: bigint
+        is_currently_assigned: boolean
+        has_been_assigned: boolean
+        days_since_last_assignment: bigint
+        days_since_first_assignment: bigint
+        last_assigned_at: timestamp
+        first_assigned_at: timestamp
+        first_modifier_user_id: varchar
+        first_modifier_name: varchar
+        conversation: varchar
+        number_of_comments: bigint
+        followers: varchar
+        number_of_followers: bigint
+        tags: varchar
+        number_of_tags: bigint
+        project_ids: varchar
+        project_names: varchar
+        projects_sections: varchar
+        number_of_projects: bigint
+        is_subtask: boolean
+        parent_task_name: varchar
+        parent_assignee_user_id: varchar
+        parent_assignee_name: varchar
+        parent_due_date: timestamp
+        parent_created_at: timestamp
