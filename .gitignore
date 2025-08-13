@@ -77,5 +77,4 @@ dmypy.json
 .uv/
 
 # misc
-scratch.txt
-zz-notes.sh
+zz-*

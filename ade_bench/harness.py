@@ -377,7 +377,7 @@ class Harness:
                 self._logger.info(f"Copying setup directory: {setup_dir_path}")
                 terminal.copy_to_container(
                     paths=setup_dir_path,
-                    container_dir="/app",
+                    container_dir="/app/setup",
                 )
             
             # Copy setup script to container (following oracle agent pattern)
