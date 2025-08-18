@@ -50,6 +50,8 @@ target/
 dbt_packages/
 logs/
 *.log
+.user.yml
+package-lock.yml
 
 # Databases
 *.db
