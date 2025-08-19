@@ -1,0 +1,147 @@
+
+
+seeds:
+  quickbooks:
+    solution__int_quickbooks__refund_receipt_transactions:
+      +column_types:
+        transaction_id: varchar
+        source_relation: varchar
+        transaction_line_id: integer
+        doc_number: varchar
+        transaction_type: varchar
+        transaction_date: date
+        item_id: varchar
+        item_quantity: integer
+        item_unit_price: integer
+        account_id: varchar
+        class_id: varchar
+        department_id: varchar
+        customer_id: varchar
+        vendor_id: varchar
+        billable_status: varchar
+        description: varchar
+        amount: integer
+        converted_amount: integer
+        total_amount: integer
+        total_converted_amount: integer
+    solution__int_quickbooks__sales_receipt_transactions:
+      +column_types:
+        transaction_id: varchar
+        source_relation: varchar
+        transaction_line_id: integer
+        doc_number: varchar
+        transaction_type: varchar
+        transaction_date: date
+        item_id: varchar
+        item_quantity: integer
+        item_unit_price: integer
+        account_id: varchar
+        class_id: varchar
+        department_id: varchar
+        customer_id: varchar
+        vendor_id: varchar
+        billable_status: varchar
+        description: varchar
+        amount: integer
+        converted_amount: integer
+        total_amount: integer
+        total_converted_amount: integer
+    solution__int_quickbooks__invoice_double_entry:
+      +column_types:
+        transaction_id: varchar
+        source_relation: varchar
+        index: integer
+        transaction_date: date
+        customer_id: varchar
+        vendor_id: varchar
+        amount: double
+        converted_amount: double
+        account_id: varchar
+        class_id: varchar
+        department_id: varchar
+        transaction_type: varchar
+        transaction_source: varchar
+    solution__int_quickbooks__expenses_union:
+      +column_types:
+        transaction_source: varchar
+        transaction_id: varchar
+        source_relation: varchar
+        transaction_line_id: integer
+        doc_number: varchar
+        transaction_type: varchar
+        transaction_date: date
+        item_id: varchar
+        item_quantity: decimal(28,6)
+        item_unit_price: decimal(28,6)
+        account_id: varchar
+        account_name: varchar
+        account_sub_type: varchar
+        class_id: varchar
+        department_id: varchar
+        customer_id: varchar
+        customer_name: varchar
+        customer_website: integer
+        vendor_id: varchar
+        vendor_name: varchar
+        billable_status: varchar
+        description: varchar
+        amount: double
+        converted_amount: double
+        total_amount: integer
+        total_converted_amount: double
+    solution__int_quickbooks__sales_union:
+      +column_types:
+        transaction_source: varchar
+        transaction_id: varchar
+        source_relation: varchar
+        transaction_line_id: integer
+        doc_number: varchar
+        transaction_type: varchar
+        transaction_date: date
+        item_id: varchar
+        item_quantity: double
+        item_unit_price: double
+        account_id: varchar
+        account_name: varchar
+        account_sub_type: varchar
+        class_id: varchar
+        department_id: varchar
+        customer_id: varchar
+        customer_name: varchar
+        customer_website: integer
+        vendor_id: varchar
+        vendor_name: varchar
+        billable_status: varchar
+        description: varchar
+        amount: double
+        converted_amount: double
+        total_amount: integer
+        total_converted_amount: integer
+    solution__quickbooks__ap_ar_enhanced:
+      +column_types:
+        transaction_type: varchar
+        transaction_id: varchar
+        source_relation: varchar
+        doc_number: varchar
+        estimate_id: varchar
+        transaction_with: varchar
+        customer_vendor_name: varchar
+        customer_vendor_balance: integer
+        customer_vendor_address_city: varchar
+        customer_vendor_address_country: varchar
+        customer_vendor_address_line: varchar
+        customer_vendor_website: integer
+        delivery_type: varchar
+        estimate_status: varchar
+        total_amount: integer
+        total_converted_amount: integer
+        estimate_total_amount: double
+        estimate_total_converted_amount: double
+        current_balance: integer
+        due_date: date
+        is_overdue: boolean
+        days_overdue: bigint
+        initial_payment_date: date
+        recent_payment_date: date
+        total_current_payment: double
+        total_current_converted_payment: double

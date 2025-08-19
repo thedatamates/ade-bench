@@ -1,0 +1,6 @@
+transaction_type,transaction_id,source_relation,doc_number,estimate_id,transaction_with,customer_vendor_name,customer_vendor_balance,customer_vendor_address_city,customer_vendor_address_country,customer_vendor_address_line,customer_vendor_website,delivery_type,estimate_status,total_amount,total_converted_amount,estimate_total_amount,estimate_total_converted_amount,current_balance,due_date,is_overdue,days_overdue,initial_payment_date,recent_payment_date,total_current_payment,total_current_converted_payment
+bill,401,"",2021-03-01,,vendor,,,,,"",,,,485,485,,,454,2020-12-17,false,0,,,0.0,0.0
+bill,399,"",2021-01-01,,vendor,,,,,"",,,,647,647,,,991,2020-12-17,false,0,,,0.0,0.0
+bill,397,"",,,vendor,,,,,"",,,,757,757,,,832,2020-12-17,false,0,,,0.0,0.0
+bill,398,"",,,vendor,,,,,"",,,,822,822,,,52,2020-12-17,false,0,,,0.0,0.0
+invoice,40113,"",2021011355,,customer,,,,,"",,Email,,565214,565214,0.0,0.0,55650,2021-02-03,false,0,,,0.0,0.0

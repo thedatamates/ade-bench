@@ -1,4 +1,6 @@
 #!/bin/bash
+
+## Fix the data type issue. 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   SED_CMD=(sed -i '')
 else
