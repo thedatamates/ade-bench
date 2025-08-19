@@ -1,5 +1,5 @@
-transaction_type,transaction_id,source_relation,doc_number,department_id,vendor_id,payable_account_id,total_amount,current_balance,due_date,initial_payment_date,recent_payment_date,total_current_payment,total_current_converted_payment
-bill,398,"",,1,20,37,822,52,2020-12-17,,,0,0
-bill,399,"",2021-01-01,1,6,37,647,991,2020-12-17,,,0,0
-bill,397,"",,1,20,37,757,832,2020-12-17,,,0,0
-bill,401,"",2021-03-01,1,6,37,485,454,2020-12-17,,,0,0
+transaction_type,transaction_id,source_relation,doc_number,department_id,vendor_id,payable_account_id,total_amount,current_balance,due_date,initial_payment_date,recent_payment_date,total_current_payment
+bill,399,"",2021-01-01,1,6,37,647,991,2020-12-17,,,0
+bill,397,"",,1,20,37,757,832,2020-12-17,,,0
+bill,398,"",,1,20,37,822,52,2020-12-17,,,0
+bill,401,"",2021-03-01,1,6,37,485,454,2020-12-17,,,0

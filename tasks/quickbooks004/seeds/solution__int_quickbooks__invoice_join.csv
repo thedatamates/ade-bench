@@ -1,2 +1,2 @@
-transaction_type,transaction_id,source_relation,doc_number,estimate_id,department_id,customer_id,billing_address_id,shipping_address_id,delivery_type,total_amount,current_balance,estimate_total_amount,estimate_status,due_date,initial_payment_date,recent_payment_date,total_current_payment,total_current_converted_payment
-invoice,40113,"",2021011355,,,4783,6594,6595,Email,565214,55650,0.0,,2021-02-03,,,0.0,0.0
+transaction_type,transaction_id,source_relation,doc_number,estimate_id,department_id,customer_id,billing_address_id,shipping_address_id,delivery_type,total_amount,current_balance,estimate_total_amount,estimate_status,due_date,initial_payment_date,recent_payment_date,total_current_payment
+invoice,40113,"",2021011355,,,4783,6594,6595,Email,565214,55650,0.0,,2021-02-03,,,0.0

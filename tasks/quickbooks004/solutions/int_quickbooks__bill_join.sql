@@ -79,7 +79,9 @@ final as (
         min(bill_payments.transaction_date) as initial_payment_date,
         max(bill_payments.transaction_date) as recent_payment_date,
         sum(coalesce(bill_payment_lines.amount, 0)) as total_current_payment,
-        sum(coalesce(bill_payment_lines.amount, 0) * coalesce(bill_payments.exchange_rate, 1)) as total_current_converted_payment
+        {% if var('using_exchange_rate', True) %}
+            sum(coalesce(bill_payment_lines.amount, 0) * coalesce(bill_payments.exchange_rate, 1)) as total_current_converted_payment,
+        {% endif %}
 
     from bill_link
 

@@ -227,7 +227,6 @@ seeds:
         initial_payment_date: date
         recent_payment_date: date
         total_current_payment: double
-        total_current_converted_payment: double
     solution__int_quickbooks__invoice_double_entry:
       +column_types:
         transaction_id: varchar
@@ -366,7 +365,6 @@ seeds:
         initial_payment_date: date
         recent_payment_date: date
         total_current_payment: hugeint
-        total_current_converted_payment: hugeint
     solution__int_quickbooks__bill_double_entry:
       +column_types:
         transaction_id: varchar
@@ -407,4 +405,3 @@ seeds:
         initial_payment_date: date
         recent_payment_date: date
         total_current_payment: double
-        total_current_converted_payment: double

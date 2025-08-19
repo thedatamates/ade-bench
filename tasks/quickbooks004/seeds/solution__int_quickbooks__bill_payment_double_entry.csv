@@ -1,11 +1,11 @@
 transaction_id,source_relation,index,transaction_date,customer_id,vendor_id,amount,account_id,class_id,department_id,transaction_type,transaction_source
-134,"",0,2020-11-01,,1,37040,28,,,credit,bill payment
 46,"",0,2020-06-17,,1,34563,28,,,credit,bill payment
+134,"",0,2020-11-01,,1,37040,28,,,credit,bill payment
+133,"",0,2020-10-30,,1,83210,28,,,credit,bill payment
 131,"",0,2020-10-30,,1,96136,28,,,credit,bill payment
 132,"",0,2020-10-30,,1,51931,28,,,credit,bill payment
-133,"",0,2020-10-30,,1,83210,28,,,credit,bill payment
-131,"",0,2020-10-30,,1,96136,,,,debit,bill payment
-132,"",0,2020-10-30,,1,51931,,,,debit,bill payment
-134,"",0,2020-11-01,,1,37040,,,,debit,bill payment
 46,"",0,2020-06-17,,1,34563,,,,debit,bill payment
+132,"",0,2020-10-30,,1,51931,,,,debit,bill payment
+131,"",0,2020-10-30,,1,96136,,,,debit,bill payment
 133,"",0,2020-10-30,,1,83210,,,,debit,bill payment
+134,"",0,2020-11-01,,1,37040,,,,debit,bill payment

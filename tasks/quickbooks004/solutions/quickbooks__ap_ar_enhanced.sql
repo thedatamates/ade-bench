@@ -90,7 +90,9 @@ final as (
         bill_join.initial_payment_date,
         bill_join.recent_payment_date,
         bill_join.total_current_payment,
-        bill_join.total_current_converted_payment
+        {% if var('using_exchange_rate', True) %}
+            bill_join.total_current_converted_payment,
+        {% endif %}
     from bill_join
 
     {% if var('using_department', True) %}
@@ -157,7 +159,9 @@ final as (
         invoice_join.initial_payment_date,
         invoice_join.recent_payment_date,
         invoice_join.total_current_payment as total_current_payment,
-        invoice_join.total_current_converted_payment
+        {% if var('using_exchange_rate', True) %}
+            invoice_join.total_current_converted_payment,
+        {% endif %}
 
     from invoice_join
 
