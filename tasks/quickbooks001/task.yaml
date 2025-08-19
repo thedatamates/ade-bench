@@ -1,5 +1,5 @@
 task_id: quickbooks001
-status: dev
+status: ready
 title: Fix a data type issue in the Quickbooks source.
 notes: |-
   The issue is with a few columns being numbers and not dates.
