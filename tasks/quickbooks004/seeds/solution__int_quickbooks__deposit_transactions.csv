@@ -1,0 +1,6 @@
+transaction_id,source_relation,transaction_line_id,doc_number,transaction_type,transaction_date,account_id,class_id,department_id,customer_id,vendor_id,billable_status,description,amount,total_amount
+3,"",0,,deposit,2020-03-27,3,,,,,,d55463e9a1eebb27bbf123906cd732d3,8000,26867
+2,"",0,,deposit,2020-03-27,35,,,,,,7705f28cac4ed281fca93f2d6047ac67,89222,96766
+137,"",0,,deposit,2020-10-28,39,,,,,,714c8fcbb71513414ad57c0895031129,24220,24943
+79,"",0,,deposit,2020-07-23,39,,,10,,,3ef789b0719133953ab39ea39c75ee7e,43904,62931
+31,"",0,,deposit,2020-04-20,39,,,10,,,906b6741066b841342224242068cf2dc,37680,23039

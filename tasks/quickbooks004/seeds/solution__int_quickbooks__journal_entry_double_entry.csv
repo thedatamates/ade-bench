@@ -1,0 +1,3 @@
+transaction_id,source_relation,index,transaction_date,customer_id,vendor_id,amount,account_id,class_id,department_id,transaction_type,transaction_source
+112,"",2,2020-08-31,10,,22472,50,,,debit,journal_entry
+116,"",2,2020-09-30,10,,85245,50,,,debit,journal_entry

@@ -1,0 +1,5 @@
+transaction_id,source_relation,index,transaction_date,customer_id,vendor_id,amount,account_id,class_id,department_id,transaction_type,transaction_source
+61,"",0,2020-06-30,,5,800,49,,,credit,vendor_credit
+62,"",0,2020-06-30,,5,25,49,,,credit,vendor_credit
+61,"",0,2020-06-30,,5,800,37,,,debit,vendor_credit
+62,"",0,2020-06-30,,5,25,37,,,debit,vendor_credit

@@ -1,0 +1,3 @@
+transaction_id,source_relation,transaction_line_id,doc_number,transaction_type,transaction_date,account_id,class_id,department_id,customer_id,vendor_id,billable_status,description,amount,total_amount
+112,"",2,b5848ab26fead0b93a748f0fdfb2e5fa,journal_entry,2020-08-31,50,,,10,,,Debit,22472,0
+116,"",2,d1ab1ee5a60fe773e6b3d383205322f9,journal_entry,2020-09-30,50,,,10,,,Debit,85245,0

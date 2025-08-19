@@ -1,0 +1,11 @@
+transaction_id,source_relation,transaction_line_id,doc_number,transaction_type,transaction_date,account_id,class_id,department_id,customer_id,vendor_id,billable_status,description,amount,total_amount
+107,"",0,,purchase,2020-11-06,3,,1,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,77,
+101,"",0,,purchase,,3,,1,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,12,
+103,"",0,,purchase,,3,,1,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,32,
+232,"",0,,purchase,,3,,1,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,33,
+228,"",0,,purchase,,3,,2,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,44,
+372,"",0,,purchase,,3,,2,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,36,
+190,"",0,,purchase,,3,,1,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,39,
+340,"",0,,purchase,,3,,1,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,56,
+342,"",0,,purchase,,3,,1,,,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,62,
+350,"",0,,purchase,,3,,1,,18,15937541ca23d45a66ca60ea1657c699,b1b73c20e3b5ad9eb21aad036a3baf45,21,

@@ -1,0 +1,3 @@
+transaction_id,source_relation,transaction_line_id,doc_number,transaction_type,transaction_date,account_id,class_id,department_id,customer_id,vendor_id,billable_status,description,amount,total_amount
+401,"",0,2021-03-01,bill,2020-12-17,12,,1,,6,8f7d086bb399bd5291915511d499a09d,57c19a9b03e7f423a52d9a298fb12b34,1386.0,485
+399,"",0,2021-01-01,bill,2020-12-17,12,,1,,6,8f7d086bb399bd5291915511d499a09d,4e607e75b05d403ca078f850ccab9518,7282.0,647

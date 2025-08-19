@@ -1,0 +1,1 @@
+transaction_source,transaction_id,source_relation,transaction_line_id,doc_number,transaction_type,transaction_date,item_id,item_quantity,item_unit_price,account_id,account_name,account_sub_type,class_id,department_id,department_name,customer_id,customer_name,customer_website,vendor_id,vendor_name,billable_status,description,amount,total_amount
