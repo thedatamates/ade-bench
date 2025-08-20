@@ -1,0 +1,25 @@
+
+
+seeds:
+  f1:
+    solution__stg_f1_dataset__results:
+      +column_types:
+        status_id: integer
+        race_id: integer
+        driver_id: integer
+        constructor_id: integer
+        result_id: integer
+        grid: integer
+        position_order: integer
+        points: double
+        laps: integer
+        fastest_lap_time: varchar
+        fastest_lap_speed: double
+        lap_time: varchar
+        lap_milliseconds: integer
+        lap_number: integer
+        fastest_lap: integer
+        position: integer
+        rank: integer
+        status_desc: varchar
+        position_desc: varchar
