@@ -60,15 +60,27 @@ done
 "${SED_CMD[@]}" "s/ref('position_descriptions')/ref('src_position_descriptions')/g" "models/stats/most_races.sql"
 
 
-##Update yml config
-yml_path="models/core/f1_dataset.yml"
-sch_find="- name: f1_dataset"
-sch_repl="- name: f1_dataset\n    schema: main"
-pos_find="- name: pit_stops"
-pos_repl="- name: pit_stops\n      - name: position_descriptions"
+cat > models/core/f1_dataset.yml << 'EOF'
+version: 2
 
-"${SED_CMD[@]}" "s/${sch_find}/${sch_repl}/g" "${yml_path}"
-"${SED_CMD[@]}" "s/${pos_find}/${pos_repl}/g" "${yml_path}"
-
+sources:
+  - name: f1_dataset
+    schema: main
+    tables:
+      - name: circuits
+      - name: constructors
+      - name: constructor_standings
+      - name: constructor_results
+      - name: drivers
+      - name: driver_standings
+      - name: lap_times
+      - name: pit_stops
+      - name: position_descriptions
+      - name: qualifying
+      - name: races
+      - name: results
+      - name: seasons
+      - name: status
+EOF
 # Run dbt to create the models
 dbt run

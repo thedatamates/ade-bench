@@ -2,7 +2,7 @@ with
 
 source as (
 
-    select * from {{ ref('constructor_standings') }}
+    select * from {{ ref('src_constructor_standings') }}
 
 ),
 

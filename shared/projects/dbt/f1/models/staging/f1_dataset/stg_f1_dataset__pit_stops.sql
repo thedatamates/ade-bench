@@ -6,7 +6,7 @@ with pit_stops as (
          time,
          duration,
          milliseconds * 1.0 / 1000 as seconds
-   from {{ ref('pit_stops') }}
+   from {{ ref('src_pit_stops') }}
 )
 
 select *

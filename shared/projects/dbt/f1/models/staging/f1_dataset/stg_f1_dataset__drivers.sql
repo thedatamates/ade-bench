@@ -9,7 +9,7 @@ with drivers as (
          nationality as driver_nationality,
          url as driver_url
 
-    from {{ ref('drivers') }}
+    from {{ ref('src_drivers') }}
 )
 
 select *,

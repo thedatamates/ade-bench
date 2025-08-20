@@ -18,18 +18,18 @@ with results as (
           positionText as position_text,
           rank
 
-    from {{ ref('results') }}
+    from {{ ref('src_results') }}
 ),
 
 status_descriptions as (
   select statusId as status_id,
          status as status_desc
-    from {{ ref('status') }}
+    from {{ ref('src_status') }}
 ),
 
 position_descriptions as (
   select *
-    from {{ ref('position_descriptions') }}
+    from {{ ref('src_position_descriptions') }}
 ),
 
 final as (

@@ -2,7 +2,8 @@ task_id: f1002
 status: dev
 title: Add new stats models based on yml config
 notes: |-
-  For some reason, the most_fastest_laps equality test fails, but not in dev?
+  For some reason, the most_fastest_laps equality test fails, but not in dev? It's because there are people tied with the last rank and the limit cuts it off.
+  Good thing to add a thing to fix though. 
 descriptions:
   - key: base
     description: |-

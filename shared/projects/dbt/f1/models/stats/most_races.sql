@@ -26,7 +26,7 @@ grouped as (
            dbt_utils.pivot(
              'position_desc',
              dbt_utils.get_column_values(
-               ref('position_descriptions'),
+               ref('src_position_descriptions'),
                'position_desc'
              )
            )

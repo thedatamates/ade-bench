@@ -2,6 +2,7 @@ version: 2
 
 sources:
   - name: f1_dataset
+    schema: main
     tables:
       - name: circuits
       - name: constructors
@@ -11,6 +12,7 @@ sources:
       - name: driver_standings
       - name: lap_times
       - name: pit_stops
+      - name: position_descriptions
       - name: qualifying
       - name: races
       - name: results

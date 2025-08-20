@@ -2,7 +2,7 @@ with
 
 source as (
 
-    select * from {{ ref('seasons') }}
+    select * from {{ ref('src_seasons') }}
 
 ),
 

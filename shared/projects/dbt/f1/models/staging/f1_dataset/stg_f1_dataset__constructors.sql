@@ -4,7 +4,7 @@ with constructors as (
          name as constructor_name,
          nationality as constructor_nationality,
          url as constructor_url
-    from {{ ref('constructors') }}
+    from {{ ref('src_constructors') }}
 )
 
 select *

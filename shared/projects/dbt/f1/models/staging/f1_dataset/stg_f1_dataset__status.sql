@@ -2,7 +2,7 @@ with
 
 source as (
 
-    select * from {{ ref('status') }}
+    select * from {{ ref('src_status') }}
 
 ),
 

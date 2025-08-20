@@ -8,7 +8,7 @@ with races as (
          url as race_url,
          name as race_name
 
-    from {{ ref('races') }}
+    from {{ ref('src_races') }}
 ),
 
 circuits as (

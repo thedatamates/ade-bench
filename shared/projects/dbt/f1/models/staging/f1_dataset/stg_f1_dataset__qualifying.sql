@@ -2,7 +2,7 @@ with
 
 source as (
 
-    select * from {{ ref('qualifying') }}
+    select * from {{ ref('src_qualifying') }}
 
 ),
 

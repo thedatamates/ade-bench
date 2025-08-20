@@ -9,7 +9,7 @@ with circuits as (
          circuitRef as circuit_ref,
          location as circuit_location
 
-    from {{ ref('circuits') }}
+    from {{ ref('src_circuits') }}
 )
 
 select *
