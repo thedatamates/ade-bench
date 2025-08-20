@@ -1,12 +1,12 @@
 -- Define columns to compare
-{% set table_name = 'most_pole_positions' %}
+{% set table_name = 'finishes_by_driver' %}
 
 {% set cols_to_include = [
     
 ] %}
 
 {% set cols_to_exclude = [
-    'driver_full_name'
+    
 ] %}
 
 
