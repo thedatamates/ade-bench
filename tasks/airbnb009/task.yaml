@@ -1,6 +1,6 @@
 task_id: airbnb009
-status: dev
-title: foo
+status: ready
+title: Fix missing days in rollup table
 notes: |-
 descriptions:
   - key: base
