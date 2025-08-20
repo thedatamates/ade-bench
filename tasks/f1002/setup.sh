@@ -17,10 +17,10 @@ files=(
   "src_status.sql"
 )
 
-SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
+SETUP_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/setup"
 
 for file in "${files[@]}"; do
-  cp $SOLUTIONS_DIR/$file models/core/$file
+  cp $SETUP_DIR/$file models/core/$file
 done
 
 
@@ -71,4 +71,5 @@ pos_repl="- name: pit_stops\n      - name: position_descriptions"
 "${SED_CMD[@]}" "s/${pos_find}/${pos_repl}/g" "${yml_path}"
 
 # Run dbt to create the models
+dbt deps
 dbt run

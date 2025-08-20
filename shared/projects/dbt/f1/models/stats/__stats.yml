@@ -7,7 +7,6 @@ models:
     refs:
       - name: stg_f1_dataset__drivers
       - name: stg_f1_dataset__results
-      - name: stg_f1_dataset__qualifying
     
     columns:
       - name: driver_id
