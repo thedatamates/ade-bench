@@ -6,7 +6,7 @@
 ] %}
 
 {% set cols_to_exclude = [
-    'driver_full_name'
+    
 ] %}
 
 

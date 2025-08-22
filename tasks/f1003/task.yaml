@@ -1,5 +1,5 @@
 task_id: f1003
-status: dev
+status: ready
 title: Add new stats models based on yml config
 notes: |-
   Fixing the issue noted in f1002.
@@ -7,7 +7,11 @@ descriptions:
   - key: base
     description: |-
       Someone noticed that the results in the "most_fastest_laps" model are inconsistent, and that model doesn't always return the same top 20 drivers. Can you figure out why this is?
-      One obvious solution would be order by some arbitrary column, but that doesn't seem like a good solution. 
+
+      When you find the issue, fix it so that:
+      - It always returns the same top drivers
+      - It does not return an arbitrary driver when there are ties
+      - If the issue is in other models, fix those too.
 author_name: test
 author_email: test
 difficulty: hard
@@ -20,16 +24,13 @@ db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - table_name: finishes_by_driver
-  - table_name: most_podiums
-    exclude_columns:
-    - driver_full_name
-  - table_name: most_pole_positions
-    exclude_columns:
-    - driver_full_name
   - table_name: most_fastest_laps
-    exclude_columns:
-    - driver_full_name
+  - table_name: most_laps
+  - table_name: most_podiums
+  - table_name: most_pole_positions
+  - table_name: most_races
+  - table_name: most_retirements
+  - table_name: most_wins
 
 # Use shared database instead of local data files
 database:

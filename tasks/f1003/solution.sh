@@ -1,17 +1,29 @@
 #!/bin/bash
-# Create src files
+## Remove limit and add final where clause
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  SED_CMD=(sed -i '')
+else
+  SED_CMD=(sed -i)
+fi
+ 
+ ## Files with limit 20
 files=(
-  "finishes_by_driver.sql"
+  "most_fastest_laps.sql"
+  "most_laps.sql"
   "most_podiums.sql"
   "most_pole_positions.sql"
-  "most_fastest_laps.sql"
+  "most_retirements.sql"
+  "most_wins.sql"
 )
 
-SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
-
 for file in "${files[@]}"; do
-  cp $SOLUTIONS_DIR/$file models/stats/$file
+  "${SED_CMD[@]}" "s/limit 20//g" models/stats/$file
+  echo " where rank <= 20" >> models/stats/$file
 done
+
+## Remove limit 120 from most races
+"${SED_CMD[@]}" "s/limit 120//g" models/stats/most_races.sql
+echo " where rank <= 120" >> models/stats/most_races.sql
 
 # Run dbt to create the models
 dbt run
