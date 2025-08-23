@@ -43,3 +43,10 @@ seeds:
         rank: bigint
         driver_full_name: varchar
         wins: hugeint
+    solution__oldest_race_winners_in_modern_era:
+      +column_types:
+        driver_full_name: varchar
+        race_name: varchar
+        race_date: date
+        age: bigint
+        rank: bigint

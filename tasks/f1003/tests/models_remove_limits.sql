@@ -6,6 +6,7 @@
     "most_races",
     "most_retirements",
     "most_wins",
+    "oldest_race_winners_in_modern_era"
 ] %}
 
 {% for model_name in models %}

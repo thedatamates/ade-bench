@@ -1,5 +1,5 @@
-task_id: f1003
-status: ready
+task_id: f1004
+status: dev
 title: Add new stats models based on yml config
 notes: |-
   Fixing the issue noted in f1002.
@@ -31,9 +31,6 @@ solution_seeds:
   - table_name: most_races
   - table_name: most_retirements
   - table_name: most_wins
-  - table_name: oldest_race_winners_in_modern_era
-    exclude_columns:
-    - rank
 
 # Use shared database instead of local data files
 database:
