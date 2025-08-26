@@ -1,0 +1,39 @@
+
+
+seeds:
+  f1:
+    solution__finishes_by_driver:
+      +column_types:
+        driver_id: integer
+        driver_full_name: varchar
+        races: bigint
+        podiums: hugeint
+        pole_positions: hugeint
+        fastest_laps: hugeint
+        p1: hugeint
+        p2: hugeint
+        p3: hugeint
+        p4: hugeint
+        p5: hugeint
+        p6: hugeint
+        p7: hugeint
+        p8: hugeint
+        p9: hugeint
+        p10: hugeint
+        p11: hugeint
+        p12: hugeint
+        p13: hugeint
+        p14: hugeint
+        p15: hugeint
+        p16: hugeint
+        p17: hugeint
+        p18: hugeint
+        p19: hugeint
+        p20: hugeint
+        p21plus: hugeint
+        disqualified: hugeint
+        excluded: hugeint
+        failed_to_qualify: hugeint
+        not_classified: hugeint
+        retired: hugeint
+        withdrew: hugeint

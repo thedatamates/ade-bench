@@ -1,36 +1,25 @@
 task_id: f1004
 status: dev
-title: Add new stats models based on yml config
+title: Fix string matching issue.
 notes: |-
-  Fixing the issue noted in f1002.
 descriptions:
   - key: base
     description: |-
-      Someone noticed that the results in the "most_fastest_laps" model are inconsistent, and that model doesn't always return the same top 20 drivers. Can you figure out why this is?
-
-      When you find the issue, fix it so that:
-      - It always returns the same top drivers
-      - It does not return an arbitrary driver when there are ties
-      - If the issue is in other models, fix those too.
+      Several columns in the "finishes_by_driver" are showing 0 results for every driver. Can you figure out what's happening and fix it?
 author_name: test
 author_email: test
-difficulty: hard
+difficulty: medium
 category: model-creation
 tags:
   - dbt
+  - data-quality
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
-  - table_name: most_fastest_laps
-  - table_name: most_laps
-  - table_name: most_podiums
-  - table_name: most_pole_positions
-  - table_name: most_races
-  - table_name: most_retirements
-  - table_name: most_wins
+  - table_name: finishes_by_driver
 
 # Use shared database instead of local data files
 database:
