@@ -1,5 +1,5 @@
 task_id: f1004
-status: dev
+status: ready
 title: Fix string matching issue.
 notes: |-
 descriptions:
