@@ -27,6 +27,12 @@ task_ids:
   # - asana003
   # - asana004
   # - asana005
-  - quickbooks001
-  - quickbooks002
-  - quickbooks003
+  # - quickbooks001
+  # - quickbooks002
+  # - quickbooks003
+  - f1001
+  - f1002
+  - f1003
+  - f1004
+  - f1005
+  - f1006

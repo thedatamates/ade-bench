@@ -1,0 +1,39 @@
+task_id: f1005
+status: ready
+title: Fix a calculation error that requires a semantic understanding of data, with an example of correction.
+notes: |-
+  This task leaves driver_points unchanged, which provides an example for how to potentially fix the issue.
+descriptions:
+  - key: base
+    description: |-
+      Someone noticed that the "points" column in constructor_points.sql look way too high. Can you figure out what's wrong and fix it?
+  - key: medium
+    description: |-
+      Someone noticed that the results in constructor_points.sql look wrong. Can you figure out what's wrong and fix it?
+author_name: test
+author_email: test
+difficulty: medium
+category: model-creation
+tags:
+  - dbt
+  - data-quality
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - table_name: constructor_points
+  - table_name: driver_points
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: f1
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: f1
+  type: dbt

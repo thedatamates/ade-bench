@@ -1,0 +1,14 @@
+
+
+seeds:
+  f1:
+    solution__constructor_points:
+      +column_types:
+        constructor_name: varchar
+        season: integer
+        total_points: double
+    solution__driver_points:
+      +column_types:
+        driver_full_name: varchar
+        season: integer
+        total_points: double
