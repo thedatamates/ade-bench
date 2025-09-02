@@ -4,7 +4,7 @@ dataset_path: "tasks"
 
 task_ids:
   # - analytics_engineering001
-  # - analytics_engineering002
+  - analytics_engineering002
   # - analytics_engineering003
   # - analytics_engineering004
   # - analytics_engineering005
@@ -30,9 +30,9 @@ task_ids:
   # - quickbooks001
   # - quickbooks002
   # - quickbooks003
-  - f1001
-  - f1002
-  - f1003
-  - f1004
-  - f1005
-  - f1006
+  # - f1001
+  # - f1002
+  # - f1003
+  # - f1004
+  # - f1005
+  # - f1006

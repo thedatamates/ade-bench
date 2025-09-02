@@ -5,9 +5,9 @@ descriptions:
   - key: base
     description: |-
       Fix the syntax error in the obt_product_inventory.sql file.
-  - key: medium
-    description: |-
-      Fix the error in this dbt project.
+  # - key: medium
+  #   description: |-
+  #     Fix the error in this dbt project.
 author_name: test
 author_email: test
 difficulty: easy

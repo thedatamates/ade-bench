@@ -116,8 +116,12 @@ class TmuxSession:
         ]
 
     def start(self) -> None:
-        self.container.exec_run(self._tmux_start_session)
-
+        self._logger.debug(f"Starting tmux session {self._session_name}")
+        self._logger.debug(f"Tmux start command: {self._tmux_start_session}")
+        
+        start_result = self.container.exec_run(self._tmux_start_session)
+        self._logger.debug(f"Tmux start result: exit_code={start_result.exit_code}, output={start_result.output.decode()}")
+        
         if self._recording_path:
             self._logger.debug("Starting recording.")
             self.send_keys(
@@ -133,6 +137,8 @@ class TmuxSession:
                     "Enter",
                 ],
             )
+        
+        self._logger.debug(f"Tmux session {self._session_name} started successfully")
 
     def stop(self) -> None:
         if self._recording_path:
@@ -200,12 +206,30 @@ class TmuxSession:
         max_timeout_sec: float,
     ):
         start_time_sec = time.time()
-        self.container.exec_run(self._tmux_send_keys(keys))
-
+        self._logger.debug(f"Executing blocking command in session {self._session_name}")
+        
+        # Send the keys
+        send_result = self.container.exec_run(self._tmux_send_keys(keys))
+        self._logger.debug(f"Keys sent, exit code: {send_result.exit_code}")
+        
+        # Wait for completion with timeout
+        self._logger.debug(f"Waiting for command completion with {max_timeout_sec}s timeout")
         result = self.container.exec_run(
             ["timeout", f"{max_timeout_sec}s", "tmux", "wait", "done"]
         )
+        
         if result.exit_code != 0:
+            self._logger.warning(f"Command timed out after {max_timeout_sec}s in session {self._session_name}")
+            self._logger.warning(f"Timeout command exit code: {result.exit_code}")
+            self._logger.warning(f"Timeout command output: {result.output.decode()}")
+            
+            # Try to capture what's in the pane when it times out
+            try:
+                pane_content = self.capture_pane(capture_entire=True)
+                self._logger.warning(f"Pane content at timeout:\n{pane_content}")
+            except Exception as e:
+                self._logger.warning(f"Failed to capture pane content at timeout: {e}")
+            
             raise TimeoutError(f"Command timed out after {max_timeout_sec} seconds")
 
         elapsed_time_sec = time.time() - start_time_sec
@@ -312,3 +336,24 @@ class TmuxSession:
             container_dir=container_dir,
             container_filename=container_filename,
         )
+
+    def kill_session(self) -> None:
+        """Kill the tmux session and all processes running in it."""
+        try:
+            # Kill the tmux session
+            result = self.container.exec_run([
+                "tmux", "kill-session", "-t", self._session_name
+            ])
+            
+            if result.exit_code == 0:
+                self._logger.debug(f"Successfully killed tmux session {self._session_name}")
+            else:
+                self._logger.warning(
+                    f"Failed to kill tmux session {self._session_name}, "
+                    f"exit code: {result.exit_code}"
+                )
+                
+        except Exception as e:
+            self._logger.error(
+                f"Error killing tmux session {self._session_name}: {e}"
+            )

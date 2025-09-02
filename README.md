@@ -10,11 +10,84 @@ ADE-Bench (Analytics and Data Engineering Benchmark) is a framework for evaluati
 
 Fuck if I know.
 
+## Configuration
+
+ADE-Bench uses environment variables for configuration. You can set these values directly in your `.env` file or as environment variables:
+
+```bash
+# Create .env file with timeout settings
+cat > .env << 'EOF'
+# Timeout Settings (in seconds)
+SETUP_TIMEOUT_SEC=120
+DEFAULT_AGENT_TIMEOUT_SEC=180
+DEFAULT_TEST_TIMEOUT_SEC=30
+CLEANUP_TIMEOUT_SEC=30
+
+# AWS Settings
+AWS_REGION=us-west-2
+S3_BUCKET_NAME=
+
+# Database Settings
+DB_HOST=
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+EOF
+```
+
+### Timeout Configuration
+
+The following timeout values can be configured via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SETUP_TIMEOUT_SEC` | 120 | Timeout for setup scripts (seconds) |
+| `DEFAULT_AGENT_TIMEOUT_SEC` | 180 | Default timeout for agent execution (seconds) |
+| `DEFAULT_TEST_TIMEOUT_SEC` | 30 | Default timeout for test execution (seconds) |
+| `CLEANUP_TIMEOUT_SEC` | 30 | Timeout for cleanup operations (seconds) |
+
+### Example Configuration
+
+You can set these values in your `.env` file or as environment variables:
+
+```bash
+# For faster iteration during development
+export SETUP_TIMEOUT_SEC=60
+export DEFAULT_AGENT_TIMEOUT_SEC=120
+export DEFAULT_TEST_TIMEOUT_SEC=20
+
+# For production runs with longer timeouts
+export SETUP_TIMEOUT_SEC=300
+export DEFAULT_AGENT_TIMEOUT_SEC=600
+export DEFAULT_TEST_TIMEOUT_SEC=120
+```
+
+Or create a `.env` file with these values:
+```bash
+# .env file
+SETUP_TIMEOUT_SEC=60
+DEFAULT_AGENT_TIMEOUT_SEC=120
+DEFAULT_TEST_TIMEOUT_SEC=20
+```
+
+### Overriding Timeouts for Specific Tasks
+
+You can also override timeout values for individual tasks by adding them to the task's `task.yaml` file:
+
+```yaml
+# In tasks/my_task/task.yaml
+max_agent_timeout_sec: 300.0  # Override default agent timeout
+max_test_timeout_sec: 60.0    # Override default test timeout
+```
+
 ## Usage
 
 ```bash
 # Run the benchmark harness
 uv run scripts_python/run_harness.py --agent claude-code --model-name claude-sonnet-4-20250514 --dataset-config datasets/ade-bench-core.yaml
+
+
+```
 
 # View logs of results
 uv run scripts_python/view_logs.py

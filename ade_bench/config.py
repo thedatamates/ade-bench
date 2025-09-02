@@ -49,5 +49,26 @@ class Config:
     def db_password(self):
         return self.get_setting("db_password")
 
+    # Timeout Settings
+    @property
+    def setup_timeout_sec(self) -> float:
+        """Timeout for setup scripts in seconds."""
+        return float(self.get_setting("setup_timeout_sec", 120.0))
+
+    @property
+    def default_agent_timeout_sec(self) -> float:
+        """Default timeout for agent execution in seconds."""
+        return float(self.get_setting("default_agent_timeout_sec", 180.0))
+
+    @property
+    def default_test_timeout_sec(self) -> float:
+        """Default timeout for test execution in seconds."""
+        return float(self.get_setting("default_test_timeout_sec", 30.0))
+
+    @property
+    def cleanup_timeout_sec(self) -> float:
+        """Timeout for cleanup operations in seconds."""
+        return float(self.get_setting("cleanup_timeout_sec", 30.0))
+
 
 config = Config()

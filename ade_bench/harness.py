@@ -81,6 +81,7 @@ class Harness:
             dataset_config: Path to a YAML configuration file for the dataset.
                 If provided, this will override dataset_path, task_ids, n_tasks,
                 and exclude_task_ids.
+
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -111,7 +112,7 @@ class Harness:
         self._init_dataset()
 
         self._init_logger()
-
+        
     @property
     def _run_path(self) -> Path:
         return self._output_path / self._run_id
@@ -180,27 +181,74 @@ class Harness:
         )
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
+        self._logger.debug(f"Setting up test environment for task {trial_handler.task_id}")
+        self._logger.debug(f"Test directory: {trial_handler.test_dir}")
+        self._logger.debug(f"Run tests path: {trial_handler.run_tests_path}")
+        self._logger.debug(f"Test script paths: {trial_handler.task.test_script_paths}")
+        
         # Generate solution tests if needed
         if trial_handler.task.solution_seeds:
+            self._logger.debug(f"Generating solution tests for {trial_handler.task_id}")
             self._generate_solution_tests(trial_handler)
         
         # Copy test-related files
+        self._logger.debug(f"Copying test files to container directory: {DockerComposeManager.CONTAINER_TEST_DIR}")
+        
+        # Log what we're about to copy
+        files_to_copy = [
+            trial_handler.post_agent_pane_path,
+            trial_handler.run_tests_path,
+            trial_handler.test_dir,
+            *trial_handler.task.test_script_paths,
+        ]
+        self._logger.debug(f"Files to copy: {[str(f) for f in files_to_copy]}")
+        
+        # Check if any of these files/directories have changed since agent execution
+        for file_path in files_to_copy:
+            if file_path.exists():
+                if file_path.is_file():
+                    stat = file_path.stat()
+                    self._logger.debug(f"File {file_path.name}: size={stat.st_size}, mtime={stat.st_mtime}")
+                elif file_path.is_dir():
+                    file_count = len(list(file_path.rglob('*')))
+                    self._logger.debug(f"Directory {file_path.name}: contains {file_count} files")
+        
         terminal.copy_to_container(
-            paths=[
-                trial_handler.post_agent_pane_path,
-                trial_handler.run_tests_path,
-                trial_handler.test_dir,
-                *trial_handler.task.test_script_paths,
-            ],
+            paths=files_to_copy,
             container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
         )
         
         # Copy seeds directory if it exists
         if trial_handler.seeds_dir.exists():
+            self._logger.debug(f"Copying seeds directory: {trial_handler.seeds_dir}")
             terminal.copy_to_container(
                 paths=[trial_handler.seeds_dir],
                 container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
             )
+        
+        # Verify files were copied correctly
+        try:
+            ls_result = terminal.container.exec_run([
+                "ls", "-la", str(DockerComposeManager.CONTAINER_TEST_DIR)
+            ])
+            self._logger.debug(f"Container test directory after copy: {ls_result.output.decode()}")
+            
+            # Count total files and show breakdown
+            find_result = terminal.container.exec_run([
+                "find", str(DockerComposeManager.CONTAINER_TEST_DIR), "-type", "f", "-exec", "wc", "-l", "{}", "+"
+            ])
+            if find_result.exit_code == 0:
+                self._logger.debug(f"File count breakdown:\n{find_result.output.decode()}")
+            
+            # Show any hidden files
+            hidden_result = terminal.container.exec_run([
+                "find", str(DockerComposeManager.CONTAINER_TEST_DIR), "-name", ".*", "-type", "f"
+            ])
+            if hidden_result.exit_code == 0 and hidden_result.output.strip():
+                self._logger.debug(f"Hidden files found: {hidden_result.output.decode()}")
+            
+        except Exception as e:
+            self._logger.warning(f"Failed to verify test files after copy: {e}")
 
         # Copy solutions directory if it exists
         if trial_handler.solutions_dir.exists():
@@ -215,27 +263,137 @@ class Harness:
         session: TmuxSession,
         trial_handler: TrialHandler,
     ) -> FailureMode:
+        self._logger.info(f"Starting test execution for task {trial_handler.task_id}")
+        self._logger.debug(f"Test session: {session._session_name}")
+        self._logger.debug(f"Test timeout: {trial_handler.task.max_test_timeout_sec}s")
+        
         self._setup_test_env(terminal, trial_handler)
 
+        # Log the test command we're about to run
+        test_command = [
+            "bash ",
+            str(
+                DockerComposeManager.CONTAINER_TEST_DIR
+                / trial_handler.run_tests_path.name
+            ),
+            "Enter",
+        ]
+        self._logger.debug(f"Test command: {test_command}")
+        self._logger.debug(f"Test script path: {trial_handler.run_tests_path}")
+        self._logger.debug(f"Container test dir: {DockerComposeManager.CONTAINER_TEST_DIR}")
+        
+        # Check what's in the container before running tests
         try:
+            # List contents of test directory with detailed info
+            ls_result = session.container.exec_run([
+                "ls", "-la", str(DockerComposeManager.CONTAINER_TEST_DIR)
+            ])
+            self._logger.debug(f"Container test directory contents: {ls_result.output.decode()}")
+            
+            # Show file sizes to identify what's different
+            du_result = session.container.exec_run([
+                "du", "-sh", str(DockerComposeManager.CONTAINER_TEST_DIR) + "/*"
+            ])
+            if du_result.exit_code == 0:
+                self._logger.debug(f"File sizes in test directory:\n{du_result.output.decode()}")
+            else:
+                self._logger.debug(f"Could not get file sizes: {du_result.output.decode()}")
+            
+            # Check if the test script exists and is executable
+            test_script_path = str(DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name)
+            stat_result = session.container.exec_run(["ls", "-la", test_script_path])
+            self._logger.debug(f"Test script status: {stat_result.output.decode()}")
+            
+            # Check script content
+            cat_result = session.container.exec_run(["cat", test_script_path])
+            if cat_result.exit_code == 0:
+                self._logger.debug(f"Test script content:\n{cat_result.output.decode()}")
+            else:
+                self._logger.warning(f"Failed to read test script: {cat_result.output.decode()}")
+                
+        except Exception as e:
+            self._logger.warning(f"Failed to inspect test environment: {e}")
+
+        try:
+            self._logger.info(f"Executing test command with {trial_handler.task.max_test_timeout_sec}s timeout")
+            
+            # Log the current working directory and environment
+            try:
+                pwd_result = session.container.exec_run(["pwd"])
+                self._logger.debug(f"Current working directory: {pwd_result.output.decode()}")
+                
+                # Check if we're in the right directory
+                if pwd_result.exit_code == 0:
+                    self._logger.debug(f"Working directory is: {pwd_result.output.decode().strip()}")
+                else:
+                    self._logger.warning(f"Failed to get working directory: {pwd_result.output.decode()}")
+            except Exception as e:
+                self._logger.warning(f"Failed to check working directory: {e}")
+            
+            # Try to run the script with bash -x for verbose output (but don't wait for it)
+            try:
+                verbose_test_cmd = [
+                    "bash", "-x", str(DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name)
+                ]
+                self._logger.debug(f"Verbose test command: {verbose_test_cmd}")
+                
+                # Run it in background to see if it produces any output
+                bg_result = session.container.exec_run(verbose_test_cmd, detach=True)
+                self._logger.debug(f"Background test execution started: {bg_result}")
+                
+                # Wait a moment to see if it produces output
+                import time
+                time.sleep(2)
+                
+                # Check if there are any processes running
+                ps_result = session.container.exec_run(["ps", "aux"])
+                self._logger.debug(f"Processes after background test: {ps_result.output.decode()}")
+                
+            except Exception as e:
+                self._logger.debug(f"Background test execution failed: {e}")
+            
+            # Now run the actual test command
+            self._logger.debug(f"Running actual test command: {test_command}")
             session.send_keys(
-                [
-                    "bash ",
-                    str(
-                        DockerComposeManager.CONTAINER_TEST_DIR
-                        / trial_handler.run_tests_path.name
-                    ),
-                    "Enter",
-                ],
+                test_command,
                 block=True,
                 max_timeout_sec=trial_handler.task.max_test_timeout_sec,
             )
+            self._logger.info(f"Test command completed successfully for task {trial_handler.task_id}")
+            
         except TimeoutError:
             self._logger.warning(
                 "Test command timed out after "
                 f"{trial_handler.task.max_test_timeout_sec}s for task "
                 f"{trial_handler.task_id}."
             )
+            
+            # Capture the current pane to see what happened
+            try:
+                current_pane = session.capture_pane(capture_entire=True)
+                self._logger.warning(f"Test pane content after timeout:\n{current_pane}")
+            except Exception as e:
+                self._logger.warning(f"Failed to capture test pane after timeout: {e}")
+            
+            # Check what processes are running
+            try:
+                ps_result = session.container.exec_run(["ps", "aux"])
+                self._logger.warning(f"Process list after test timeout:\n{ps_result.output.decode()}")
+            except Exception as e:
+                self._logger.warning(f"Failed to check processes after timeout: {e}")
+            
+            # Check if there are any hanging database connections
+            try:
+                if trial_handler.task.db_type == "duckdb":
+                    db_check = session.container.exec_run(["duckdb", "--version"])
+                    self._logger.debug(f"DuckDB version check: {db_check.output.decode()}")
+                    
+                    # Try to list any open files
+                    lsof_result = session.container.exec_run(["lsof", "-p", "1"])
+                    if lsof_result.exit_code == 0:
+                        self._logger.debug(f"Open files in init process: {lsof_result.output.decode()}")
+            except Exception as e:
+                self._logger.warning(f"Failed to check database state: {e}")
 
             return FailureMode.TEST_TIMEOUT
 
@@ -390,7 +548,7 @@ class Harness:
             # Run the setup script (following oracle agent pattern)
             session.send_keys(
                 ["bash /app/setup.sh", "Enter"],
-                max_timeout_sec=300,  # 5 minute timeout for setup script
+                max_timeout_sec=terminal_bench_config.setup_timeout_sec,  # Configurable timeout for setup script
                 block=True,
             )
             
@@ -414,7 +572,7 @@ class Harness:
                 for command in cleanup_commands:
                     session.send_keys(
                         [command, "Enter"],
-                        max_timeout_sec=30,
+                        max_timeout_sec=terminal_bench_config.cleanup_timeout_sec,
                         block=True,
                     )
                 self._logger.debug("Setup files cleaned up from container")
@@ -564,11 +722,29 @@ class Harness:
                 results.total_input_tokens = agent_result.total_input_tokens
                 results.total_output_tokens = agent_result.total_output_tokens
 
+            # Always kill the agent session to ensure cleanup, regardless of success/failure
+            try:
+                self._logger.debug(f"Killing agent session for task {trial_handler.task_id}")
+                session.kill_session()
+                self._logger.debug(f"Successfully killed agent session for task {trial_handler.task_id}")
+            except Exception as e:
+                self._logger.warning(
+                    f"Failed to kill agent session for task {trial_handler.task_id}: {e}"
+                )
+
             if not trial_handler.task.run_tests_in_same_shell:
+                self._logger.debug(f"Creating new test session for task {trial_handler.task_id}")
                 session = terminal.create_session(
                     "tests"
                 )
+                self._logger.debug(f"Created test session: {session._session_name}")
+            else:
+                self._logger.debug(f"Using same shell for tests in task {trial_handler.task_id}")
 
+            self._logger.debug(f"About to run tests for task {trial_handler.task_id}")
+            self._logger.debug(f"Current session: {session._session_name}")
+            self._logger.debug(f"Test script: {trial_handler.run_tests_path.name}")
+            
             test_failure_mode = self._run_tests(
                 terminal=terminal,
                 session=session,
