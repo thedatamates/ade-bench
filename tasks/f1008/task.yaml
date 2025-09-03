@@ -1,0 +1,34 @@
+task_id: f1008
+status: dev
+title: Create new stats models
+notes: |-
+descriptions:
+  - key: base
+    description: |-
+      Add the constructor models
+author_name: test
+author_email: test
+difficulty: medium
+category: debugging
+tags:
+  - dbt
+  - data-quality
+timeout_seconds: 500
+parser_name: dbt
+db_type: duckdb
+
+# Tables to compare for solution
+solution_seeds:
+  - table_name: foo
+
+# Use shared database instead of local data files
+database:
+  source: shared
+  name: f1
+  type: duckdb
+
+# Use shared project instead of local project
+project:
+  source: shared
+  name: f1
+  type: dbt

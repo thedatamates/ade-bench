@@ -312,3 +312,24 @@ class TmuxSession:
             container_dir=container_dir,
             container_filename=container_filename,
         )
+
+    def kill_session(self) -> None:
+        """Kill the tmux session and all processes running in it."""
+        try:
+            # Kill the tmux session
+            result = self.container.exec_run([
+                "tmux", "kill-session", "-t", self._session_name
+            ])
+            
+            if result.exit_code == 0:
+                self._logger.debug(f"Successfully killed tmux session {self._session_name}")
+            else:
+                self._logger.warning(
+                    f"Failed to kill tmux session {self._session_name}, "
+                    f"exit code: {result.exit_code}"
+                )
+                
+        except Exception as e:
+            self._logger.error(
+                f"Error killing tmux session {self._session_name}: {e}"
+            )

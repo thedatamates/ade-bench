@@ -11,6 +11,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 from ade_bench.utils.logger import logger
 from ade_bench.harness_models import DatabaseConfig, ProjectConfig, SolutionSeedConfig
+from ade_bench.config import config
 
 
 class TaskDescription(BaseModel):
@@ -63,10 +64,12 @@ class Task(BaseModel):
         description="Name of the parser to use for test results",
     )
     max_agent_timeout_sec: float = Field(
-        default=360.0, description="Maximum timeout in seconds for the agent to run."
+        default_factory=lambda: config.default_agent_timeout_sec, 
+        description="Maximum timeout in seconds for the agent to run."
     )
     max_test_timeout_sec: float = Field(
-        default=60.0, description="Maximum timeout in seconds for each individual test"
+        default_factory=lambda: config.default_test_timeout_sec, 
+        description="Maximum timeout in seconds for each individual test"
     )
     test_scripts: list[str] = Field(
         default=["setup-dbt-test.sh", "run-dbt-test.sh", "seed-schema.sh"],

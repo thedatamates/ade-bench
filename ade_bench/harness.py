@@ -7,6 +7,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+import time
 import boto3
 from tenacity import RetryError
 from tqdm import tqdm
@@ -218,6 +219,10 @@ class Harness:
         self._setup_test_env(terminal, trial_handler)
 
         try:
+            # TODO: This seems like a bad hack.
+            # I have no idea why this is needed, but without it, the test run fails?
+            time.sleep(2)
+
             session.send_keys(
                 [
                     "bash ",
@@ -230,6 +235,7 @@ class Harness:
                 block=True,
                 max_timeout_sec=trial_handler.task.max_test_timeout_sec,
             )
+            
         except TimeoutError:
             self._logger.warning(
                 "Test command timed out after "
@@ -390,7 +396,7 @@ class Harness:
             # Run the setup script (following oracle agent pattern)
             session.send_keys(
                 ["bash /app/setup.sh", "Enter"],
-                max_timeout_sec=300,  # 5 minute timeout for setup script
+                max_timeout_sec=terminal_bench_config.setup_timeout_sec,  # Configurable timeout for setup script
                 block=True,
             )
             
@@ -414,7 +420,7 @@ class Harness:
                 for command in cleanup_commands:
                     session.send_keys(
                         [command, "Enter"],
-                        max_timeout_sec=30,
+                        max_timeout_sec=terminal_bench_config.cleanup_timeout_sec,
                         block=True,
                     )
                 self._logger.debug("Setup files cleaned up from container")
@@ -563,6 +569,14 @@ class Harness:
             if agent_result is not None:
                 results.total_input_tokens = agent_result.total_input_tokens
                 results.total_output_tokens = agent_result.total_output_tokens
+
+            # Always kill the agent session to ensure cleanup, regardless of success/failure
+            try:
+                session.kill_session()
+            except Exception as e:
+                self._logger.warning(
+                    f"Failed to kill agent session for task {trial_handler.task_id}: {e}"
+                )
 
             if not trial_handler.task.run_tests_in_same_shell:
                 session = terminal.create_session(
