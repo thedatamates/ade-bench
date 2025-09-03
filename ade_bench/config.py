@@ -16,10 +16,10 @@ class Config:
         #     if key.lower() in st.secrets:
         #         return st.secrets[key.lower()]
 
-        # # Check environment variables (converting to uppercase)
-        # env_val = os.environ.get(key.upper())
-        # if env_val is not None:
-        #     return env_val
+        # Check environment variables (converting to uppercase)
+        env_val = os.environ.get(key.upper())
+        if env_val is not None:
+            return env_val
 
         return default
 

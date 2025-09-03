@@ -12,7 +12,6 @@ import tempfile
 import time
 import boto3
 from tenacity import RetryError
-from tqdm import tqdm
 
 from ade_bench.agents.agent_factory import AgentFactory
 from ade_bench.agents.agent_name import AgentName
@@ -32,7 +31,7 @@ from ade_bench.terminal.docker_compose_manager import DockerComposeManager
 from ade_bench.terminal.terminal import Terminal, spin_up_terminal
 from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.dataset import Dataset
-from ade_bench.utils.logger import logger
+from ade_bench.utils.logger import logger, log_harness_info
 from ade_bench.utils.test_generator import generate_solution_tests
 
 
@@ -291,7 +290,7 @@ class Harness:
         if not trial_handler.task.solution_seeds:
             return
             
-        self._logger.info(f"Generating solution tests for {trial_handler.task_id}")
+        log_harness_info(self._logger, trial_handler.task_id, "test", f"Generating solution tests")
         
         # Ensure test directory exists
         test_dir = trial_handler.test_dir
@@ -305,7 +304,6 @@ class Harness:
         for config in trial_handler.task.get_solution_seed_configs():
             try:
                 generate_solution_tests(config.table_name, test_dir, config)
-                self._logger.info(f"Generated tests for {config.table_name}")
             except Exception as e:
                 self._logger.error(f"Failed to generate tests for {config.table_name}: {e}")
 
@@ -410,12 +408,12 @@ class Harness:
             self._logger.debug(f"No setup script found at {setup_script_path}")
             return
             
-        self._logger.info(f"Running setup script: {setup_script_path}")
+        log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
         
         try:
             # Copy setup directory to container if it exists
             if setup_dir_path.exists():
-                self._logger.info(f"Copying setup directory: {setup_dir_path}")
+
                 terminal.copy_to_container(
                     paths=setup_dir_path,
                     container_dir="/app/setup",
@@ -435,7 +433,7 @@ class Harness:
                 block=True,
             )
             
-            self._logger.info("Setup script completed successfully")
+            log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script completed successfully")
             
         except TimeoutError:
             self._logger.warning(
@@ -712,15 +710,11 @@ class Harness:
         import yaml
         with open(task_yaml_path, 'r') as f:
             task_config = yaml.safe_load(f)
-        
-        # Check if there are tables to extract
-        solution_seeds = task_config.get('solution_seeds', [])
-        if not solution_seeds:
-            self._logger.info(f"No tables to extract for {trial_handler.task_id}")
-            return
-        
+    
         # Extract table names from solution_seeds (all items are dictionaries)
         tables_to_extract = []
+        
+        solution_seeds = task_config.get('solution_seeds', [])
         for item in solution_seeds:
             if isinstance(item, dict):
                 table_name = item.get('table_name')
@@ -732,10 +726,10 @@ class Harness:
                 self._logger.warning(f"Invalid solution_seed item type (expected dict): {type(item)}")
 
         if not tables_to_extract:
-            self._logger.info(f"No valid tables to extract for {trial_handler.task_id}")
+            log_harness_info(self._logger, trial_handler.task_id, "seed", f"No valid tables to extract")
             return
 
-        self._logger.info(f"Extracting tables for {trial_handler.task_id}: {tables_to_extract}")
+        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables: {tables_to_extract}")
         
         # Create output directory
         task_seeds_dir = trial_handler.input_path / "seeds"
@@ -785,7 +779,7 @@ class Harness:
                         csv_path = task_seeds_dir / f"solution__{table_name}.csv"
                         copy_query = f"COPY {table_name} TO '{csv_path}' (HEADER, DELIMITER ',');"
                         con.execute(copy_query)
-                        self._logger.info(f"Exported {table_name} to {csv_path}")
+                        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Exported {table_name} to {csv_path}")
                     except Exception as e:
                         self._logger.error(f"Failed to export table {table_name}: {e}")
                 
@@ -819,7 +813,7 @@ class Harness:
                         f.write('\n\n')  # Add two blank lines at the start
                         yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)
                     
-                    self._logger.info(f"Generated _no-op.txt file: {no_op_path}")
+                    log_harness_info(self._logger, trial_handler.task_id, "seed", f"Generated _no-op.txt file: {no_op_path}")
                 
                 con.close()
             
@@ -879,11 +873,11 @@ class Harness:
 
         try:
             s3_client = boto3.client("s3")
-            self._logger.info(f"Uploading run results to S3 bucket: {self._s3_bucket}")
+            log_harness_info(self._logger, "harness", "upload", f"Uploading run results to S3 bucket: {self._s3_bucket}")
 
             failed_uploads = []
 
-            for file_path in tqdm(files_to_upload, desc="Uploading files to S3"):
+            for file_path in files_to_upload:
                 relative_path = file_path.relative_to(self._run_path)
                 s3_key = f"{self._run_id}/{relative_path}"
 
@@ -899,7 +893,10 @@ class Harness:
                     failed_uploads.append(str(relative_path))
 
             if not failed_uploads:
-                self._logger.info(
+                log_harness_info(
+                    self._logger,
+                    "HARNESS",
+                    "upload",
                     f"Successfully uploaded all {len(files_to_upload)} files to "
                     f"s3://{self._s3_bucket}/{self._run_id}/"
                 )
@@ -936,7 +933,7 @@ class Harness:
             model_name=self._model_name,
             commit_hash=self._get_git_commit_hash(),
             username=self._get_user(),
-            start_time=datetime.now(timezone.utc).isoformat(),
+            start_time=self._start_time,
             s3_bucket=self._s3_bucket if self._s3_bucket else None,
         )
         self._run_uuid = metadata.uuid
@@ -995,24 +992,6 @@ class Harness:
             )
             return trial_results
 
-    def _update_progress_bar(
-        self,
-        pbar: tqdm,
-        results: list[TrialResults],
-    ) -> None:
-        """Update the progress bar with current accuracy.
-
-        Args:
-            pbar: The progress bar to update
-            results: List of TaskResults
-        """
-        accuracy = (
-            (sum(1 for result in results if result.is_resolved) / len(results) * 100)
-            if len(results) > 0
-            else 0
-        )
-        pbar.set_description(f"Running tasks (Accuracy: {accuracy:.2%})")
-
     def _get_trial_name(
         self,
         task_path: Path,
@@ -1042,22 +1021,24 @@ class Harness:
                     )
                     future_to_task[future] = (trial_name, attempt)
 
-            # Create progress bar for all attempts
+            # Track progress
             total_tasks = len(self._dataset) * self._n_attempts
-            pbar = tqdm(
-                as_completed(future_to_task),
-                total=total_tasks,
-                desc="Running tasks",
-            )
+            completed_tasks = 0
 
-            for future in pbar:
+            for future in as_completed(future_to_task):
                 trial_results = future.result()
                 results.results.append(trial_results)
+                completed_tasks += 1
 
                 self._write_results(results)
 
-                pbar.set_description(
-                    f"Running tasks (Accuracy: {results.accuracy:.2%})"
+                # Log progress update
+                successful_tasks = sum(1 for result in results.results if result.is_resolved)
+                log_harness_info(
+                    self._logger,
+                    "HARNESS",
+                    "progress",
+                    f"Run {completed_tasks} of {total_tasks} tasks, {successful_tasks} successful"
                 )
 
         return results
@@ -1068,8 +1049,8 @@ class Harness:
         Returns:
             BenchmarkResults: The results of the harness run.
         """
-        logger.info("Starting harness run")
-        logger.info(f"Run ID: {self._run_id}")
+        log_harness_info(logger, "HARNESS", "start", "STARTING HARNESS RUN")
+        log_harness_info(logger, "HARNESS", "start", f"Run ID: {self._run_id}")
 
         self._write_run_metadata()
 

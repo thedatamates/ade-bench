@@ -3,6 +3,7 @@ import re
 from typing import Dict, Any
 
 from ade_bench.parsers.base_parser import BaseParser, UnitTestStatus
+from ade_bench.utils.logger import log_harness_info
 
 
 class ClaudeParser(BaseParser):
@@ -50,17 +51,17 @@ class ClaudeParser(BaseParser):
                 if line.startswith('{') and line.endswith('}'):
                     try:
                         data = json.loads(line)
-                        self._logger.info("Found parsable JSON response")
+                        log_harness_info(self._logger, self._task_name, "test", "Found parsable JSON response")
                         return self._parse_json_response(data)
                     except json.JSONDecodeError:
                         continue
 
             # If we can't parse JSON, return default values
-            self._logger.warning("Could not find parsable JSON response")
+            log_harness_info(self._logger, self._task_name, "test", "Could not find parsable JSON response")
             return default_return
             
         except Exception as e:
-            self._logger.error(f"Error parsing Claude response: {e}")
+            log_harness_info(self._logger, self._task_name, "test", f"Error parsing Claude response: {e}")
             return default_return
     
     def _parse_json_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -83,12 +84,11 @@ class ClaudeParser(BaseParser):
         # Determine success
         success = data.get("is_error", True) == False
         
-        self._logger.info(
-            f"Claude response \n\t- Runtime: {runtime_ms}ms \n"
-            f"\t- Input tokens: {total_input_tokens}\n"
-            f"\t- Output tokens: {total_output_tokens}\n"
-            f"\t- Cost: ${cost_usd:.6f}\n"
-            f"\t- SUCCESS: {success}"
+        log_harness_info(
+            self._logger,
+            self._task_name,
+            "test",
+            f"Claude response - Runtime: {runtime_ms}ms, Input tokens: {total_input_tokens}, Output tokens: {total_output_tokens}, Cost: ${cost_usd:.6f}, SUCCESS: {success}"
         )
         
         return {

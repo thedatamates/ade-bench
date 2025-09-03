@@ -10,8 +10,9 @@ class UnitTestStatus(Enum):
 
 
 class BaseParser(ABC):
-    def __init__(self) -> None:
+    def __init__(self, task_name: str = "unknown") -> None:
         self._logger = logger.getChild(__name__)
+        self._task_name = task_name
 
     @abstractmethod
     def parse(self, content: str) -> dict[str, UnitTestStatus]:

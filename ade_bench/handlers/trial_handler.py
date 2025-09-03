@@ -173,7 +173,7 @@ class TrialHandler:
 
         self._logger = logger.getChild(__name__)
         self.task = Task.from_yaml(self._task_config_path)
-        self.parser = ParserFactory.get_parser(self.task.parser_name)
+        self.parser = ParserFactory.get_parser(self.task.parser_name, task_name=self.task_id)
 
         if self.output_path is not None:
             self._task_output_path.mkdir(parents=True, exist_ok=True)

@@ -1,5 +1,6 @@
 import re
 from ade_bench.parsers.base_parser import BaseParser, UnitTestStatus
+from ade_bench.utils.logger import log_harness_info
 
 
 class DbtParser(BaseParser):
@@ -40,12 +41,12 @@ class DbtParser(BaseParser):
             error_count = int(summary_match.group(3))
             total_count = int(summary_match.group(5))
             
-            self._logger.info(f"Test summary - PASS: {pass_count}, ERROR: {error_count}, TOTAL: {total_count}")
-            self._logger.info(f"Parsed {len(results) - 1} test results (excluding compile test)")
+            log_harness_info(self._logger, self._task_name, "test", f"Test summary - PASS: {pass_count}, ERROR: {error_count}, TOTAL: {total_count}")
+            log_harness_info(self._logger, self._task_name, "test", f"Parsed {len(results) - 1} test results (excluding compile test)")
             
             # Verify we parsed the correct number of tests
             if len(results) - 1 != total_count:  # -1 for compile test
-                self._logger.warning(f"Mismatch: parsed {len(results) - 1} tests but summary shows {total_count} total")
+                log_harness_info(self._logger, self._task_name, "test", f"Mismatch: parsed {len(results) - 1} tests but summary shows {total_count} total")
         
         if not results:
             raise ValueError("No test results found in the provided content.")
