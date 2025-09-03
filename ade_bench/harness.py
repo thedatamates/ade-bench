@@ -213,30 +213,6 @@ class Harness:
                 paths=[trial_handler.seeds_dir],
                 container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
             )
-        
-        # Verify files were copied correctly
-        try:
-            ls_result = terminal.container.exec_run([
-                "ls", "-la", str(DockerComposeManager.CONTAINER_TEST_DIR)
-            ])
-            self._logger.debug(f"Container test directory after copy: {ls_result.output.decode()}")
-            
-            # Count total files and show breakdown
-            find_result = terminal.container.exec_run([
-                "find", str(DockerComposeManager.CONTAINER_TEST_DIR), "-type", "f", "-exec", "wc", "-l", "{}", "+"
-            ])
-            if find_result.exit_code == 0:
-                self._logger.debug(f"File count breakdown:\n{find_result.output.decode()}")
-            
-            # Show any hidden files
-            hidden_result = terminal.container.exec_run([
-                "find", str(DockerComposeManager.CONTAINER_TEST_DIR), "-name", ".*", "-type", "f"
-            ])
-            if hidden_result.exit_code == 0 and hidden_result.output.strip():
-                self._logger.debug(f"Hidden files found: {hidden_result.output.decode()}")
-            
-        except Exception as e:
-            self._logger.warning(f"Failed to verify test files after copy: {e}")
 
         # Copy solutions directory if it exists
         if trial_handler.solutions_dir.exists():
