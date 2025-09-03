@@ -201,7 +201,7 @@ class TmuxSession:
     ):
         start_time_sec = time.time()
         self.container.exec_run(self._tmux_send_keys(keys))
-        
+
         result = self.container.exec_run(
             ["timeout", f"{max_timeout_sec}s", "tmux", "wait", "done"]
         )
