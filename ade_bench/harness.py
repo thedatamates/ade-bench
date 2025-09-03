@@ -7,6 +7,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+import time
 import boto3
 from tenacity import RetryError
 from tqdm import tqdm
@@ -218,10 +219,8 @@ class Harness:
         self._setup_test_env(terminal, trial_handler)
 
         try:
-            import time
             time.sleep(2)
-            
-            # Now run the actual test command
+
             session.send_keys(
                 [
                     "bash ",
