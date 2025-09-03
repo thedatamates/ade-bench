@@ -26,6 +26,14 @@ class AgentResult(BaseModel):
         description="The total number of output tokens used by the agent to "
         "complete the task."
     )
+    runtime_ms: int = Field(
+        default=0,
+        description="The runtime of the agent in milliseconds."
+    )
+    cost_usd: float = Field(
+        default=0.0,
+        description="The cost of the agent execution in USD."
+    )
     failure_mode: FailureMode = Field(
         default=FailureMode.NONE,
         description="The failure mode of the agent's execution, if any.",

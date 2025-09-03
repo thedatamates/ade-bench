@@ -604,6 +604,8 @@ class Harness:
             if agent_result is not None:
                 results.total_input_tokens = agent_result.total_input_tokens
                 results.total_output_tokens = agent_result.total_output_tokens
+                results.runtime_ms = agent_result.runtime_ms
+                results.cost_usd = agent_result.cost_usd
 
             # Always kill the agent session to ensure cleanup, regardless of success/failure
             try:

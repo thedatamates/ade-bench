@@ -109,6 +109,7 @@ class TmuxSession:
         return [
             "tmux",
             "capture-pane",
+            "-J",  # Prevent line wrapping
             "-p",
             *extra_args,
             "-t",

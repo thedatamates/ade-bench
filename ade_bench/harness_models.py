@@ -59,6 +59,8 @@ class TrialResults(BaseModel):
     parser_results: dict[str, UnitTestStatus] | None = None
     total_input_tokens: int | None = None
     total_output_tokens: int | None = None
+    runtime_ms: int | None = None
+    cost_usd: float | None = None
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()))
     recording_path: str | None = None
 

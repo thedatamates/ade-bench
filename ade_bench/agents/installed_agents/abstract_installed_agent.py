@@ -13,6 +13,8 @@ agent's inability to perform the task (e.g. volume constraints, broken networkin
 import shlex
 from abc import ABC, abstractmethod
 from pathlib import Path
+import time
+from typing import Any
 
 from ade_bench.agents.agent_name import AgentName
 from ade_bench.agents.base_agent import AgentResult, BaseAgent
@@ -98,7 +100,25 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         for command in run_agent_commands:
             session.send_command(command)
 
+        # Try to capture just the recent output by looking at the last few lines
+        output = session.capture_pane(capture_entire=False)
+
+        # Try to extract just the JSON part from the output
+        parsed_metrics = self._parse_agent_output(output)
+
         return AgentResult(
-            total_input_tokens=0,
-            total_output_tokens=0,
+            total_input_tokens=parsed_metrics["total_input_tokens"],
+            total_output_tokens=parsed_metrics["total_output_tokens"],
+            runtime_ms=parsed_metrics["runtime_ms"],
+            cost_usd=parsed_metrics["cost_usd"],
         )
+
+    def _parse_agent_output(self, output: str) -> dict[str, Any]:
+        """Parse the agent output to extract metrics. Override in subclasses if needed."""
+        # Default implementation returns 0 values
+        return {
+            "total_input_tokens": 0,
+            "total_output_tokens": 0,
+            "runtime_ms": 0,
+            "cost_usd": 0.0,
+        }
