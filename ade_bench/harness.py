@@ -218,21 +218,8 @@ class Harness:
         self._setup_test_env(terminal, trial_handler)
 
         try:
-            # Try to run the script with bash -x for verbose output (but don't wait for it)
-            try:
-                verbose_test_cmd = [
-                    "bash", "-x", str(DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name)
-                ]
-                
-                # Run it in background to see if it produces any output
-                bg_result = session.container.exec_run(verbose_test_cmd, detach=True)
-                
-                # Wait a moment to see if it produces output
-                import time
-                time.sleep(2)
-                
-            except Exception as e:
-                self._logger.debug(f"Background test execution failed: {e}")
+            import time
+            time.sleep(2)
             
             # Now run the actual test command
             session.send_keys(
