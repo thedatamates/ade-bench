@@ -41,12 +41,11 @@ class DbtParser(BaseParser):
             error_count = int(summary_match.group(3))
             total_count = int(summary_match.group(5))
             
-            log_harness_info(self._logger, self._task_name, "test", f"Test summary - PASS: {pass_count}, ERROR: {error_count}, TOTAL: {total_count}")
-            log_harness_info(self._logger, self._task_name, "test", f"Parsed {len(results) - 1} test results (excluding compile test)")
+            log_harness_info(self._logger, self._task_name, "eval", f"dbt test summary:|||PASS: {pass_count}, ERROR: {error_count}, TOTAL: {total_count}")
             
             # Verify we parsed the correct number of tests
             if len(results) - 1 != total_count:  # -1 for compile test
-                log_harness_info(self._logger, self._task_name, "test", f"Mismatch: parsed {len(results) - 1} tests but summary shows {total_count} total")
+                log_harness_info(self._logger, self._task_name, "eval", f"Mismatch: parsed {len(results) - 1} tests but summary shows {total_count} total")
         
         if not results:
             raise ValueError("No test results found in the provided content.")

@@ -13,17 +13,20 @@ agent's inability to perform the task (e.g. volume constraints, broken networkin
 import shlex
 from abc import ABC, abstractmethod
 from pathlib import Path
-import time
 from typing import Any
 
 from ade_bench.agents.agent_name import AgentName
 from ade_bench.agents.base_agent import AgentResult, BaseAgent
 from ade_bench.harness_models import TerminalCommand
 from ade_bench.terminal.tmux_session import TmuxSession
+from ade_bench.utils.logger import log_harness_info, logger
 
 
 class AbstractInstalledAgent(BaseAgent, ABC):
     NAME = AgentName.ABSTRACT_INSTALLED
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @property
     @abstractmethod
@@ -58,6 +61,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         task_description: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
+        task_name: str | None = None,
     ) -> AgentResult:
         session.copy_to_container(
             self._install_agent_script,
@@ -98,7 +102,10 @@ class AbstractInstalledAgent(BaseAgent, ABC):
 
         run_agent_commands = self._run_agent_commands(task_description)
         for command in run_agent_commands:
+            log_harness_info(logger, task_name, "agent", f"Calling agent:|||{task_description[:100]}")
             session.send_command(command)
+
+        log_harness_info(logger, task_name, "agent", "Agent returned response")
 
         # Try to capture just the recent output by looking at the last few lines
         output = session.capture_pane(capture_entire=False)

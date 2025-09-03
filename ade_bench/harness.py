@@ -257,6 +257,9 @@ class Harness:
             # I have no idea why this is needed, but without it, the test run fails?
             time.sleep(2)
 
+            # Log that test script is starting to run
+            log_harness_info(self._logger, trial_handler.task_id, "eval", "Starting test script execution")
+
             session.send_keys(
                 [
                     "bash ",
@@ -290,7 +293,7 @@ class Harness:
         if not trial_handler.task.solution_seeds:
             return
             
-        log_harness_info(self._logger, trial_handler.task_id, "test", f"Generating solution tests")
+        log_harness_info(self._logger, trial_handler.task_id, "eval", f"Generating solution tests")
         
         # Ensure test directory exists
         test_dir = trial_handler.test_dir
@@ -329,6 +332,7 @@ class Harness:
         logging_dir: Path,
         timeout_sec: float,
         agent: BaseAgent,
+        task_name: str | None = None,
     ) -> AgentResult | None:
         loop = asyncio.get_event_loop()
         task = loop.run_in_executor(
@@ -338,6 +342,7 @@ class Harness:
                 task_description=trial_handler.task_description,
                 session=session,
                 logging_dir=logging_dir,
+                task_name=task_name,
             ),
         )
         return await asyncio.wait_for(task, timeout=timeout_sec)
@@ -347,6 +352,7 @@ class Harness:
         session: TmuxSession,
         trial_handler: TrialHandler,
         agent: BaseAgent,
+        task_name: str | None = None,
     ) -> tuple[AgentResult | None, FailureMode]:
         try:
             result = asyncio.run(
@@ -356,6 +362,7 @@ class Harness:
                     logging_dir=trial_handler.agent_logging_dir,
                     timeout_sec=trial_handler.task.max_agent_timeout_sec,
                     agent=agent,
+                    task_name=task_name,
                 )
             )
             if result is None:
@@ -433,7 +440,7 @@ class Harness:
                 block=True,
             )
             
-            log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script completed successfully")
+            log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script completed")
             
         except TimeoutError:
             self._logger.warning(
@@ -579,10 +586,12 @@ class Harness:
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
+            log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent")
             agent_result, agent_failure_mode = self._run_agent(
                 session=session,
                 agent=task_agent,
                 trial_handler=trial_handler,
+                task_name=trial_handler.task_id,
             )
 
             post_agent_pane = session.capture_pane(capture_entire=True)
@@ -1057,5 +1066,15 @@ class Harness:
         results = self._execute_tasks()
 
         self._update_metadata_on_end(results=results)
+
+        # Log harness completion
+        successful_tasks = sum(1 for result in results.results if result.is_resolved)
+        total_tasks = len(results.results)
+        log_harness_info(
+            self._logger,
+            "HARNESS",
+            "end",
+            f"Harness run completed: {successful_tasks} of {total_tasks} tasks successful"
+        )
 
         return results

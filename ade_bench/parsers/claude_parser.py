@@ -51,17 +51,16 @@ class ClaudeParser(BaseParser):
                 if line.startswith('{') and line.endswith('}'):
                     try:
                         data = json.loads(line)
-                        log_harness_info(self._logger, self._task_name, "test", "Found parsable JSON response")
                         return self._parse_json_response(data)
                     except json.JSONDecodeError:
                         continue
 
             # If we can't parse JSON, return default values
-            log_harness_info(self._logger, self._task_name, "test", "Could not find parsable JSON response")
+            log_harness_info(self._logger, self._task_name, "eval", "Could not find parsable JSON response")
             return default_return
             
         except Exception as e:
-            log_harness_info(self._logger, self._task_name, "test", f"Error parsing Claude response: {e}")
+            log_harness_info(self._logger, self._task_name, "eval", f"Error parsing Claude response: {e}")
             return default_return
     
     def _parse_json_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -87,8 +86,8 @@ class ClaudeParser(BaseParser):
         log_harness_info(
             self._logger,
             self._task_name,
-            "test",
-            f"Claude response - Runtime: {runtime_ms}ms, Input tokens: {total_input_tokens}, Output tokens: {total_output_tokens}, Cost: ${cost_usd:.6f}, SUCCESS: {success}"
+            "agent",
+            f"Agent response:|||Runtime: {runtime_ms}ms, Input tokens: {total_input_tokens}, Output tokens: {total_output_tokens}, Cost: ${cost_usd:.6f}, SUCCESS: {success}"
         )
         
         return {
