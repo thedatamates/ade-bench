@@ -20,9 +20,7 @@ class MacroAgent(BaseAgent):
     @property
     def _env(self) -> dict[str, str]:
         return {
-            "ANTHROPIC_API_KEY": os.environ["ANTHROPIC_API_KEY"],
-            "GEMINI_API_KEY": os.environ["GEMINI_API_KEY"],
-            "OPENAI_API_KEY": os.environ["OPENAI_API_KEY"]
+            "MACRO_PLATFORM_API_KEY": os.environ["MACRO_API_KEY"],
         }
 
     @property
@@ -80,7 +78,7 @@ class MacroAgent(BaseAgent):
         escaped_description = shlex.quote(task_description)
         return [
             TerminalCommand(
-                command=f"macro -p {escaped_description} -e {self.LOG_DIR}/{self.LOG_FILENAME}",
+                command=f"macro -p {escaped_description}",
                 min_timeout_sec=0.0,
                 max_timeout_sec=float("inf"),
                 block=True,
