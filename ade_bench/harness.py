@@ -219,6 +219,7 @@ class Harness:
         self._setup_test_env(terminal, trial_handler)
 
         try:
+            # I have no idea why this is needed, but without it, the test run fails?
             time.sleep(2)
 
             session.send_keys(
