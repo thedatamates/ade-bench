@@ -111,7 +111,7 @@ class Harness:
         self._init_dataset()
 
         self._init_logger()
-        
+
     @property
     def _run_path(self) -> Path:
         return self._output_path / self._run_id
@@ -180,7 +180,6 @@ class Harness:
         )
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
-        
         # Generate solution tests if needed
         if trial_handler.task.solution_seeds:
             self._generate_solution_tests(trial_handler)
@@ -345,33 +344,6 @@ class Harness:
                 f"{trial_handler.task.max_test_timeout_sec}s for task "
                 f"{trial_handler.task_id}."
             )
-            
-            # Capture the current pane to see what happened
-            try:
-                current_pane = session.capture_pane(capture_entire=True)
-                self._logger.warning(f"Test pane content after timeout:\n{current_pane}")
-            except Exception as e:
-                self._logger.warning(f"Failed to capture test pane after timeout: {e}")
-            
-            # Check what processes are running
-            try:
-                ps_result = session.container.exec_run(["ps", "aux"])
-                self._logger.warning(f"Process list after test timeout:\n{ps_result.output.decode()}")
-            except Exception as e:
-                self._logger.warning(f"Failed to check processes after timeout: {e}")
-            
-            # Check if there are any hanging database connections
-            try:
-                if trial_handler.task.db_type == "duckdb":
-                    db_check = session.container.exec_run(["duckdb", "--version"])
-                    self._logger.debug(f"DuckDB version check: {db_check.output.decode()}")
-                    
-                    # Try to list any open files
-                    lsof_result = session.container.exec_run(["lsof", "-p", "1"])
-                    if lsof_result.exit_code == 0:
-                        self._logger.debug(f"Open files in init process: {lsof_result.output.decode()}")
-            except Exception as e:
-                self._logger.warning(f"Failed to check database state: {e}")
 
             return FailureMode.TEST_TIMEOUT
 
