@@ -4,6 +4,11 @@ rm -rf tests
 mkdir tests
 cp /tests/* tests
 
+# Run test setup script if it exists
+if [ -f "tests/test_setup.sh" ]; then
+    bash tests/test_setup.sh
+fi
+
 # Setup seeds and convert schema if needed
 if [ -d "/seeds" ]; then
     mkdir -p seeds

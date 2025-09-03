@@ -7,6 +7,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+import os
+import tempfile
 import time
 import boto3
 from tenacity import RetryError
@@ -209,6 +211,26 @@ class Harness:
                 paths=[trial_handler.solutions_dir],
                 container_dir=str(DockerComposeManager.CONTAINER_SOLUTIONS_DIR),
             )
+
+        # Handle test_setup script if it exists
+        if trial_handler.task.test_setup:
+            # Create a temporary directory and file
+            with tempfile.TemporaryDirectory() as temp_dir:
+                test_setup_path = Path(temp_dir) / "test_setup.sh"
+
+                with open(test_setup_path, 'w') as f:
+                    f.write("#!/bin/bash\n")
+                    f.write(trial_handler.task.test_setup)
+                    f.write("\n")
+
+                # Copy the file to the container with the exact name we want
+                terminal.copy_to_container(
+                    paths=[test_setup_path],
+                    container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
+                    container_filename="test_setup.sh"
+                )
+                # Make it executable using the container's exec_run method
+                terminal.container.exec_run(f"chmod +x {DockerComposeManager.CONTAINER_TEST_DIR}/test_setup.sh")
 
     def _run_tests(
         self,

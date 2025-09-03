@@ -100,6 +100,10 @@ class Task(BaseModel):
         default=[],
         description="List of solution seeds. Can be table names (strings) or configurations (dicts) with table_name and optional include_columns/exclude_columns.",
     )
+    test_setup: str | None = Field(
+        default=None,
+        description="Optional multiline bash script to run before dbt tests. This script will be executed in the test environment prior to running tests.",
+    )
 
     @property
     def task_description_dict(self) -> dict[str, str]:
