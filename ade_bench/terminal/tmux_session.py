@@ -205,7 +205,6 @@ class TmuxSession:
         result = self.container.exec_run(
             ["timeout", f"{max_timeout_sec}s", "tmux", "wait", "done"]
         )
-
         if result.exit_code != 0:
             raise TimeoutError(f"Command timed out after {max_timeout_sec} seconds")
 
