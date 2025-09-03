@@ -217,16 +217,6 @@ class Harness:
     ) -> FailureMode:
         self._setup_test_env(terminal, trial_handler)
 
-        # Log the test command we're about to run
-        test_command = [
-            "bash ",
-            str(
-                DockerComposeManager.CONTAINER_TEST_DIR
-                / trial_handler.run_tests_path.name
-            ),
-            "Enter",
-        ]
-
         try:
             # Try to run the script with bash -x for verbose output (but don't wait for it)
             try:
@@ -246,7 +236,14 @@ class Harness:
             
             # Now run the actual test command
             session.send_keys(
-                test_command,
+                [
+                    "bash ",
+                    str(
+                        DockerComposeManager.CONTAINER_TEST_DIR
+                        / trial_handler.run_tests_path.name
+                    ),
+                    "Enter",
+                ],
                 block=True,
                 max_timeout_sec=trial_handler.task.max_test_timeout_sec,
             )
