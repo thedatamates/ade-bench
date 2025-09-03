@@ -336,7 +336,6 @@ class Harness:
                 block=True,
                 max_timeout_sec=trial_handler.task.max_test_timeout_sec,
             )
-            self._logger.info(f"Test command completed successfully for task {trial_handler.task_id}")
             
         except TimeoutError:
             self._logger.warning(
@@ -674,26 +673,18 @@ class Harness:
 
             # Always kill the agent session to ensure cleanup, regardless of success/failure
             try:
-                self._logger.debug(f"Killing agent session for task {trial_handler.task_id}")
                 session.kill_session()
-                self._logger.debug(f"Successfully killed agent session for task {trial_handler.task_id}")
             except Exception as e:
                 self._logger.warning(
                     f"Failed to kill agent session for task {trial_handler.task_id}: {e}"
                 )
 
             if not trial_handler.task.run_tests_in_same_shell:
-                self._logger.debug(f"Creating new test session for task {trial_handler.task_id}")
                 session = terminal.create_session(
                     "tests"
                 )
-                self._logger.debug(f"Created test session: {session._session_name}")
             else:
                 self._logger.debug(f"Using same shell for tests in task {trial_handler.task_id}")
-
-            self._logger.debug(f"About to run tests for task {trial_handler.task_id}")
-            self._logger.debug(f"Current session: {session._session_name}")
-            self._logger.debug(f"Test script: {trial_handler.run_tests_path.name}")
             
             test_failure_mode = self._run_tests(
                 terminal=terminal,
