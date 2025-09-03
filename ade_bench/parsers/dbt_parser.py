@@ -13,8 +13,9 @@ class DbtParser(BaseParser):
     TEST_SUMMARY_PATTERN = r"Done\.\s+PASS=(\d+)\s+WARN=(\d+)\s+ERROR=(\d+)\s+SKIP=(\d+)\s+TOTAL=(\d+)"
     
     def parse(self, content: str) -> dict[str, UnitTestStatus]:
-        # Check for compilation error
-        if "Compilation Error" in content:
+        # Check for compilation error - this should only happen when dbt fails to run at all
+        # If we see test results, even with failures, compilation succeeded
+        if "Compilation Error" in content and not self._has_test_results(content):
             return { "dbt_compile": UnitTestStatus.FAILED }
         
         results = { "dbt_compile": UnitTestStatus.PASSED }
@@ -35,18 +36,23 @@ class DbtParser(BaseParser):
         if summary_matches:
             # Use the last occurrence of the summary line
             summary_match = summary_matches[-1]
-            pass_count = int(summary_match.group(1)) + 1 # include compile test
+            pass_count = int(summary_match.group(1))
             error_count = int(summary_match.group(3))
-            total_count = int(summary_match.group(5)) + 1 # include compile test
+            total_count = int(summary_match.group(5))
             
             self._logger.info(f"Test summary - PASS: {pass_count}, ERROR: {error_count}, TOTAL: {total_count}")
-            self._logger.info(f"Parsed {len(results)} test results")
+            self._logger.info(f"Parsed {len(results) - 1} test results (excluding compile test)")
             
             # Verify we parsed the correct number of tests
-            if len(results) != total_count:
-                self._logger.warning(f"Mismatch: parsed {len(results)} tests but summary shows {total_count} total")
+            if len(results) - 1 != total_count:  # -1 for compile test
+                self._logger.warning(f"Mismatch: parsed {len(results) - 1} tests but summary shows {total_count} total")
         
         if not results:
             raise ValueError("No test results found in the provided content.")
         
         return results
+
+    def _has_test_results(self, content: str) -> bool:
+        """Check if the content contains actual test results (not just compilation errors)."""
+        # Look for test result lines or summary lines
+        return bool(re.search(self.TEST_RESULT_PATTERN, content) or re.search(self.TEST_SUMMARY_PATTERN, content))

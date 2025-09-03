@@ -178,9 +178,22 @@ class Harness:
         if parser_results is None:
             return False
 
-        return all(
-            result == UnitTestStatus.PASSED for result in parser_results.values()
-        )
+        # Check if compilation failed
+        if "dbt_compile" in parser_results and parser_results["dbt_compile"] == UnitTestStatus.FAILED:
+            return False
+
+        # Count the number of tests (excluding the compile test)
+        test_results = {k: v for k, v in parser_results.items() if k != "dbt_compile"}
+        if not test_results:
+            return False
+
+        # Count passing tests
+        passing_tests = sum(1 for result in test_results.values() if result == UnitTestStatus.PASSED)
+        total_tests = len(test_results)
+
+        # For now, require all tests to pass. This could be made configurable per task
+        # if we want to allow partial success thresholds
+        return passing_tests == total_tests
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
         # Generate solution tests if needed
