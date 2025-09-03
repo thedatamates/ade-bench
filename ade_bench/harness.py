@@ -81,7 +81,6 @@ class Harness:
             dataset_config: Path to a YAML configuration file for the dataset.
                 If provided, this will override dataset_path, task_ids, n_tasks,
                 and exclude_task_ids.
-
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -181,27 +180,18 @@ class Harness:
         )
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
-        self._logger.debug(f"Setting up test environment for task {trial_handler.task_id}")
-        self._logger.debug(f"Test directory: {trial_handler.test_dir}")
-        self._logger.debug(f"Run tests path: {trial_handler.run_tests_path}")
-        self._logger.debug(f"Test script paths: {trial_handler.task.test_script_paths}")
         
         # Generate solution tests if needed
         if trial_handler.task.solution_seeds:
-            self._logger.debug(f"Generating solution tests for {trial_handler.task_id}")
             self._generate_solution_tests(trial_handler)
         
         # Copy test-related files
-        self._logger.debug(f"Copying test files to container directory: {DockerComposeManager.CONTAINER_TEST_DIR}")
-        
-        # Log what we're about to copy
         files_to_copy = [
             trial_handler.post_agent_pane_path,
             trial_handler.run_tests_path,
             trial_handler.test_dir,
             *trial_handler.task.test_script_paths,
         ]
-        self._logger.debug(f"Files to copy: {[str(f) for f in files_to_copy]}")
         
         # Check if any of these files/directories have changed since agent execution
         for file_path in files_to_copy:
@@ -220,7 +210,6 @@ class Harness:
         
         # Copy seeds directory if it exists
         if trial_handler.seeds_dir.exists():
-            self._logger.debug(f"Copying seeds directory: {trial_handler.seeds_dir}")
             terminal.copy_to_container(
                 paths=[trial_handler.seeds_dir],
                 container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
@@ -263,10 +252,6 @@ class Harness:
         session: TmuxSession,
         trial_handler: TrialHandler,
     ) -> FailureMode:
-        self._logger.info(f"Starting test execution for task {trial_handler.task_id}")
-        self._logger.debug(f"Test session: {session._session_name}")
-        self._logger.debug(f"Test timeout: {trial_handler.task.max_test_timeout_sec}s")
-        
         self._setup_test_env(terminal, trial_handler)
 
         # Log the test command we're about to run
@@ -278,9 +263,6 @@ class Harness:
             ),
             "Enter",
         ]
-        self._logger.debug(f"Test command: {test_command}")
-        self._logger.debug(f"Test script path: {trial_handler.run_tests_path}")
-        self._logger.debug(f"Container test dir: {DockerComposeManager.CONTAINER_TEST_DIR}")
         
         # Check what's in the container before running tests
         try:
@@ -315,8 +297,6 @@ class Harness:
             self._logger.warning(f"Failed to inspect test environment: {e}")
 
         try:
-            self._logger.info(f"Executing test command with {trial_handler.task.max_test_timeout_sec}s timeout")
-            
             # Log the current working directory and environment
             try:
                 pwd_result = session.container.exec_run(["pwd"])
@@ -339,7 +319,6 @@ class Harness:
                 
                 # Run it in background to see if it produces any output
                 bg_result = session.container.exec_run(verbose_test_cmd, detach=True)
-                self._logger.debug(f"Background test execution started: {bg_result}")
                 
                 # Wait a moment to see if it produces output
                 import time
@@ -353,7 +332,6 @@ class Harness:
                 self._logger.debug(f"Background test execution failed: {e}")
             
             # Now run the actual test command
-            self._logger.debug(f"Running actual test command: {test_command}")
             session.send_keys(
                 test_command,
                 block=True,
