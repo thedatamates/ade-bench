@@ -117,6 +117,7 @@ class TmuxSession:
 
     def start(self) -> None:
         self.container.exec_run(self._tmux_start_session)
+
         if self._recording_path:
             self._logger.debug("Starting recording.")
             self.send_keys(
@@ -200,10 +201,11 @@ class TmuxSession:
     ):
         start_time_sec = time.time()
         self.container.exec_run(self._tmux_send_keys(keys))
+        
         result = self.container.exec_run(
             ["timeout", f"{max_timeout_sec}s", "tmux", "wait", "done"]
         )
-        
+
         if result.exit_code != 0:
             raise TimeoutError(f"Command timed out after {max_timeout_sec} seconds")
 
