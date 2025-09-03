@@ -272,19 +272,6 @@ class Harness:
             self._logger.warning(f"Failed to inspect test environment: {e}")
 
         try:
-            # Log the current working directory and environment
-            try:
-                pwd_result = session.container.exec_run(["pwd"])
-                self._logger.debug(f"Current working directory: {pwd_result.output.decode()}")
-                
-                # Check if we're in the right directory
-                if pwd_result.exit_code == 0:
-                    self._logger.debug(f"Working directory is: {pwd_result.output.decode().strip()}")
-                else:
-                    self._logger.warning(f"Failed to get working directory: {pwd_result.output.decode()}")
-            except Exception as e:
-                self._logger.warning(f"Failed to check working directory: {e}")
-            
             # Try to run the script with bash -x for verbose output (but don't wait for it)
             try:
                 verbose_test_cmd = [
@@ -658,9 +645,7 @@ class Harness:
             if not trial_handler.task.run_tests_in_same_shell:
                 session = terminal.create_session(
                     "tests"
-                )
-            else:
-                self._logger.debug(f"Using same shell for tests in task {trial_handler.task_id}")
+                )   
             
             test_failure_mode = self._run_tests(
                 terminal=terminal,
