@@ -91,6 +91,7 @@ class MacroAgent(BaseAgent):
         task_description: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
+        task_name: str | None = None,
     ) -> AgentResult:
         session.copy_to_container(
             self._install_agent_script,

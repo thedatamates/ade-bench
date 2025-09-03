@@ -258,7 +258,7 @@ class Harness:
             time.sleep(2)
 
             # Log that test script is starting to run
-            log_harness_info(self._logger, trial_handler.task_id, "eval", "Starting test script execution")
+            log_harness_info(self._logger, trial_handler.task_id, "eval", "Executing test script")
 
             session.send_keys(
                 [

@@ -65,5 +65,6 @@ class BaseAgent(ABC, metaclass=RequireNameMeta):
         task_description: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
+        task_name: str | None = None,
     ) -> AgentResult:
         raise NotImplementedError("Agents must implement this method.")

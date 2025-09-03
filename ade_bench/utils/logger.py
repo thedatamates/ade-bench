@@ -32,13 +32,14 @@ def log_harness_info(
     # Map certain messages to transformed versions for consistent logging
     # The delimiters ||| is used to split messages with custom logging
     message_transforms = {
-        "Running setup script": "* ◦ ◦  Running setup script...",
-        "Setup script completed": "✓ ◦ ◦  Setup script completed.",
-        "Starting agent": "✓ * ◦  Starting agent...",
-        "Calling agent:": "✓ * ◦  Calling agent:",
-        "Agent returned response": "✓ * ◦  Agent returned response...",
-        "Agent response:": "✓ ✓ ◦  Agent response:",
-        "Starting test script execution": "✓ ✓ *  Starting test script execution...",
+        "Running setup script": "* · ·  Running setup script...",
+        "Setup script completed": "✓ · ·  Setup script completed.",
+        "Starting agent": "✓ * ·  Starting agent...",
+        "Calling agent:": "✓ * ·  Calling agent:",
+        "Agent returned response": "✓ * ·  Agent returned response...",
+        "Agent response:": "✓ ✓ ·  Agent response:",
+        "Generating solution tests": "✓ ✓ *  Generating solution tests...",
+        "Executing test script": "✓ ✓ *  Executing test script...",
         "dbt test summary:": "✓ ✓ ✓  dbt test summary:",
     }
 

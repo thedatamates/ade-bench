@@ -73,6 +73,7 @@ class OracleAgent(BaseAgent):
         task_description: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
+        task_name: str | None = None,
     ) -> AgentResult:
         solution = self._solution_dict[task_description]
 
