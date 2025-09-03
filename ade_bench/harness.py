@@ -185,25 +185,13 @@ class Harness:
             self._generate_solution_tests(trial_handler)
         
         # Copy test-related files
-        files_to_copy = [
-            trial_handler.post_agent_pane_path,
-            trial_handler.run_tests_path,
-            trial_handler.test_dir,
-            *trial_handler.task.test_script_paths,
-        ]
-        
-        # Check if any of these files/directories have changed since agent execution
-        for file_path in files_to_copy:
-            if file_path.exists():
-                if file_path.is_file():
-                    stat = file_path.stat()
-                    self._logger.debug(f"File {file_path.name}: size={stat.st_size}, mtime={stat.st_mtime}")
-                elif file_path.is_dir():
-                    file_count = len(list(file_path.rglob('*')))
-                    self._logger.debug(f"Directory {file_path.name}: contains {file_count} files")
-        
         terminal.copy_to_container(
-            paths=files_to_copy,
+            paths=[
+                trial_handler.post_agent_pane_path,
+                trial_handler.run_tests_path,
+                trial_handler.test_dir,
+                *trial_handler.task.test_script_paths,
+            ],
             container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
         )
         
@@ -613,8 +601,8 @@ class Harness:
             if not trial_handler.task.run_tests_in_same_shell:
                 session = terminal.create_session(
                     "tests"
-                )   
-            
+                )
+
             test_failure_mode = self._run_tests(
                 terminal=terminal,
                 session=session,
