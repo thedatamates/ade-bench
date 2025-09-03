@@ -233,7 +233,6 @@ class Harness:
                 verbose_test_cmd = [
                     "bash", "-x", str(DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name)
                 ]
-                self._logger.debug(f"Verbose test command: {verbose_test_cmd}")
                 
                 # Run it in background to see if it produces any output
                 bg_result = session.container.exec_run(verbose_test_cmd, detach=True)
@@ -241,10 +240,6 @@ class Harness:
                 # Wait a moment to see if it produces output
                 import time
                 time.sleep(2)
-                
-                # Check if there are any processes running
-                ps_result = session.container.exec_run(["ps", "aux"])
-                self._logger.debug(f"Processes after background test: {ps_result.output.decode()}")
                 
             except Exception as e:
                 self._logger.debug(f"Background test execution failed: {e}")
