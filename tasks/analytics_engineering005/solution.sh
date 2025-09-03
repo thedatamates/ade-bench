@@ -45,6 +45,3 @@ SELECT
 FROM unique_source
 WHERE row_number = 1
 EOF
-
-# Run dbt to create the models
-dbt run --select fact_inventory

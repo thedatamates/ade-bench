@@ -131,6 +131,3 @@ ON p.product_id = i.product_id
 SELECT *
 FROM source
 EOF
-
-# Run dbt to create the models
-dbt run --select dim_products fact_inventory obt_product_inventory 

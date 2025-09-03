@@ -20,10 +20,9 @@ timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
-# Optional test setup script to run before dbt tests
+# Test setup script to run before dbt tests
 test_setup: |-
   dbt run --select obt_product_inventory
-
 
 # Tables to compare for solution
 solution_seeds:
