@@ -238,38 +238,6 @@ class Harness:
             ),
             "Enter",
         ]
-        
-        # Check what's in the container before running tests
-        try:
-            # List contents of test directory with detailed info
-            ls_result = session.container.exec_run([
-                "ls", "-la", str(DockerComposeManager.CONTAINER_TEST_DIR)
-            ])
-            self._logger.debug(f"Container test directory contents: {ls_result.output.decode()}")
-            
-            # Show file sizes to identify what's different
-            du_result = session.container.exec_run([
-                "du", "-sh", str(DockerComposeManager.CONTAINER_TEST_DIR) + "/*"
-            ])
-            if du_result.exit_code == 0:
-                self._logger.debug(f"File sizes in test directory:\n{du_result.output.decode()}")
-            else:
-                self._logger.debug(f"Could not get file sizes: {du_result.output.decode()}")
-            
-            # Check if the test script exists and is executable
-            test_script_path = str(DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name)
-            stat_result = session.container.exec_run(["ls", "-la", test_script_path])
-            self._logger.debug(f"Test script status: {stat_result.output.decode()}")
-            
-            # Check script content
-            cat_result = session.container.exec_run(["cat", test_script_path])
-            if cat_result.exit_code == 0:
-                self._logger.debug(f"Test script content:\n{cat_result.output.decode()}")
-            else:
-                self._logger.warning(f"Failed to read test script: {cat_result.output.decode()}")
-                
-        except Exception as e:
-            self._logger.warning(f"Failed to inspect test environment: {e}")
 
         try:
             # Try to run the script with bash -x for verbose output (but don't wait for it)
