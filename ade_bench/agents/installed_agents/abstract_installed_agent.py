@@ -113,6 +113,19 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         # Try to extract just the JSON part from the output
         parsed_metrics = self._parse_agent_output(output)
 
+        # Log the agent response metrics if we have a task name
+        if parsed_metrics:
+            log_harness_info(
+                logger,
+                task_name,
+                "agent",
+                f"Agent response:|||Runtime: {parsed_metrics.get('runtime_ms', 0)}ms, "
+                f"Input tokens: {parsed_metrics.get('total_input_tokens', 0)}, "
+                f"Output tokens: {parsed_metrics.get('total_output_tokens', 0)}, "
+                f"Cost: ${parsed_metrics.get('cost_usd', 0.0):.6f}, "
+                f"SUCCESS: {parsed_metrics.get('success', False)}"
+            )
+
         return AgentResult(
             total_input_tokens=parsed_metrics["total_input_tokens"],
             total_output_tokens=parsed_metrics["total_output_tokens"],

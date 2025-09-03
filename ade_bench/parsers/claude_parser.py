@@ -3,8 +3,6 @@ import re
 from typing import Dict, Any
 
 from ade_bench.parsers.base_parser import BaseParser, UnitTestStatus
-from ade_bench.utils.logger import log_harness_info
-
 
 class ClaudeParser(BaseParser):
     """Parser for Claude agent responses to extract runtime, token usage, and cost metrics."""
@@ -56,11 +54,11 @@ class ClaudeParser(BaseParser):
                         continue
 
             # If we can't parse JSON, return default values
-            log_harness_info(self._logger, self._task_name, "eval", "Could not find parsable JSON response")
+            self._logger.error("Could not find parsable JSON response")
             return default_return
             
         except Exception as e:
-            log_harness_info(self._logger, self._task_name, "eval", f"Error parsing Claude response: {e}")
+            self._logger.error(f"Error parsing Claude response: {e}")
             return default_return
     
     def _parse_json_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -82,13 +80,6 @@ class ClaudeParser(BaseParser):
         
         # Determine success
         success = data.get("is_error", True) == False
-        
-        log_harness_info(
-            self._logger,
-            self._task_name,
-            "agent",
-            f"Agent response:|||Runtime: {runtime_ms}ms, Input tokens: {total_input_tokens}, Output tokens: {total_output_tokens}, Cost: ${cost_usd:.6f}, SUCCESS: {success}"
-        )
         
         return {
             "runtime_ms": runtime_ms,
