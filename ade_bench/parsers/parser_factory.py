@@ -4,12 +4,14 @@ from ade_bench.parsers.base_parser import BaseParser
 from ade_bench.parsers.pytest_parser import PytestParser
 from ade_bench.parsers.dbt_parser import DbtParser
 from ade_bench.parsers.claude_parser import ClaudeParser
+from ade_bench.parsers.macro_parser import MacroParser
 
 
 class ParserName(Enum):
     PYTEST = "pytest"
     DBT = "dbt"
     CLAUDE = "claude"
+    MACRO = "macro"
 
 
 class ParserFactory:
@@ -17,6 +19,7 @@ class ParserFactory:
         ParserName.PYTEST: PytestParser,
         ParserName.DBT: DbtParser,
         ParserName.CLAUDE: ClaudeParser,
+        ParserName.MACRO: MacroParser,
     }
 
     @staticmethod

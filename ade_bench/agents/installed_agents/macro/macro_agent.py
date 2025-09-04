@@ -9,7 +9,7 @@ from ade_bench.agents.base_agent import AgentResult, BaseAgent
 from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.logger import logger
 from ade_bench.harness_models import TerminalCommand
-
+from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 
 class MacroAgent(BaseAgent):
     NAME = AgentName.MACRO
@@ -78,7 +78,7 @@ class MacroAgent(BaseAgent):
         escaped_description = shlex.quote(task_description)
         return [
             TerminalCommand(
-                command=f"macro -p {escaped_description}",
+                command=f"macro -p {escaped_description} -e {self.LOG_DIR}/{self.LOG_FILENAME} --output-format=json",
                 min_timeout_sec=0.0,
                 max_timeout_sec=float("inf"),
                 block=True,
@@ -99,7 +99,8 @@ class MacroAgent(BaseAgent):
             container_filename="install-agent.sh",
         )
 
-        session.container.__format__
+        # Create logs directory
+        session.container.exec_run(["mkdir", "-p", self.LOG_DIR])
 
         # Execute outside the session to avoid exposing the env variables.
         env_setup_content = self._create_env_setup_file()
@@ -136,10 +137,21 @@ class MacroAgent(BaseAgent):
         for command in run_agent_commands:
             session.send_command(command)
 
+        # Capture the output from the session to extract metrics
+        pane_output = session.capture_pane(capture_entire=True)
+
+        # Parse the output to extract metrics using MacroParser
+        parser = ParserFactory.get_parser(ParserName.MACRO, task_name=task_name or "macro")
+        metrics = parser.parse(pane_output)
+
+        logger.info(f"Extracted metrics from Macro output: {metrics}")
+
         if logging_dir is not None:
             self._copy_log_file_from_container(session, logging_dir)
 
         return AgentResult(
-            total_input_tokens=0,
-            total_output_tokens=0,
+            total_input_tokens=metrics["total_input_tokens"],
+            total_output_tokens=metrics["total_output_tokens"],
+            cost_usd=metrics["cost_usd"],
+            runtime_ms=metrics["runtime_ms"],
         )
