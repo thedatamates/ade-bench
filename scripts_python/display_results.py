@@ -7,7 +7,7 @@ def display_detailed_results(results: BenchmarkResults) -> None:
     
     # Create detailed summary table
     table_data = []
-    headers = ["Task", "Result", "Tests", "Passed", "Passed %", "Time (s)", "Cost", "Input Tokens", "Output Tokens"]
+    headers = ["Task", "Result", "Tests", "Passed", "Passed %", "Time (s)", "Cost", "Input Tokens", "Output Tokens", "Cache Tokens", "Turns"]
     
     total_tests = 0
     total_tests_passed = 0
@@ -15,6 +15,8 @@ def display_detailed_results(results: BenchmarkResults) -> None:
     total_cost = 0.0
     total_input_tokens = 0
     total_output_tokens = 0
+    total_cache_tokens = 0
+    total_turns = 0
     resolved_count = 0
     
     for result in sorted(results.results, key=lambda x: x.task_id):
@@ -33,8 +35,10 @@ def display_detailed_results(results: BenchmarkResults) -> None:
         total_tests_passed += tests_passed
         total_runtime += result.runtime_ms or 0
         total_cost += result.cost_usd or 0.0
-        total_input_tokens += result.total_input_tokens or 0
-        total_output_tokens += result.total_output_tokens or 0
+        total_input_tokens += result.input_tokens or 0
+        total_output_tokens += result.output_tokens or 0
+        total_cache_tokens += result.cache_tokens or 0
+        total_turns += result.num_turns or 0
         if result.is_resolved:
             resolved_count += 1
         
@@ -43,8 +47,10 @@ def display_detailed_results(results: BenchmarkResults) -> None:
         runtime_seconds = (result.runtime_ms / 1000) if result.runtime_ms else 0
         runtime_str = f"{runtime_seconds:.0f}"
         cost_str = f"${result.cost_usd:.2f}" if result.cost_usd else "$0.00"
-        input_tokens_str = f"{result.total_input_tokens:,}" if result.total_input_tokens else "0"
-        output_tokens_str = f"{result.total_output_tokens:,}" if result.total_output_tokens else "0"
+        input_tokens_str = f"{result.input_tokens:,}" if result.input_tokens else "0"
+        output_tokens_str = f"{result.output_tokens:,}" if result.output_tokens else "0"
+        cache_tokens_str = f"{result.cache_tokens:,}" if result.cache_tokens else "0"
+        turns_str = f"{result.num_turns:,}" if result.num_turns else "0"
         
         # Format percentage - show nothing if 100%
         percentage_str = "" if passed_percentage == 100.0 else f"{passed_percentage:.0f}%"
@@ -58,7 +64,9 @@ def display_detailed_results(results: BenchmarkResults) -> None:
             runtime_str,
             cost_str,
             input_tokens_str,
-            output_tokens_str
+            output_tokens_str,
+            cache_tokens_str,
+            turns_str
         ])
     
     # Add blank row as divider
@@ -78,7 +86,9 @@ def display_detailed_results(results: BenchmarkResults) -> None:
         f"{total_runtime_seconds:.0f}",
         f"${total_cost:.2f}",
         f"{total_input_tokens:,}",
-        f"{total_output_tokens:,}"
+        f"{total_output_tokens:,}",
+        f"{total_cache_tokens:,}",
+        f"{total_turns:,}"
     ])
 
     print("\n" + tabulate(table_data, headers=headers, tablefmt="psql"))

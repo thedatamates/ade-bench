@@ -150,8 +150,10 @@ class MacroAgent(BaseAgent):
             self._copy_log_file_from_container(session, logging_dir)
 
         return AgentResult(
-            total_input_tokens=metrics["total_input_tokens"],
-            total_output_tokens=metrics["total_output_tokens"],
+            input_tokens=metrics["input_tokens"],
+            output_tokens=metrics["output_tokens"],
+            cache_tokens=metrics["cache_tokens"],
+            num_turns=metrics["num_turns"],
             cost_usd=metrics["cost_usd"],
             runtime_ms=metrics["runtime_ms"],
         )

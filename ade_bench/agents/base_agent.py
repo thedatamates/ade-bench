@@ -18,13 +18,22 @@ class RequireNameMeta(type(ABC)):
 
 
 class AgentResult(BaseModel):
-    total_input_tokens: int = Field(
-        description="The total number of input tokens used by the agent to "
+    input_tokens: int = Field(
+        description="The number of input tokens used by the agent to "
         "complete the task."
     )
-    total_output_tokens: int = Field(
-        description="The total number of output tokens used by the agent to "
+    output_tokens: int = Field(
+        description="The number of output tokens used by the agent to "
         "complete the task."
+    )
+    cache_tokens: int = Field(
+        default=0,
+        description="The number of cache tokens used by the agent to "
+        "complete the task."
+    )
+    num_turns: int = Field(
+        default=0,
+        description="The number of turns in the conversation."
     )
     runtime_ms: int = Field(
         default=0,

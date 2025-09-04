@@ -101,7 +101,9 @@ class OracleAgent(BaseAgent):
                 session.send_command(command)
 
         return AgentResult(
-            total_input_tokens=0,
-            total_output_tokens=0,
+            input_tokens=0,
+            output_tokens=0,
+            cache_tokens=0,
+            num_turns=0,
             failure_mode=FailureMode.NONE,
         )

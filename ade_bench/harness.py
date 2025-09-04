@@ -609,8 +609,10 @@ class Harness:
                 results.failure_mode = agent_failure_mode
 
             if agent_result is not None:
-                results.total_input_tokens = agent_result.total_input_tokens
-                results.total_output_tokens = agent_result.total_output_tokens
+                results.input_tokens = agent_result.input_tokens
+                results.output_tokens = agent_result.output_tokens
+                results.cache_tokens = agent_result.cache_tokens
+                results.num_turns = agent_result.num_turns
                 results.runtime_ms = agent_result.runtime_ms
                 results.cost_usd = agent_result.cost_usd
 

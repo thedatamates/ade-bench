@@ -57,8 +57,10 @@ class TrialResults(BaseModel):
     is_resolved: bool | None = None
     failure_mode: FailureMode = FailureMode.UNSET
     parser_results: dict[str, UnitTestStatus] | None = None
-    total_input_tokens: int | None = None
-    total_output_tokens: int | None = None
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    cache_tokens: int | None = None
+    num_turns: int | None = None
     runtime_ms: int | None = None
     cost_usd: float | None = None
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()))

@@ -120,15 +120,19 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 task_name,
                 "agent",
                 f"Agent response:|||Runtime: {parsed_metrics.get('runtime_ms', 0)/1000}s, "
-                f"Input tokens: {parsed_metrics.get('total_input_tokens', 0)}, "
-                f"Output tokens: {parsed_metrics.get('total_output_tokens', 0)}, "
                 f"Cost: ${parsed_metrics.get('cost_usd', 0.0):.4f}, "
+                f"Turns: {parsed_metrics.get('num_turns', 0)}, "
+                f"Tokens: in-{parsed_metrics.get('input_tokens', 0)} "
+                f"out-{parsed_metrics.get('output_tokens', 0)} "
+                f"cache-{parsed_metrics.get('cache_tokens', 0)}, "
                 f"SUCCESS: {parsed_metrics.get('success', False)}"
             )
 
         return AgentResult(
-            total_input_tokens=parsed_metrics["total_input_tokens"],
-            total_output_tokens=parsed_metrics["total_output_tokens"],
+            input_tokens=parsed_metrics["input_tokens"],
+            output_tokens=parsed_metrics["output_tokens"],
+            cache_tokens=parsed_metrics["cache_tokens"],
+            num_turns=parsed_metrics["num_turns"],
             runtime_ms=parsed_metrics["runtime_ms"],
             cost_usd=parsed_metrics["cost_usd"],
         )
@@ -137,8 +141,10 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         """Parse the agent output to extract metrics. Override in subclasses if needed."""
         # Default implementation returns 0 values
         return {
-            "total_input_tokens": 0,
-            "total_output_tokens": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_tokens": 0,
+            "num_turns": 0,
             "runtime_ms": 0,
             "cost_usd": 0.0,
         }
