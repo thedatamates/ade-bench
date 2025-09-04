@@ -119,10 +119,10 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 logger,
                 task_name,
                 "agent",
-                f"Agent response:|||Runtime: {parsed_metrics.get('runtime_ms', 0)}ms, "
+                f"Agent response:|||Runtime: {parsed_metrics.get('runtime_ms', 0)/1000}s, "
                 f"Input tokens: {parsed_metrics.get('total_input_tokens', 0)}, "
                 f"Output tokens: {parsed_metrics.get('total_output_tokens', 0)}, "
-                f"Cost: ${parsed_metrics.get('cost_usd', 0.0):.6f}, "
+                f"Cost: ${parsed_metrics.get('cost_usd', 0.0):.4f}, "
                 f"SUCCESS: {parsed_metrics.get('success', False)}"
             )
 

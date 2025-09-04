@@ -1043,11 +1043,12 @@ class Harness:
 
                 # Log progress update
                 successful_tasks = sum(1 for result in results.results if result.is_resolved)
+                percentage = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
                 log_harness_info(
                     self._logger,
                     "HARNESS",
                     "progress",
-                    f"Run {completed_tasks} of {total_tasks} tasks, {successful_tasks} successful"
+                    f"Run {completed_tasks} of {total_tasks} tasks, {successful_tasks} successful ({percentage:.1f}%)"
                 )
 
         return results
