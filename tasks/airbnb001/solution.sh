@@ -12,6 +12,3 @@ fi
 "${SED_CMD[@]}" 's/surrogate_key/generate_surrogate_key/g' models/agg/monthly_agg_reviews.sql
 "${SED_CMD[@]}" 's/surrogate_key/generate_surrogate_key/g' models/agg/wow_agg_reviews.sql
 "${SED_CMD[@]}" 's/surrogate_key/generate_surrogate_key/g' models/dim/dim_listings_hosts.sql
-
-# Run dbt to create the models
-dbt run

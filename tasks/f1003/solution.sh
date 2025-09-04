@@ -29,6 +29,3 @@ echo " where rank <= 120" >> models/stats/most_races.sql
 file="oldest_race_winners_in_modern_era.sql"
 SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
 cp $SOLUTIONS_DIR/$file models/stats/$file
-
-# Run dbt to create the models
-dbt run

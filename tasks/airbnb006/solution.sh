@@ -11,6 +11,3 @@ fi
 "${SED_CMD[@]}" 's/src_listings_cte/src_hosts_cte/g' models/dim/dim_hosts.sql
 
 dbt deps
-
-# Run dbt to create the models
-dbt run --select fct_reviews dim_hosts

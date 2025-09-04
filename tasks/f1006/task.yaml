@@ -6,10 +6,10 @@ notes: |-
 descriptions:
   - key: base
     description: |-
-      Someone noticed that the "points" columns in constructor_points.sql and driver_points.sql look way too high. Can you figure out what's wrong and fix it?
+      Someone noticed that the "points" columns in constructor_points.sql and driver_points.sql look way too high. Can you figure out what's wrong, fix it, and update the table?
   - key: hard
     description: |-
-      Someone noticed that the results in constructor_points.sql and driver_points.sql look wrong. Can you figure out what's wrong and fix it?
+      Someone noticed that the results in constructor_points.sql and driver_points.sql look wrong. Can you figure out what's wrong, fix it, and update the table?
 author_name: test
 author_email: test
 difficulty: hard

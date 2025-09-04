@@ -36,6 +36,3 @@ cp $SOLUTIONS_DIR/int_quickbooks__sales_union.sql models/intermediate/int_quickb
 
 ## Not in intermediate directory
 cp $SOLUTIONS_DIR/quickbooks__ap_ar_enhanced.sql models/quickbooks__ap_ar_enhanced.sql
-
-
-dbt run

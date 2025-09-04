@@ -6,7 +6,7 @@ notes: |-
 descriptions:
   - key: base
     description: |-
-      This project is erroring out and needs to be fixed.
+      This project is erroring out and needs to be fixed. Fix the issue and update the tables.
 author_name: test
 author_email: test
 difficulty: easy

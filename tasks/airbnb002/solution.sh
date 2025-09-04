@@ -19,6 +19,3 @@ cat <<EOF >> dbt_project.yml
 vars:
   surrogate_key_treat_nulls_as_empty_strings: true
 EOF
-
-# Run dbt to create the models
-dbt run

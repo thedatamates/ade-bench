@@ -35,5 +35,3 @@ for file in "${files[@]}"; do
   cp $SOLUTIONS_DIR/$file dbt_packages/asana_source/models/$file
   cat dbt_packages/asana_source/models/$file
 done
-
-dbt run

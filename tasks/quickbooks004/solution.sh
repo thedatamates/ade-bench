@@ -52,5 +52,3 @@ done
 
 cp $SOLUTIONS_DIR/$ap_ar models/$ap_ar
 cp $SOLUTIONS_DIR/$dbt_yml $dbt_yml
-
-dbt run

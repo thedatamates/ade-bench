@@ -40,6 +40,10 @@ timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
+# Test setup script to run before dbt tests
+test_setup: |-
+  dbt run --select intercom__threads intercom__conversation_metrics
+
 # Tables to compare for solution
 solution_seeds:
   - table_name: intercom__conversation_metrics

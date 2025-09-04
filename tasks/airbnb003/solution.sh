@@ -35,6 +35,3 @@ cat <<EOF | cat - models/source/src_reviews.sql > tmp && mv tmp models/source/sr
 }}
 
 EOF
-
-# Run dbt to create the models
-dbt run --select src_hosts src_listings src_reviews

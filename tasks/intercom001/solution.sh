@@ -43,6 +43,3 @@ from final
 EOF
 
 dbt deps
-
-# Run dbt to create the models
-dbt run --select intercom__threads

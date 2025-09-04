@@ -82,5 +82,3 @@ sources:
       - name: seasons
       - name: status
 EOF
-# Run dbt to create the models
-dbt run

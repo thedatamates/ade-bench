@@ -6,13 +6,13 @@ notes: |-
 descriptions:
   - key: base
     description: |-
-      Something is wrong with the staging results table, where it's missing a lot of rows. Can you figure out why and fix it?
+      Something is wrong with the staging results table, where it's missing a lot of rows. Can you figure out why, fix it, and update the table?
   - key: medium
     description: |-
-      The driver_wins_by_season table is suddenly empty. Can you figure out why and fix it?
+      The driver_wins_by_season table is suddenly empty. Can you figure out why, fix it, and update the table?
   - key: hard
     description: |-
-      A lot of stats models are showing very different values and everything things broken. Can you figure out why and fix it?
+      A lot of stats models are showing very different values and everything things broken. Can you figure out why, fix it, and update the tables?
 author_name: test
 author_email: test
 difficulty: medium

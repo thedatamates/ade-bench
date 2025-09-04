@@ -4,7 +4,7 @@ title: Create two models for intercom threads and conversation metrics.
 descriptions:
   - key: base
     description: |-
-      Create two model - one called intercom__threads and one called intercom__conversation_metrics. The threads model should aggregate the conversation_parts by conversation_id, and the metrics model should add additional metrics.
+      Create two models - one called intercom__threads and one called intercom__conversation_metrics. The threads model should aggregate the conversation_parts by conversation_id, and the metrics model should add additional metrics.
 
       intercom__threads should include the following columns:
         - conversation_id
@@ -53,6 +53,10 @@ tags:
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
+
+# Test setup script to run before dbt tests
+test_setup: |-
+  dbt run --select intercom__threads intercom__conversation_metrics
 
 # Tables to compare for solution
 solution_seeds:

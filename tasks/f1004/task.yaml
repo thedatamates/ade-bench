@@ -5,7 +5,7 @@ notes: |-
 descriptions:
   - key: base
     description: |-
-      Several columns in the "finishes_by_driver" are showing 0 results for every driver. Can you figure out what's happening and fix it?
+      Several columns in the "finishes_by_driver" are showing 0 results for every driver. Can you figure out what's happening, fix it, and update the table?
 author_name: test
 author_email: test
 difficulty: medium

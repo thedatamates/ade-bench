@@ -12,6 +12,3 @@ SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
 for file in "${files[@]}"; do
   cp $SOLUTIONS_DIR/$file models/stats/$file
 done
-
-# Run dbt to create the models
-dbt run

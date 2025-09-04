@@ -20,6 +20,5 @@ r2="cast( {{ dbt.date_trunc('day', 'cast(transaction_date as date)') }} as date)
 "${SED_CMD[@]}" "s/${f2}/${r2}/g" dbt_packages/quickbooks_source/models/stg_quickbooks__sales_receipt.sql
 "${SED_CMD[@]}" "s/${f2}/${r2}/g" dbt_packages/quickbooks_source/models/stg_quickbooks__refund_receipt.sql
 
-
 # Run dbt to create the models
 dbt run

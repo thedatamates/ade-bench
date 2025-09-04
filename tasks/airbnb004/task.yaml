@@ -6,7 +6,7 @@ notes: |-
 descriptions:
   - key: base
     description: |-
-      Add a primary key to the fct_reviews table. 
+      Add a primary key to the fct_reviews table and update the model.
 author_name: test
 author_email: test
 difficulty: medium

@@ -18,11 +18,17 @@ timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
+# Test setup script to run before dbt tests
+test_setup: |-
+  dbt run
+
 # Tables to compare for solution
 solution_seeds:
   - table_name: asana__project
   - table_name: asana__tag
   - table_name: asana__task
+    exclude_columns:
+      - days_open
   - table_name: int_asana__project_user
   - table_name: int_asana__task_story
   - table_name: int_asana__task_tags

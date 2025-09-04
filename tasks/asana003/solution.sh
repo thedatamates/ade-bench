@@ -24,6 +24,3 @@ conn.close()
 "
 # Clean up the SQL file
 rm update_task_data_type.sql
-
-dbt deps
-dbt run

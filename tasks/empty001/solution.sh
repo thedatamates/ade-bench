@@ -46,8 +46,3 @@ SELECT
     get_current_timestamp() AS ingestion_timestamp
 FROM source
 EOF
-
-
-
-# Run dbt to create the models
-dbt run --select stg_customer
