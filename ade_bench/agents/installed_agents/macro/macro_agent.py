@@ -25,8 +25,11 @@ class MacroAgent(BaseAgent):
 
     @property
     def _install_agent_script(self) -> Path:
+        # Check if we should use custom binary
+        if os.environ.get("MACRO_BINARY_PATH"):
+            return Path(__file__).parent / "macro-setup-local.sh"
         return Path(__file__).parent / "macro-setup.sh"
-    
+
     def _create_env_setup_file(self) -> str:
         return "\n".join(
             [f"export {key}='{value}'" for key, value in self._env.items()]
@@ -40,18 +43,18 @@ class MacroAgent(BaseAgent):
             if result.exit_code != 0:
                 logger.warning("Failed to get working directory from container")
                 return
-            
+
             log_file_path = f"{self.LOG_DIR}/{self.LOG_FILENAME}"
-            
+
             # Check if the log file exists
             result = session.container.exec_run(["test", "-f", log_file_path])
             if result.exit_code != 0:
                 logger.warning(f"Log file {log_file_path} not found in container")
                 return
-            
+
             # Get the file from the container as a tar archive
             archive_data, _ = session.container.get_archive(log_file_path)
-            
+
             # Extract the file contents from the tar archive
             archive_stream = io.BytesIO(b"".join(archive_data))
             with tarfile.open(fileobj=archive_stream, mode="r") as tar:
@@ -62,14 +65,14 @@ class MacroAgent(BaseAgent):
                     logger.warning("Failed to extract log file from tar archive")
                     return
                 file_content = extracted_file.read()
-            
+
             # Write to the logging directory
             output_file_path = logging_dir / self.LOG_FILENAME
             with open(output_file_path, "wb") as f:
                 f.write(file_content)
-            
+
             logger.info(f"Successfully copied log file to {output_file_path}")
-            
+
         except Exception as e:
             # Log the error but don't fail the entire task
             logger.warning(f"Failed to copy log file from container: {e}")
@@ -98,6 +101,22 @@ class MacroAgent(BaseAgent):
             container_dir="/installed-agent",
             container_filename="install-agent.sh",
         )
+
+        # Copy custom macro binary if specified
+        macro_binary_path = os.environ.get("MACRO_BINARY_PATH")
+        if macro_binary_path:
+            binary_path = Path(macro_binary_path)
+            if not binary_path.exists():
+                error_msg = f"MACRO_BINARY_PATH is set but file does not exist: {macro_binary_path}"
+                logger.error(error_msg)
+                raise FileNotFoundError(error_msg)
+
+            logger.info(f"Using custom macro binary from {macro_binary_path}")
+            session.copy_to_container(
+                binary_path,
+                container_dir="/installed-agent",
+                container_filename="macro",
+            )
 
         # Create logs directory
         session.container.exec_run(["mkdir", "-p", self.LOG_DIR])
