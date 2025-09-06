@@ -6,11 +6,11 @@ from ade_bench.parsers.base_parser import BaseParser, UnitTestStatus
 
 class MacroParser(BaseParser):
     """Parser for Macro agent responses to extract token usage and cost metrics."""
-    
+
     def parse(self, content: str) -> Dict[str, Any]:
         """
         Parse Macro agent response to extract metrics.
-        
+
         Returns a dictionary with the following keys:
         - runtime_ms: Currently set to 0 as not provided in Macro output
         - input_tokens: input_tokens
@@ -39,7 +39,7 @@ class MacroParser(BaseParser):
             for line in lines:
                 if line.startswith('{') and line.endswith('}'):
                     lines_to_try.append(line)
-            
+
             # Add lines from bottom up if no obvious JSON objects found
             if not lines_to_try:
                 lines_to_try.extend(reversed(lines))
@@ -61,31 +61,31 @@ class MacroParser(BaseParser):
             # If we can't parse JSON, return default values
             self._logger.error("Could not find parsable JSON response")
             return default_return
-            
+
         except Exception as e:
             self._logger.error(f"Error parsing Macro response: {e}")
             return default_return
-    
+
     def _parse_json_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Parse the JSON response data to extract metrics."""
         # Runtime is not provided in Macro output, so set to 0
-        runtime_ms = 0
-        
+        runtime_ms = data.get("duration_ms", 0)
+
         # Extract token usage
         usage = data.get("usage", {})
         input_tokens = usage.get("input_tokens", 0)
         output_tokens = usage.get("output_tokens", 0)
-        
+
         # Cache tokens and num_turns are not provided in Macro output, so set to 0
         cache_tokens = 0
-        num_turns = 0
-        
+        num_turns = data.get("num_turns", 0)
+
         # Extract cost
         cost_usd = data.get("total_cost", 0.0)
-        
+
         # Determine success
         success = data.get("is_error", True) == False
-        
+
         return {
             "runtime_ms": runtime_ms,
             "input_tokens": input_tokens,
