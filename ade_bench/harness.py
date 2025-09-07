@@ -370,6 +370,7 @@ class Harness:
                     task_name=task_name,
                 )
             )
+
             if result is None:
                 return None, FailureMode.UNKNOWN_AGENT_ERROR
 
@@ -411,21 +412,25 @@ class Harness:
             )
             return None, FailureMode.UNKNOWN_AGENT_ERROR
 
-        return result, FailureMode.NONE
+        return None, FailureMode.NONE
 
     def _run_setup_script(
         self,
         terminal: Terminal,
         session: TmuxSession,
         trial_handler: TrialHandler,
-    ) -> None:
-        """Run setup.sh script if it exists in the task directory."""
+    ) -> FailureMode:
+        """Run setup.sh script if it exists in the task directory.
+
+        Returns:
+            FailureMode indicating success or type of failure
+        """
         setup_script_path = trial_handler.input_path / "setup.sh"
         setup_dir_path = trial_handler.input_path / "setup"
 
         if not setup_script_path.exists():
             self._logger.debug(f"No setup script found at {setup_script_path}")
-            return
+            return FailureMode.NONE
 
         log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
 
@@ -458,43 +463,51 @@ class Harness:
             self._logger.warning(
                 f"Setup script timed out for task {trial_handler.task_id}"
             )
-            # Send Ctrl+C to interrupt the setup script instead of killing session
-            # This allows us to still clean up afterwards
+            # Kill the session to stop the setup script
             try:
-                session.send_keys(["C-c"], block=False)
-                time.sleep(1)  # Give it a moment to interrupt
-                self._logger.info(f"Interrupted setup script for timed-out task {trial_handler.task_id}")
+                session.kill_session()
+                self._logger.info(f"Killed setup session for timed-out task {trial_handler.task_id}")
             except Exception as e:
-                self._logger.error(f"Failed to interrupt setup script: {e}")
+                self._logger.error(f"Failed to kill session after setup timeout: {e}")
+
+            # Don't try to cleanup after killing session - it will fail
+            return FailureMode.SETUP_TIMEOUT
 
         except Exception as e:
             self._logger.error(
                 f"Error running setup script for task {trial_handler.task_id}: {e}"
             )
-        finally:
-            # Always try to clean up, even if setup timed out (it may have partially executed)
-            # Clean up: remove the setup script and setup directory from container
-            try:
-                cleanup_commands = ["rm -f /app/setup.sh"]
-                if setup_dir_path.exists():
-                    cleanup_commands.append("rm -rf /app/setup")
+            # Still try cleanup for non-timeout errors
+            self._cleanup_setup_files(session, setup_dir_path, trial_handler)
+            return FailureMode.UNKNOWN
 
-                for command in cleanup_commands:
-                    session.send_keys(
-                        [command, "Enter"],
-                        max_timeout_sec=terminal_bench_config.cleanup_timeout_sec,
-                        block=True,
-                    )
-                self._logger.debug("Setup files cleaned up from container")
-            except TimeoutError:
-                self._logger.warning(f"Cleanup timed out for task {trial_handler.task_id}, skipping")
-                # If cleanup times out, kill the session to prevent hanging
-                try:
-                    session.kill_session()
-                except:
-                    pass
-            except Exception as cleanup_error:
-                self._logger.warning(f"Failed to cleanup setup files: {cleanup_error}")
+        # Normal completion - do cleanup
+        self._cleanup_setup_files(session, setup_dir_path, trial_handler)
+        return FailureMode.NONE
+
+    def _cleanup_setup_files(self, session: TmuxSession, setup_dir_path: Path, trial_handler: TrialHandler) -> None:
+        """Clean up setup files from container after setup script runs."""
+        try:
+            cleanup_commands = ["rm -f /app/setup.sh"]
+            if setup_dir_path.exists():
+                cleanup_commands.append("rm -rf /app/setup")
+
+            for command in cleanup_commands:
+                session.send_keys(
+                    [command, "Enter"],
+                    max_timeout_sec=terminal_bench_config.cleanup_timeout_sec,
+                    block=True,
+                )
+            self._logger.debug("Setup files cleaned up from container")
+        except TimeoutError:
+            self._logger.warning(f"Cleanup timed out for task {trial_handler.task_id}, skipping")
+            # If cleanup times out, kill the session to prevent hanging
+            try:
+                session.kill_session()
+            except:
+                pass
+        except Exception as cleanup_error:
+            self._logger.warning(f"Failed to cleanup setup files: {cleanup_error}")
 
     def _run_trial(
         self,
@@ -616,7 +629,17 @@ class Harness:
             )
 
             # Run setup script if it exists
-            self._run_setup_script(terminal, session, trial_handler)
+            setup_failure_mode = self._run_setup_script(terminal, session, trial_handler)
+
+            # If setup failed with timeout, stop the task immediately
+            if setup_failure_mode == FailureMode.SETUP_TIMEOUT:
+                results.failure_mode = setup_failure_mode
+                self._logger.info(f"Task {trial_handler.task_id} halted due to setup timeout")
+                return results
+            elif setup_failure_mode != FailureMode.NONE:
+                results.failure_mode = setup_failure_mode
+                self._logger.warning(f"Setup failed for task {trial_handler.task_id}, halting task")
+                return results
 
             pre_agent_pane = session.capture_pane(capture_entire=True)
             trial_handler.pre_agent_pane_path.write_text(pre_agent_pane)
@@ -635,16 +658,27 @@ class Harness:
             post_agent_pane = session.capture_pane(capture_entire=True)
             trial_handler.post_agent_pane_path.write_text(post_agent_pane)
 
-            # Continue with test execution even after agent timeout
+            # If agent timed out, stop the task immediately (don't run tests)
             if agent_failure_mode == FailureMode.AGENT_TIMEOUT:
                 results.failure_mode = agent_failure_mode
-                self._logger.debug(
-                    f"Agent failed with mode {agent_failure_mode}, continuing"
-                    " with test execution"
-                )
+                self._logger.info(f"Task {trial_handler.task_id} halted due to agent timeout")
+                # Session already killed in _run_agent, but try again to be safe
+                try:
+                    session.kill_session()
+                except Exception as e:
+                    self._logger.debug(f"Session already killed or error during cleanup: {e}")
+                return results
 
             elif agent_failure_mode != FailureMode.NONE:
+                # Any other agent failure should also halt the task
                 results.failure_mode = agent_failure_mode
+                self._logger.warning(f"Task {trial_handler.task_id} halted due to agent failure: {agent_failure_mode}")
+                # Kill the session to ensure cleanup
+                try:
+                    session.kill_session()
+                except Exception as e:
+                    self._logger.warning(f"Failed to kill agent session for task {trial_handler.task_id}: {e}")
+                return results
 
             if agent_result is not None:
                 results.input_tokens = agent_result.input_tokens
@@ -785,7 +819,7 @@ class Harness:
         task_seeds_dir.mkdir(parents=True, exist_ok=True)
 
         # Get database type and name
-        db_type = task_config.get('db_type', 'duckdb')
+        # db_type = task_config.get('db_type', 'duckdb')
         db_name = task_config.get('database', {}).get('name', '')
 
         # Use docker cp command to copy database file

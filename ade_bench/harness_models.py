@@ -2,7 +2,7 @@
 import uuid
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 from pathlib import Path
 import yaml
 import numpy as np
@@ -16,8 +16,9 @@ class FailureMode(Enum):
     UNSET = "unset"
     NONE = "none"
     UNKNOWN = "unknown"
-    TEST_TIMEOUT = "test_timeout"
+    SETUP_TIMEOUT = "setup_timeout"
     AGENT_TIMEOUT = "agent_timeout"
+    TEST_TIMEOUT = "test_timeout"
     UNKNOWN_AGENT_ERROR = "unknown_agent_error"
     PARSE_ERROR = "parse_error"
     FATAL_LLM_PARSE_ERROR = "fatal_llm_parse_error"
@@ -148,7 +149,7 @@ class BenchmarkResults(BaseModel):
 
 class DatabaseConfig(BaseModel):
     """Configuration for task database."""
-    
+
     source: str = Field(default="local", pattern="^(local|shared)$")
     name: Optional[str] = None  # For shared databases
     type: Optional[str] = Field(default=None, pattern="^(duckdb|sqlite|postgres)$")
@@ -157,7 +158,7 @@ class DatabaseConfig(BaseModel):
 
 class ProjectConfig(BaseModel):
     """Configuration for task project."""
-    
+
     source: str = Field(default="local", pattern="^(local|shared)$")
     name: Optional[str] = None  # For shared projects
     type: str = Field(default="dbt", pattern="^(dbt|other)$")  # Project type
@@ -165,7 +166,7 @@ class ProjectConfig(BaseModel):
 
 class SolutionSeedConfig(BaseModel):
     """Configuration for a single solution seed."""
-    
+
     table_name: str
     include_columns: Optional[List[str]] = None
     exclude_columns: Optional[List[str]] = None
@@ -173,7 +174,7 @@ class SolutionSeedConfig(BaseModel):
 
 class TaskMetadata(BaseModel):
     """Metadata for a task."""
-    
+
     task_id: str
     title: str
     description: str
