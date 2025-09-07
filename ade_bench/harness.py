@@ -602,6 +602,15 @@ class Harness:
                     else:
                         self._logger.warning(f"Local project not found: {local_project_path}")
 
+            gitignore_path = Path(__file__).parent.parent / "shared" / "defaults" / ".gitignore"
+            if gitignore_path.exists():
+                self._logger.debug("Copying .gitignore to container")
+                terminal.copy_to_container(
+                    paths=gitignore_path,
+                    container_dir="/app",
+                    container_filename=".gitignore"
+                )
+
             session = terminal.create_session(
                 "agent"
             )

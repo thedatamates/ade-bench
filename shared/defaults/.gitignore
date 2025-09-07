@@ -1,0 +1,32 @@
+# dbt specific ignores
+target/
+dbt_internal_packages/
+dbt_packages/
+logs/
+dbt_modules/
+
+# Python
+__pycache__/
+*.pyc
+.Python
+venv/
+.venv/
+
+# Environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+*.log
+.coverage
+htmlcov/
