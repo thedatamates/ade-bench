@@ -7,7 +7,6 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-import os
 import tempfile
 import time
 import boto3
@@ -198,7 +197,7 @@ class Harness:
         # Generate solution tests if needed
         if trial_handler.task.solution_seeds:
             self._generate_solution_tests(trial_handler)
-        
+
         # Copy test-related files
         terminal.copy_to_container(
             paths=[
@@ -209,7 +208,7 @@ class Harness:
             ],
             container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
         )
-        
+
         # Copy seeds directory if it exists
         if trial_handler.seeds_dir.exists():
             terminal.copy_to_container(
@@ -272,13 +271,19 @@ class Harness:
                 block=True,
                 max_timeout_sec=trial_handler.task.max_test_timeout_sec,
             )
-            
+
         except TimeoutError:
             self._logger.warning(
                 "Test command timed out after "
                 f"{trial_handler.task.max_test_timeout_sec}s for task "
                 f"{trial_handler.task_id}."
             )
+            # Kill the session to stop the test
+            try:
+                session.kill_session()
+                self._logger.info(f"Killed test session for timed-out task {trial_handler.task_id}")
+            except Exception as e:
+                self._logger.error(f"Failed to kill session after test timeout: {e}")
 
             return FailureMode.TEST_TIMEOUT
 
@@ -286,23 +291,23 @@ class Harness:
 
     def _generate_solution_tests(self, trial_handler: TrialHandler) -> None:
         """Generate solution tests for tables specified in solution_seeds.
-        
+
         Args:
             trial_handler: The trial handler containing task configuration
         """
         if not trial_handler.task.solution_seeds:
             return
-            
+
         log_harness_info(self._logger, trial_handler.task_id, "eval", f"Generating solution tests")
-        
+
         # Ensure test directory exists
         test_dir = trial_handler.test_dir
         test_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Remove existing AUTO tests
         for auto_test in test_dir.glob("AUTO_*.sql"):
             auto_test.unlink()
-        
+
         # Generate tests for each solution seed
         for config in trial_handler.task.get_solution_seed_configs():
             try:
@@ -376,6 +381,13 @@ class Harness:
                 f"{trial_handler.task.max_agent_timeout_sec}s for task "
                 f"{trial_handler.task_id}."
             )
+            # Kill the session immediately to stop the agent
+            try:
+                session.kill_session()
+                self._logger.info(f"Killed agent session for timed-out task {trial_handler.task_id}")
+            except Exception as e:
+                self._logger.error(f"Failed to kill session after timeout: {e}")
+
             return None, FailureMode.AGENT_TIMEOUT
 
         except RetryError as e:
@@ -410,13 +422,13 @@ class Harness:
         """Run setup.sh script if it exists in the task directory."""
         setup_script_path = trial_handler.input_path / "setup.sh"
         setup_dir_path = trial_handler.input_path / "setup"
-        
+
         if not setup_script_path.exists():
             self._logger.debug(f"No setup script found at {setup_script_path}")
             return
-            
+
         log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
-        
+
         try:
             # Copy setup directory to container if it exists
             if setup_dir_path.exists():
@@ -425,38 +437,48 @@ class Harness:
                     paths=setup_dir_path,
                     container_dir="/app/setup",
                 )
-            
+
             # Copy setup script to container (following oracle agent pattern)
             session.copy_to_container(
                 setup_script_path,
                 container_dir="/app",
                 container_filename="setup.sh",
             )
-            
+
             # Run the setup script (following oracle agent pattern)
             session.send_keys(
                 ["bash /app/setup.sh", "Enter"],
                 max_timeout_sec=terminal_bench_config.setup_timeout_sec,  # Configurable timeout for setup script
                 block=True,
             )
-            
+
             log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script completed")
-            
+
         except TimeoutError:
             self._logger.warning(
                 f"Setup script timed out for task {trial_handler.task_id}"
             )
+            # Send Ctrl+C to interrupt the setup script instead of killing session
+            # This allows us to still clean up afterwards
+            try:
+                session.send_keys(["C-c"], block=False)
+                time.sleep(1)  # Give it a moment to interrupt
+                self._logger.info(f"Interrupted setup script for timed-out task {trial_handler.task_id}")
+            except Exception as e:
+                self._logger.error(f"Failed to interrupt setup script: {e}")
+
         except Exception as e:
             self._logger.error(
                 f"Error running setup script for task {trial_handler.task_id}: {e}"
             )
         finally:
+            # Always try to clean up, even if setup timed out (it may have partially executed)
             # Clean up: remove the setup script and setup directory from container
             try:
                 cleanup_commands = ["rm -f /app/setup.sh"]
                 if setup_dir_path.exists():
                     cleanup_commands.append("rm -rf /app/setup")
-                
+
                 for command in cleanup_commands:
                     session.send_keys(
                         [command, "Enter"],
@@ -464,6 +486,13 @@ class Harness:
                         block=True,
                     )
                 self._logger.debug("Setup files cleaned up from container")
+            except TimeoutError:
+                self._logger.warning(f"Cleanup timed out for task {trial_handler.task_id}, skipping")
+                # If cleanup times out, kill the session to prevent hanging
+                try:
+                    session.kill_session()
+                except:
+                    pass
             except Exception as cleanup_error:
                 self._logger.warning(f"Failed to cleanup setup files: {cleanup_error}")
 
@@ -687,13 +716,13 @@ class Harness:
         try:
             # Use information_schema to get table schema - more robust than DESCRIBE
             schema_query = f"""
-                SELECT column_name, data_type 
-                FROM information_schema.columns 
+                SELECT column_name, data_type
+                FROM information_schema.columns
                 WHERE table_name = '{table_name}'
                 ORDER BY ordinal_position
             """
             schema_result = con.execute(schema_query).fetchall()
-            
+
             columns = []
             for row in schema_result:
                 col_name, col_type = row
@@ -701,7 +730,7 @@ class Harness:
                     "name": col_name,
                     "type": col_type.lower()  # Use DuckDB type directly
                 })
-            
+
             return {
                 "name": f"solution__{table_name}",
                 "columns": columns
@@ -717,14 +746,14 @@ class Harness:
         if not task_yaml_path.exists():
             self._logger.warning(f"task.yaml not found for {trial_handler.task_id}")
             return
-        
+
         import yaml
         with open(task_yaml_path, 'r') as f:
             task_config = yaml.safe_load(f)
-    
+
         # Extract table names from solution_seeds (all items are dictionaries)
         tables_to_extract = []
-        
+
         solution_seeds = task_config.get('solution_seeds', [])
         for item in solution_seeds:
             if isinstance(item, dict):
@@ -741,51 +770,51 @@ class Harness:
             return
 
         log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables: {tables_to_extract}")
-        
+
         # Create output directory
         task_seeds_dir = trial_handler.input_path / "seeds"
         task_seeds_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Get database type and name
         db_type = task_config.get('db_type', 'duckdb')
         db_name = task_config.get('database', {}).get('name', '')
-        
+
         # Use docker cp command to copy database file
         try:
             import tempfile
             import os
             import subprocess
-            
+
             # Create temp directory for database file
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_db_path = os.path.join(temp_dir, f"{db_name}.duckdb")
-                
+
                 # Copy database file from container using docker cp
                 container_name = terminal.container.name
                 db_path = f"/app/{db_name}.duckdb"
-                
+
                 result = subprocess.run([
                     "docker", "cp", f"{container_name}:{db_path}", temp_db_path
                 ], capture_output=True, text=True)
-                
+
                 if result.returncode != 0:
                     self._logger.error(f"Failed to copy database: {result.stderr}")
                     return
-                
+
                 # Extract tables using Python
                 import duckdb
                 con = duckdb.connect(temp_db_path)
-                
+
                 # Collect all schema information
                 all_schemas = []
-                
+
                 for table_name in tables_to_extract:
                     try:
                         # Extract schema
                         schema_info = self._extract_table_schema(con, table_name)
                         if schema_info:
                             all_schemas.append(schema_info)
-                        
+
                         # Extract CSV data using DuckDB's COPY command
                         csv_path = task_seeds_dir / f"solution__{table_name}.csv"
                         copy_query = f"COPY {table_name} TO '{csv_path}' (HEADER, DELIMITER ',');"
@@ -793,41 +822,41 @@ class Harness:
                         log_harness_info(self._logger, trial_handler.task_id, "seed", f"Exported {table_name} to {csv_path}")
                     except Exception as e:
                         self._logger.error(f"Failed to export table {table_name}: {e}")
-                
+
                 # Write schema information to _no-op.txt file
                 # Has to be a txt file because dbt reads yml files as config
                 if all_schemas:
                     no_op_path = task_seeds_dir / "_no-op.txt"
-                    
+
                     # Get project name from task config
                     project_name = task_config.get('project', {}).get('name', 'default')
-                    
+
                     # Create the seeds section in proper YAML format
                     seeds_content = {
                         'seeds': {
                             project_name: {}
                         }
                     }
-                    
+
                     # Add column types for each table
                     for schema in all_schemas:
                         table_name = schema['name']
                         column_types = {}
                         for col in schema['columns']:
                             column_types[col['name']] = col['type']
-                        
+
                         seeds_content['seeds'][project_name][table_name] = {
                             '+column_types': column_types
                         }
-                    
+
                     with open(no_op_path, 'w') as f:
                         f.write('\n\n')  # Add two blank lines at the start
                         yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)
-                    
+
                     log_harness_info(self._logger, trial_handler.task_id, "seed", f"Generated _no-op.txt file: {no_op_path}")
-                
+
                 con.close()
-            
+
         except Exception as e:
             self._logger.error(f"Failed to extract tables for {trial_handler.task_id}: {e}")
 
