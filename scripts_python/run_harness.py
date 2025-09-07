@@ -85,6 +85,7 @@ if __name__ == "__main__":
         "--model-name",
         type=str,
         help="The LLM model to use (e.g., claude-3-5-sonnet-20241022, gpt-4)",
+        default=""
     )
     parser.add_argument(
         "--max-episodes",
@@ -136,6 +137,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Extract specified tables as CSV files after harness run completes",
     )
+    parser.add_argument(
+        "--agent-args",
+        type=str,
+        help="Additional arguments to pass to the agent binary (e.g., '--verbose --debug')",
+        default="",
+    )
     args = parser.parse_args()
 
     agent_kwargs = {}
@@ -143,6 +150,9 @@ if __name__ == "__main__":
     match args.agent:
         case AgentName.ORACLE:
             agent_kwargs["dataset_path"] = args.dataset_path
+        case _:
+            if args.agent_args:
+                agent_kwargs["additional_args"] = args.agent_args
 
     harness = Harness(
         dataset_path=args.dataset_path,

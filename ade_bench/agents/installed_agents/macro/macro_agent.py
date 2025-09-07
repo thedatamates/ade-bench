@@ -16,6 +16,10 @@ class MacroAgent(BaseAgent):
     LOG_FILENAME = "logs.jsonl"
     LOG_DIR = "/var/log/macro-agent"
 
+    def __init__(self, additional_args: str = "", **kwargs):
+        super().__init__(**kwargs)
+        self.additional_args = additional_args
+
 
     @property
     def _env(self) -> dict[str, str]:
@@ -79,9 +83,17 @@ class MacroAgent(BaseAgent):
 
     def _run_agent_commands(self, task_description: str) -> list[TerminalCommand]:
         escaped_description = shlex.quote(task_description)
+        base_command = f"macro -p {escaped_description} -e {self.LOG_DIR}/{self.LOG_FILENAME} --output-format=json"
+
+        if self.additional_args:
+            logger.info(f"Running macro with additional args: {self.additional_args}")
+            command = f"{base_command} {self.additional_args}"
+        else:
+            command = base_command
+
         return [
             TerminalCommand(
-                command=f"macro -p {escaped_description} -e {self.LOG_DIR}/{self.LOG_FILENAME} --output-format=json",
+                command=command,
                 min_timeout_sec=0.0,
                 max_timeout_sec=float("inf"),
                 block=True,
