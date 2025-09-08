@@ -4,7 +4,7 @@ models:
   # Aggregation Models
   - name: listing_agg_nps_reviews
     description: |
-      Calculates NPS score for each listing, using review sentiment as promoter / detractor
+      Calculates NPS score for each listing, using positive reviews as promoters and negative reviews as detractor
     config:
       materialized: table
     columns:
@@ -12,13 +12,13 @@ models:
       - name: listing_name
       - name: room_type
       - name: nps_total
-        description: "Lifetime NPS score of listing"        
+        description: "Lifetime NPS score of listing, from -100 to 100, with no decimal places"
       - name: reviews_total
         description: "Total number of reviews for the listing"
 
   - name: daily_agg_nps_reviews
     description: |
-      Calculates daily and rolling 28-day NPS scores, using review sentiment as promoter / detractor
+      Calculates daily and rolling 28-day NPS scores, using positive reviews as promoters and negative reviews as detractor
     config:
       materialized: incremental
     columns:
@@ -26,7 +26,7 @@ models:
       - name: nps_daily
       - name: reviews_daily
       - name: nps_28d
-        description: "NPS score over last 28 days"
+        description: "NPS score over last 28 days. Scores should be from -100 to 100, with no decimal places"
       - name: reviews_28d
         description: "Reviews over last 28 days"
 

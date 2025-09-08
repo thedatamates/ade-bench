@@ -41,6 +41,10 @@ def log_harness_info(
         "Generating solution tests": "✓ ✓ *  Generating solution tests...",
         "Executing test script": "✓ ✓ *  Executing test script...",
         "dbt test summary:": "✓ ✓ ✓  dbt test summary:",
+
+        "Extracting tables:": "✓ ✓ ⤴  Extracting tables:",
+        "Exported": "✓ ✓ ⤴  Exported",
+        "Generated _no-op.txt file:": "✓ ✓ ⤴  Generated _no-op.txt file:",
     }
 
     message_parts = message.split("|||")

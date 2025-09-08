@@ -41,9 +41,9 @@ rolling as (
 
 select
   review_date,
-  nps_daily,
+  round(nps_daily * 100, 0) as nps_daily,
   reviews_daily,
-  nps_28d,
+  round(nps_28d * 100, 0) as nps_28d,
   reviews_28d
 from rolling 
 

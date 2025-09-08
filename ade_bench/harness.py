@@ -836,7 +836,7 @@ class Harness:
             log_harness_info(self._logger, trial_handler.task_id, "seed", f"No valid tables to extract")
             return
 
-        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables: {tables_to_extract}")
+        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables:|||{tables_to_extract}")
 
         # Create output directory
         task_seeds_dir = trial_handler.input_path / "seeds"
@@ -886,7 +886,7 @@ class Harness:
                         csv_path = task_seeds_dir / f"solution__{table_name}.csv"
                         copy_query = f"COPY {table_name} TO '{csv_path}' (HEADER, DELIMITER ',');"
                         con.execute(copy_query)
-                        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Exported {table_name} to {csv_path}")
+                        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Exported|||{table_name} to {csv_path}")
                     except Exception as e:
                         self._logger.error(f"Failed to export table {table_name}: {e}")
 
@@ -920,7 +920,7 @@ class Harness:
                         f.write('\n\n')  # Add two blank lines at the start
                         yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)
 
-                    log_harness_info(self._logger, trial_handler.task_id, "seed", f"Generated _no-op.txt file: {no_op_path}")
+                    log_harness_info(self._logger, trial_handler.task_id, "seed", f"Generated _no-op.txt file:|||{no_op_path}")
 
                 con.close()
 

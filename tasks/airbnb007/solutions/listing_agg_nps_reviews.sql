@@ -21,7 +21,7 @@ final as (
     l.listing_id,
     l.listing_name,
     l.room_type,
-    avg(s.nps_score) as nps_total,
+    round(avg(s.nps_score) * 100, 0) as nps_total,
     count(s.listing_id) as reviews_total,
   from {{ ref('dim_listings') }} l 
   join with_nps_scores s
