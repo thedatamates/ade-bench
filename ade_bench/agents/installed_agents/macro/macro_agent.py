@@ -16,9 +16,10 @@ class MacroAgent(BaseAgent):
     LOG_FILENAME = "logs.jsonl"
     LOG_DIR = "/var/log/macro-agent"
 
-    def __init__(self, additional_args: str = "", **kwargs):
+    def __init__(self, additional_args: str = "", max_agent_timeout_sec: float = 180.0, **kwargs):
         super().__init__(**kwargs)
         self.additional_args = additional_args
+        self.max_agent_timeout_sec = max_agent_timeout_sec
 
 
     @property
@@ -95,7 +96,7 @@ class MacroAgent(BaseAgent):
             TerminalCommand(
                 command=command,
                 min_timeout_sec=0.0,
-                max_timeout_sec=float("inf"),
+                max_timeout_sec=self.max_agent_timeout_sec,
                 block=True,
                 append_enter=True,
             )

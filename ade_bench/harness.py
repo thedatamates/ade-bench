@@ -129,11 +129,12 @@ class Harness:
     def _log_output_path(self) -> Path:
         return self._run_path / "run.log"
 
-    def _create_agent_for_task(self, task_id: str) -> BaseAgent:
+    def _create_agent_for_task(self, task_id: str, max_agent_timeout_sec: float | None = None) -> BaseAgent:
         """Create a fresh agent for a specific task.
 
         Args:
             task_id: The ID of the task to create an agent for.
+            max_agent_timeout_sec: Optional timeout override for the agent.
 
         Returns:
             A newly initialized agent.
@@ -142,6 +143,9 @@ class Harness:
 
         if self._agent_name == AgentName.ORACLE:
             agent_kwargs["task_ids"] = [task_id]
+
+        if max_agent_timeout_sec is not None:
+            agent_kwargs["max_agent_timeout_sec"] = max_agent_timeout_sec
 
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 
@@ -382,6 +386,15 @@ class Harness:
                 f"{trial_handler.task.max_agent_timeout_sec}s for task "
                 f"{trial_handler.task_id}."
             )
+
+            # Try to copy logs before killing the session (for agents that support it)
+            if hasattr(agent, '_copy_log_file_from_container'):
+                try:
+                    self._logger.info(f"Attempting to copy logs for timed-out task {trial_handler.task_id}")
+                    agent._copy_log_file_from_container(session, trial_handler.agent_logging_dir)
+                except Exception as log_error:
+                    self._logger.warning(f"Failed to copy logs after timeout: {log_error}")
+
             # Kill the session immediately to stop the agent
             try:
                 session.kill_session()
@@ -645,7 +658,10 @@ class Harness:
             trial_handler.pre_agent_pane_path.write_text(pre_agent_pane)
 
             # Create a fresh agent for this task
-            task_agent = self._create_agent_for_task(trial_handler.task_id)
+            task_agent = self._create_agent_for_task(
+                trial_handler.task_id,
+                max_agent_timeout_sec=trial_handler.task.max_agent_timeout_sec
+            )
 
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent")
             agent_result, agent_failure_mode = self._run_agent(

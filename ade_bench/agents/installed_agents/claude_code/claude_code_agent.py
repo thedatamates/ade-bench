@@ -15,9 +15,10 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
     NAME = AgentName.CLAUDE_CODE
     ALLOWED_TOOLS = ["Bash", "Edit", "Write", "NotebookEdit", "WebFetch"]
 
-    def __init__(self, **kwargs):
+    def __init__(self, max_agent_timeout_sec: float = 180.0, **kwargs):
         super().__init__(**kwargs)
         self._claude_parser = ClaudeParser()
+        self.max_agent_timeout_sec = max_agent_timeout_sec
 
     @property
     def _env(self) -> dict[str, str]:
@@ -38,7 +39,7 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
                 f"claude --output-format json -p {escaped_description} --allowedTools "
                 f"{' '.join(self.ALLOWED_TOOLS)}",
                 min_timeout_sec=0.0,
-                max_timeout_sec=float("inf"),
+                max_timeout_sec=self.max_agent_timeout_sec,
                 block=True,
                 append_enter=True,
             )
