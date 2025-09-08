@@ -41,33 +41,38 @@ The following timeout values can be configured via environment variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SETUP_TIMEOUT_SEC` | 120 | Timeout for setup scripts (seconds) |
-| `DEFAULT_AGENT_TIMEOUT_SEC` | 180 | Default timeout for agent execution (seconds) |
+| `SETUP_TIMEOUT_SEC` | 120 | Timeout for task setup scripts and agent installation (seconds) |
+| `DEFAULT_AGENT_TIMEOUT_SEC` | 180 | Default timeout for agent task execution (seconds) |
 | `DEFAULT_TEST_TIMEOUT_SEC` | 30 | Default timeout for test execution (seconds) |
 | `CLEANUP_TIMEOUT_SEC` | 30 | Timeout for cleanup operations (seconds) |
+
+**Note**: The actual timeout for agent operations is composite: setup + agent execution + cleanup. For example, with defaults, an agent has 120+180+30=330 seconds total.
 
 ### Example Configuration
 
 You can set these values in your `.env` file or as environment variables:
 
 ```bash
-# For faster iteration during development
+# For faster iteration during development (shorter timeouts)
 export SETUP_TIMEOUT_SEC=60
 export DEFAULT_AGENT_TIMEOUT_SEC=120
 export DEFAULT_TEST_TIMEOUT_SEC=20
+export CLEANUP_TIMEOUT_SEC=20
 
 # For production runs with longer timeouts
-export SETUP_TIMEOUT_SEC=300
-export DEFAULT_AGENT_TIMEOUT_SEC=600
-export DEFAULT_TEST_TIMEOUT_SEC=120
+export SETUP_TIMEOUT_SEC=180
+export DEFAULT_AGENT_TIMEOUT_SEC=300
+export DEFAULT_TEST_TIMEOUT_SEC=60
+export CLEANUP_TIMEOUT_SEC=30
 ```
 
 Or create a `.env` file with these values:
 ```bash
-# .env file
+# .env file for development
 SETUP_TIMEOUT_SEC=60
 DEFAULT_AGENT_TIMEOUT_SEC=120
 DEFAULT_TEST_TIMEOUT_SEC=20
+CLEANUP_TIMEOUT_SEC=20
 ```
 
 ### Overriding Timeouts for Specific Tasks

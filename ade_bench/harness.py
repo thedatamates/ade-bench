@@ -32,6 +32,7 @@ from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.dataset import Dataset
 from ade_bench.utils.logger import logger, log_harness_info
 from ade_bench.utils.test_generator import generate_solution_tests
+from ade_bench.utils.timeout_manager import TimeoutManager
 
 
 class Harness:
@@ -129,12 +130,11 @@ class Harness:
     def _log_output_path(self) -> Path:
         return self._run_path / "run.log"
 
-    def _create_agent_for_task(self, task_id: str, max_agent_timeout_sec: float | None = None) -> BaseAgent:
+    def _create_agent_for_task(self, task_id: str) -> BaseAgent:
         """Create a fresh agent for a specific task.
 
         Args:
             task_id: The ID of the task to create an agent for.
-            max_agent_timeout_sec: Optional timeout override for the agent.
 
         Returns:
             A newly initialized agent.
@@ -143,9 +143,6 @@ class Harness:
 
         if self._agent_name == AgentName.ORACLE:
             agent_kwargs["task_ids"] = [task_id]
-
-        if max_agent_timeout_sec is not None:
-            agent_kwargs["max_agent_timeout_sec"] = max_agent_timeout_sec
 
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 
@@ -253,7 +250,11 @@ class Harness:
         session: TmuxSession,
         trial_handler: TrialHandler,
     ) -> FailureMode:
+        """Run tests with proper timeout management."""
         self._setup_test_env(terminal, trial_handler)
+
+        # Get timeouts for this task
+        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
 
         try:
             # TODO: This seems like a bad hack.
@@ -273,13 +274,13 @@ class Harness:
                     "Enter",
                 ],
                 block=True,
-                max_timeout_sec=trial_handler.task.max_test_timeout_sec,
+                max_timeout_sec=timeouts.test_execution,
             )
 
         except TimeoutError:
             self._logger.warning(
-                "Test command timed out after "
-                f"{trial_handler.task.max_test_timeout_sec}s for task "
+                f"Test command timed out after "
+                f"{timeouts.test_execution}s for task "
                 f"{trial_handler.task_id}."
             )
             # Kill the session to stop the test
@@ -339,10 +340,10 @@ class Harness:
         trial_handler: TrialHandler,
         session: TmuxSession,
         logging_dir: Path,
-        timeout_sec: float,
         agent: BaseAgent,
         task_name: str | None = None,
     ) -> AgentResult | None:
+        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
         loop = asyncio.get_event_loop()
         task = loop.run_in_executor(
             None,
@@ -354,7 +355,9 @@ class Harness:
                 task_name=task_name,
             ),
         )
-        return await asyncio.wait_for(task, timeout=timeout_sec)
+
+        # Use the composite timeout that includes all agent operations
+        return await asyncio.wait_for(task, timeout=timeouts.total_agent_operation)
 
     def _run_agent(
         self,
@@ -369,7 +372,6 @@ class Harness:
                     trial_handler=trial_handler,
                     session=session,
                     logging_dir=trial_handler.agent_logging_dir,
-                    timeout_sec=trial_handler.task.max_agent_timeout_sec,
                     agent=agent,
                     task_name=task_name,
                 )
@@ -381,10 +383,14 @@ class Harness:
             return result, result.failure_mode
 
         except asyncio.TimeoutError:
+            timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
             self._logger.warning(
                 f"Agent timed out after "
-                f"{trial_handler.task.max_agent_timeout_sec}s for task "
-                f"{trial_handler.task_id}."
+                f"{timeouts.total_agent_operation}s for task "
+                f"{trial_handler.task_id}. "
+                f"(Breakdown: setup={timeouts.setup}s, "
+                f"execution={timeouts.agent_execution}s, "
+                f"cleanup={timeouts.cleanup}s)"
             )
 
             # Try to copy logs before killing the session (for agents that support it)
@@ -447,6 +453,9 @@ class Harness:
 
         log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
 
+        # Get timeouts for this task
+        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
+
         try:
             # Copy setup directory to container if it exists
             if setup_dir_path.exists():
@@ -466,7 +475,7 @@ class Harness:
             # Run the setup script (following oracle agent pattern)
             session.send_keys(
                 ["bash /app/setup.sh", "Enter"],
-                max_timeout_sec=terminal_bench_config.setup_timeout_sec,  # Configurable timeout for setup script
+                max_timeout_sec=timeouts.setup,
                 block=True,
             )
 
@@ -474,7 +483,7 @@ class Harness:
 
         except TimeoutError:
             self._logger.warning(
-                f"Setup script timed out for task {trial_handler.task_id}"
+                f"Setup script timed out after {timeouts.setup}s for task {trial_handler.task_id}"
             )
             # Kill the session to stop the setup script
             try:
@@ -500,6 +509,8 @@ class Harness:
 
     def _cleanup_setup_files(self, session: TmuxSession, setup_dir_path: Path, trial_handler: TrialHandler) -> None:
         """Clean up setup files from container after setup script runs."""
+        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
+
         try:
             cleanup_commands = ["rm -f /app/setup.sh"]
             if setup_dir_path.exists():
@@ -508,7 +519,7 @@ class Harness:
             for command in cleanup_commands:
                 session.send_keys(
                     [command, "Enter"],
-                    max_timeout_sec=terminal_bench_config.cleanup_timeout_sec,
+                    max_timeout_sec=timeouts.cleanup,
                     block=True,
                 )
             self._logger.debug("Setup files cleaned up from container")
@@ -658,10 +669,7 @@ class Harness:
             trial_handler.pre_agent_pane_path.write_text(pre_agent_pane)
 
             # Create a fresh agent for this task
-            task_agent = self._create_agent_for_task(
-                trial_handler.task_id,
-                max_agent_timeout_sec=trial_handler.task.max_agent_timeout_sec
-            )
+            task_agent = self._create_agent_for_task(trial_handler.task_id)
 
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent")
             agent_result, agent_failure_mode = self._run_agent(

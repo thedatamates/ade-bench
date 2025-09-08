@@ -53,12 +53,12 @@ class Config:
     # Timeout Settings
     @property
     def setup_timeout_sec(self) -> float:
-        """Timeout for setup scripts in seconds."""
+        """Timeout for setup operations (task setup scripts and agent installation) in seconds."""
         return float(self.get_setting("setup_timeout_sec", 120.0))
 
     @property
     def default_agent_timeout_sec(self) -> float:
-        """Default timeout for agent execution in seconds."""
+        """Default timeout for agent task execution in seconds."""
         return float(self.get_setting("default_agent_timeout_sec", 180.0))
 
     @property

@@ -9,16 +9,16 @@ from ade_bench.agents.installed_agents.abstract_installed_agent import (
 )
 from ade_bench.harness_models import TerminalCommand
 from ade_bench.parsers.claude_parser import ClaudeParser
+from ade_bench.config import config
 
 
 class ClaudeCodeAgent(AbstractInstalledAgent):
     NAME = AgentName.CLAUDE_CODE
     ALLOWED_TOOLS = ["Bash", "Edit", "Write", "NotebookEdit", "WebFetch"]
 
-    def __init__(self, max_agent_timeout_sec: float = 180.0, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._claude_parser = ClaudeParser()
-        self.max_agent_timeout_sec = max_agent_timeout_sec
 
     @property
     def _env(self) -> dict[str, str]:
@@ -32,6 +32,7 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
 
     def _run_agent_commands(self, task_description: str) -> list[TerminalCommand]:
         escaped_description = shlex.quote(task_description)
+
         return [
             TerminalCommand(
                 command=
@@ -39,7 +40,7 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
                 f"claude --output-format json -p {escaped_description} --allowedTools "
                 f"{' '.join(self.ALLOWED_TOOLS)}",
                 min_timeout_sec=0.0,
-                max_timeout_sec=self.max_agent_timeout_sec,
+                max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,
                 append_enter=True,
             )

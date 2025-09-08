@@ -10,16 +10,16 @@ from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.logger import logger
 from ade_bench.harness_models import TerminalCommand
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
+from ade_bench.config import config
 
 class MacroAgent(BaseAgent):
     NAME = AgentName.MACRO
     LOG_FILENAME = "logs.jsonl"
     LOG_DIR = "/var/log/macro-agent"
 
-    def __init__(self, additional_args: str = "", max_agent_timeout_sec: float = 180.0, **kwargs):
+    def __init__(self, additional_args: str = "", **kwargs):
         super().__init__(**kwargs)
         self.additional_args = additional_args
-        self.max_agent_timeout_sec = max_agent_timeout_sec
 
 
     @property
@@ -96,7 +96,7 @@ class MacroAgent(BaseAgent):
             TerminalCommand(
                 command=command,
                 min_timeout_sec=0.0,
-                max_timeout_sec=self.max_agent_timeout_sec,
+                max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,
                 append_enter=True,
             )
@@ -153,7 +153,7 @@ class MacroAgent(BaseAgent):
                 "Enter",
             ],
             block=True,
-            max_timeout_sec=float("inf"),
+            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
         )
 
         session.send_keys(
@@ -162,7 +162,7 @@ class MacroAgent(BaseAgent):
                 "Enter",
             ],
             block=True,
-            max_timeout_sec=float("inf"),
+            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
         )
 
         run_agent_commands = self._run_agent_commands(task_description)

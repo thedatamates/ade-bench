@@ -20,6 +20,7 @@ from ade_bench.agents.base_agent import AgentResult, BaseAgent
 from ade_bench.harness_models import TerminalCommand
 from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.logger import log_harness_info, logger
+from ade_bench.config import config
 
 
 class AbstractInstalledAgent(BaseAgent, ABC):
@@ -88,7 +89,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 "Enter",
             ],
             block=True,
-            max_timeout_sec=float("inf"),
+            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
         )
 
         session.send_keys(
@@ -97,7 +98,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 "Enter",
             ],
             block=True,
-            max_timeout_sec=float("inf"),
+            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
         )
 
         run_agent_commands = self._run_agent_commands(task_description)
