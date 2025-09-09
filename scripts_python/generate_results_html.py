@@ -237,10 +237,10 @@ class ResultsHTMLGenerator:
         if diff_log_path.exists():
             # Try to generate HTML diff
             try:
-                html_diff_path = render_diff_log_html(diff_log_path, task_data['task_id'])
-                # Copy the generated HTML diff to our task directory
-                import shutil
-                shutil.copy2(html_diff_path, task_html_dir / "diffs.html")
+                html_content = render_diff_log_html(diff_log_path, task_data['task_id'])
+                # Write the HTML content directly to our task directory
+                with open(task_html_dir / "diffs.html", 'w') as f:
+                    f.write(html_content)
                 return  # We've created the diffs.html file directly
             except Exception as e:
                 print(f"Warning: Could not generate HTML diff: {e}")

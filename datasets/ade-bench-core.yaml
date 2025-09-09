@@ -3,8 +3,8 @@ description: "Core benchmarking tasks for data analysts using dbt and SQL"
 dataset_path: "tasks"
 
 task_ids:
-  - airbnb001
-  - airbnb002
+  # - airbnb001
+  # - airbnb002
   # - airbnb003
   # - airbnb004
   # - airbnb005
@@ -25,9 +25,9 @@ task_ids:
   # - asana004
   # - asana005
   # - empty001
-  - f1001
+  # - f1001
   - f1002
-  - f1003
+  # - f1003
   # - f1004
   # - f1005
   # - f1006

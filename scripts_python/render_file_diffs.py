@@ -78,8 +78,18 @@ def parse_diff_log(log_content: str) -> list[dict]:
             # Just skip the header line - files are listed individually with ~ prefix
             pass
         
-        # Look for individual file entries (with ~ prefix)
-        if current_phase and lines[i].startswith('  ~ '):
+        # Look for individual file entries (with +, -, or ~ prefix)
+        if current_phase and lines[i].startswith('  + '):
+            # This is an added file entry
+            file_path = lines[i][4:].strip()  # Remove the '  + ' prefix
+            if file_path not in current_phase['added_files']:
+                current_phase['added_files'].append(file_path)
+        elif current_phase and lines[i].startswith('  - '):
+            # This is a removed file entry
+            file_path = lines[i][4:].strip()  # Remove the '  - ' prefix
+            if file_path not in current_phase['removed_files']:
+                current_phase['removed_files'].append(file_path)
+        elif current_phase and lines[i].startswith('  ~ '):
             # This is a modified file entry
             file_path = lines[i][4:].strip()  # Remove the '  ~ ' prefix
             if file_path not in current_phase['modified_files']:
@@ -505,12 +515,9 @@ def render_diff_log_html(diff_log_path: Path, task_id: str = None) -> Path:
     # Generate HTML
     html_content = generate_html(phases, task_id, json_data)
     
-    # Write HTML file
-    output_path = diff_log_path.parent / "file_diff_log.html"
-    with open(output_path, 'w') as f:
-        f.write(html_content)
-    
-    return output_path
+    # Return the HTML content instead of writing to file
+    # The caller will handle writing to the appropriate location
+    return html_content
 
 
 if __name__ == "__main__":
@@ -523,8 +530,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     try:
-        output_path = render_diff_log_html(args.diff_log_path, args.task_id)
-        print(f"Generated HTML diff log: {output_path}")
+        html_content = render_diff_log_html(args.diff_log_path, args.task_id)
+        print(html_content)  # Output HTML to stdout for CLI usage
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
