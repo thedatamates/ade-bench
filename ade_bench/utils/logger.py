@@ -38,10 +38,10 @@ def log_harness_info(
         "Running setup script": "* · ·  Running setup script...",
         "Setup script completed": "* · ·  Setup script completed.",
         "Diffing the setup changes...": "* · ·  Diffing the setup changes...",
-        "Captured setup diffs:": "* · ·  Captured setup diffs:",
+        "Captured setup diffs:": "✓ · ·  Captured setup diffs:",
+        ## AGENT
         "Starting agent...": "✓ * ·  Starting agent...",
         "Calling agent:": "✓ * ·  Calling agent:",
-        ## AGENT
         "Agent returned response": "✓ * ·  Agent returned response...",
         "Agent response:": "✓ * ·  Agent response:",
         "Diffing the agent changes...": "✓ * ·  Diffing the agent changes...",
