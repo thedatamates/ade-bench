@@ -17,6 +17,7 @@ from ade_bench.agents.agent_name import AgentName
 from ade_bench.agents.base_agent import AgentResult, BaseAgent
 from ade_bench.config import config as terminal_bench_config
 from ade_bench.handlers.asciinema_handler import AsciinemaHandler
+from ade_bench.handlers.file_diff_handler import FileDiffHandler, FileSnapshot
 from ade_bench.handlers.trial_handler import TrialHandler
 from ade_bench.harness_models import (
     BenchmarkResults,
@@ -56,6 +57,7 @@ class Harness:
         n_attempts: int = 1,
         dataset_config: Path | None = None,
         create_seed: bool = False,
+        result_log_level: str = "html",
     ):
         """
         Runs the Terminal-Bench harness.
@@ -83,6 +85,10 @@ class Harness:
             dataset_config: Path to a YAML configuration file for the dataset.
                 If provided, this will override dataset_path, task_ids, n_tasks,
                 and exclude_task_ids.
+            result_log_level: Level of result logging. Options:
+                - "html": Generate diffs and HTML dashboard (default)
+                - "diffs_only": Generate diffs only
+                - "none": No diffing or HTML generation
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -93,6 +99,7 @@ class Harness:
         self._task_ids = task_ids
         self._exclude_task_ids = exclude_task_ids
         self._create_seed = create_seed
+        self._result_log_level = result_log_level
 
         self._output_path = output_path
         self._agent_name = agent_name
@@ -202,7 +209,7 @@ class Harness:
         # Copy test-related files
         terminal.copy_to_container(
             paths=[
-                trial_handler.post_agent_pane_path,
+                trial_handler.agent_pane_path,
                 trial_handler.run_tests_path,
                 trial_handler.test_dir,
                 *trial_handler.task.test_script_paths,
@@ -323,14 +330,14 @@ class Harness:
     def _parse_results(
         self,
         trial_handler: TrialHandler,
-        post_test_pane: str,
+        post_agent_pane: str,
     ) -> tuple[dict[str, UnitTestStatus] | None, FailureMode]:
         try:
-            return trial_handler.parser.parse(post_test_pane), FailureMode.NONE
+            return trial_handler.parser.parse(post_agent_pane), FailureMode.NONE
         except Exception as e:
             self._logger.error(
                 f"Error parsing results for task {trial_handler.task_id}: {e}. It's "
-                "possible that the tests failed to run. Inspect post_test.txt for "
+                "possible that the tests failed to run. Inspect post-agent.txt for "
                 "more information."
             )
             return None, FailureMode.PARSE_ERROR
@@ -652,6 +659,28 @@ class Harness:
                 "agent"
             )
 
+            # Initialize file diffing if enabled
+            file_diff_handler = None
+            if self._result_log_level in ["html", "diffs_only"]:
+                # Use task-level exclusions if available, otherwise use global config
+                exclude_paths = (
+                    trial_handler.task.file_diff_exclude_paths 
+                    if trial_handler.task.file_diff_exclude_paths is not None
+                    else terminal_bench_config.file_diff_exclude_paths
+                )
+                
+                file_diff_handler = FileDiffHandler(
+                    trial_handler._task_output_path, 
+                    enabled=True,
+                    exclude_paths=exclude_paths,
+                    task_name=trial_handler.task_id
+                )
+                # Capture initial snapshot before setup
+                log_harness_info(self._logger, trial_handler.task_id, "setup", "Capturing initial file snapshot...")
+                initial_snapshot = file_diff_handler.capture_snapshot(terminal.container)
+                if initial_snapshot:
+                    log_harness_info(self._logger, trial_handler.task_id, "setup", "Captured snapshot")
+
             # Run setup script if it exists
             setup_failure_mode = self._run_setup_script(terminal, session, trial_handler)
 
@@ -667,11 +696,18 @@ class Harness:
 
             pre_agent_pane = session.capture_pane(capture_entire=True)
             trial_handler.pre_agent_pane_path.write_text(pre_agent_pane)
+            
+            # Inject delimiter to mark the end of pre-agent phase
+            session.send_keys(["echo '=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ==='", "Enter"])
+
+            # Capture snapshot after setup and create setup diff
+            if file_diff_handler:
+                file_diff_handler.handle_phase_diffing(terminal.container, "setup", trial_handler.task_id, self._logger)
 
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
-            log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent")
+            log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent...")
             agent_result, agent_failure_mode = self._run_agent(
                 session=session,
                 agent=task_agent,
@@ -679,8 +715,16 @@ class Harness:
                 task_name=trial_handler.task_id,
             )
 
-            post_agent_pane = session.capture_pane(capture_entire=True)
-            trial_handler.post_agent_pane_path.write_text(post_agent_pane)
+            # Capture the full pane and split on delimiter to get post-agent content
+            full_pane = session.capture_pane(capture_entire=True)
+            parts = full_pane.split('=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ===')
+            post_agent_pane = parts[-1].strip()
+            
+            trial_handler.agent_pane_path.write_text(post_agent_pane)
+
+            # Capture snapshot after agent and create agent diff
+            if file_diff_handler:
+                file_diff_handler.handle_phase_diffing(terminal.container, "agent", trial_handler.task_id, self._logger)
 
             # If agent timed out, stop the task immediately (don't run tests)
             if agent_failure_mode == FailureMode.AGENT_TIMEOUT:
@@ -731,8 +775,12 @@ class Harness:
                 trial_handler=trial_handler,
             )
 
-            post_test_pane = session.capture_pane(capture_entire=True)
-            trial_handler.post_test_pane_path.write_text(post_test_pane)
+            post_agent_pane = session.capture_pane(capture_entire=True)
+            trial_handler.post_agent_pane_path.write_text(post_agent_pane)
+
+            # Save the complete diff log
+            if file_diff_handler:
+                file_diff_handler.save_diff_log()
 
             agent_recording_path = trial_handler.sessions_path / "agent.cast"
 
@@ -761,7 +809,7 @@ class Harness:
 
         parser_results, parse_failure_mode = self._parse_results(
             trial_handler=trial_handler,
-            post_test_pane=post_test_pane,
+            post_agent_pane=post_agent_pane,
         )
 
         if parse_failure_mode != FailureMode.NONE:
@@ -1166,13 +1214,23 @@ class Harness:
 
         self._update_metadata_on_end(results=results)
 
+        # Generate HTML results dashboard
+        if self._result_log_level == "html":
+            try:
+                from scripts_python.generate_results_html import ResultsHTMLGenerator
+                generator = ResultsHTMLGenerator(self._run_path)
+                generator.generate_all()
+                log_harness_info(self._logger, "HARNESS", "finish", "Generated HTML dashboard.")
+            except Exception as e:
+                log_harness_info(self._logger, "HARNESS", "finish", "Failed to generate HTML dashboard.")
+
         # Log harness completion
         successful_tasks = sum(1 for result in results.results if result.is_resolved)
         total_tasks = len(results.results)
         log_harness_info(
             self._logger,
             "HARNESS",
-            "end",
+            "finish",
             f"Harness run completed: {successful_tasks} of {total_tasks} tasks successful"
         )
 

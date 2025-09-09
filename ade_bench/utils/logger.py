@@ -32,16 +32,26 @@ def log_harness_info(
     # Map certain messages to transformed versions for consistent logging
     # The delimiters ||| is used to split messages with custom logging
     message_transforms = {
+        ## SETUP
+        "Capturing initial file snapshot...": "* · ·  Capturing initial file snapshot...",''
+        "Captured snapshot": "* · ·  Captured snapshot.",
         "Running setup script": "* · ·  Running setup script...",
-        "Setup script completed": "✓ · ·  Setup script completed.",
-        "Starting agent": "✓ * ·  Starting agent...",
+        "Setup script completed": "* · ·  Setup script completed.",
+        "Diffing the setup changes...": "* · ·  Diffing the setup changes...",
+        "Captured setup diffs:": "* · ·  Captured setup diffs:",
+        "Starting agent...": "✓ * ·  Starting agent...",
         "Calling agent:": "✓ * ·  Calling agent:",
+        ## AGENT
         "Agent returned response": "✓ * ·  Agent returned response...",
-        "Agent response:": "✓ ✓ ·  Agent response:",
+        "Agent response:": "✓ * ·  Agent response:",
+        "Diffing the agent changes...": "✓ * ·  Diffing the agent changes...",
+        "Captured agent diffs:": "✓ ✓ ·  Captured agent diffs:",
+        ## EVAL
         "Generating solution tests": "✓ ✓ *  Generating solution tests...",
         "Executing test script": "✓ ✓ *  Executing test script...",
         "dbt test summary:": "✓ ✓ ✓  dbt test summary:",
 
+        ## SEED
         "Extracting tables:": "✓ ✓ ⤴  Extracting tables:",
         "Exported": "✓ ✓ ⤴  Exported",
         "Generated _no-op.txt file:": "✓ ✓ ⤴  Generated _no-op.txt file:",

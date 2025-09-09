@@ -104,6 +104,10 @@ class Task(BaseModel):
         default=None,
         description="Optional multiline bash script to run before dbt tests. This script will be executed in the test environment prior to running tests.",
     )
+    file_diff_exclude_paths: list[str] | None = Field(
+        default=None,
+        description="List of path patterns to exclude from file diffing for this task. Overrides global config.",
+    )
 
     @property
     def task_description_dict(self) -> dict[str, str]:
@@ -319,12 +323,12 @@ class TrialHandler:
         return self._panes_path / "pre-agent.txt"
 
     @property
-    def post_agent_pane_path(self) -> Path:
-        return self._panes_path / "post-agent.txt"
+    def agent_pane_path(self) -> Path:
+        return self._panes_path / "agent.txt"
 
     @property
-    def post_test_pane_path(self) -> Path:
-        return self._panes_path / "post-test.txt"
+    def post_agent_pane_path(self) -> Path:
+        return self._panes_path / "post-agent.txt"
 
     @property
     def commands_path(self) -> Path:

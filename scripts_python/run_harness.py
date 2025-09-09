@@ -9,7 +9,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from ade_bench import Harness
 from ade_bench.agents import AgentName
-from display_results import display_all_results
+from scripts_python.summarize_results import display_detailed_results
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -143,6 +143,12 @@ if __name__ == "__main__":
         help="Additional arguments to pass to the agent binary (e.g., '--verbose --debug')",
         default="",
     )
+    parser.add_argument(
+        "--result-log-level",
+        choices=["html", "diffs_only", "none"],
+        default="html",
+        help="Level of result logging. 'html' generates diffs and HTML dashboard (default), 'diffs_only' generates diffs only, 'none' disables both.",
+    )
     args = parser.parse_args()
 
     agent_kwargs = {}
@@ -173,9 +179,10 @@ if __name__ == "__main__":
         n_attempts=args.n_attempts,
         dataset_config=args.dataset_config,
         create_seed=args.create_seed,
+        result_log_level=args.result_log_level,
     )
 
     results = harness.run()
 
     # Display results using the separate module
-    display_all_results(results)
+    display_detailed_results(results)

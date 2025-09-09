@@ -94,11 +94,44 @@ uv run scripts_python/run_harness.py --agent claude-code --model-name claude-son
 
 ```
 
-# View logs of results
-uv run scripts_python/view_logs.py
+# View results dashboard (HTML interface with logs, diffs, and more)
+uv run scripts_python/view_results.py
+
+# View a summary of the latest experiment results
+uv run scripts_python/view_summary.py
 
 # Extract the details of all the tasks in the benchmark
 uv run scripts_python/extract_task_details.py
+```
+
+## Results Dashboard
+
+After each experiment completes, ADE-Bench automatically generates an HTML dashboard that provides a comprehensive view of all results. The dashboard includes:
+
+- **Summary Table**: Overview of all tasks with status, timing, and navigation
+- **Task Details**: Individual pages for each task showing:
+  - **Logs**: Agent execution logs
+  - **Results**: JSON results data
+  - **Panes**: Terminal output from different phases
+  - **Diffs**: File changes made by the agent (if result logging is enabled)
+
+### Result Logging
+
+ADE-Bench provides three levels of result logging via the `--result-log-level` argument:
+
+- **`html`** (default): Generates file diffs and HTML dashboard
+- **`diffs_only`**: Generates file diffs only (no HTML dashboard)
+- **`none`**: No file diffing or HTML generation
+
+```bash
+# Full HTML dashboard with diffs (default)
+uv run scripts_python/run_harness.py --agent oracle --task-ids airbnb001
+
+# Diffs only, no HTML dashboard
+uv run scripts_python/run_harness.py --agent oracle --result-log-level diffs_only --task-ids airbnb001
+
+# No diffing or HTML generation
+uv run scripts_python/run_harness.py --agent oracle --result-log-level none --task-ids airbnb001
 ```
 
 ## Task Structure

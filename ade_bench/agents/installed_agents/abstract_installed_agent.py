@@ -103,7 +103,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
 
         run_agent_commands = self._run_agent_commands(task_description)
         for command in run_agent_commands:
-            log_harness_info(logger, task_name, "agent", f"Calling agent:|||{task_description[:100]}")
+            log_harness_info(logger, task_name, "agent", f"Calling agent:|||{task_description.replace(chr(10), ' ').replace(chr(13), '')[:100]}")
             session.send_command(command)
 
         log_harness_info(logger, task_name, "agent", "Agent returned response")

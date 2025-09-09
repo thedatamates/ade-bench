@@ -71,5 +71,14 @@ class Config:
         """Timeout for cleanup operations in seconds."""
         return float(self.get_setting("cleanup_timeout_sec", 30.0))
 
+    # File Diffing Settings
+    @property
+    def file_diff_exclude_paths(self) -> list[str]:
+        """List of path patterns to exclude from file diffing."""
+        exclude_paths_str = self.get_setting("file_diff_exclude_paths", "/tmp,/logs,/var,/target,/build,/node_modules")
+        if exclude_paths_str:
+            return [path.strip() for path in exclude_paths_str.split(",") if path.strip()]
+        return []
+
 
 config = Config()
