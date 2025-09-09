@@ -30,6 +30,27 @@ def load_diff_json(diff_log_path: Path) -> dict:
         return {}
 
 
+def get_file_content(json_data: dict, file_path: str, snapshot_type: str = 'after') -> str:
+    """Get file content from optimized JSON data structure."""
+    if not json_data or 'content_manager' not in json_data:
+        return ""
+    
+    content_manager = json_data['content_manager']
+    content_store = content_manager.get('content_store', {})
+    
+    # Look through diffs to find the file in the specified snapshot type
+    for diff_data in json_data.get('diffs', []):
+        snapshot_data = diff_data.get(snapshot_type, {})
+        file_hashes = snapshot_data.get('file_hashes', {})
+        
+        # Get the content hash for this file from the snapshot
+        content_hash = file_hashes.get(file_path)
+        if content_hash:
+            return content_store.get(content_hash, "")
+    
+    return ""
+
+
 def parse_diff_log(log_content: str) -> list[dict]:
     """Parse the file diff log content into structured data."""
     phases = []
@@ -369,15 +390,7 @@ def generate_html(phases: list[dict], task_id: str = None, json_data: dict = Non
                 clean_file_path = file_path.lstrip('+ ').strip()
                 
                 # Get file content from JSON data
-                file_content = None
-                if json_data and 'diffs' in json_data:
-                    # Find the diff that contains this added file
-                    for diff_data in json_data['diffs']:
-                        if clean_file_path in diff_data.get('added_files', []):
-                            # Get content from the 'after' snapshot
-                            after_files = diff_data.get('after', {}).get('files', {})
-                            file_content = after_files.get(clean_file_path, '')
-                            break
+                file_content = get_file_content(json_data, clean_file_path, 'after')
                 
                 if file_content is not None:
                     html += f"""
@@ -405,15 +418,7 @@ def generate_html(phases: list[dict], task_id: str = None, json_data: dict = Non
                 clean_file_path = file_path.lstrip('- ').strip()
                 
                 # Get file content from JSON data
-                file_content = None
-                if json_data and 'diffs' in json_data:
-                    # Find the diff that contains this removed file
-                    for diff_data in json_data['diffs']:
-                        if clean_file_path in diff_data.get('removed_files', []):
-                            # Get content from the 'before' snapshot
-                            before_files = diff_data.get('before', {}).get('files', {})
-                            file_content = before_files.get(clean_file_path, '')
-                            break
+                file_content = get_file_content(json_data, clean_file_path, 'before')
                 
                 if file_content is not None:
                     html += f"""
