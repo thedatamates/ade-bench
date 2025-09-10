@@ -664,13 +664,13 @@ class Harness:
             if self._result_log_level in ["html", "diffs_only"]:
                 # Use task-level exclusions if available, otherwise use global config
                 exclude_paths = (
-                    trial_handler.task.file_diff_exclude_paths 
+                    trial_handler.task.file_diff_exclude_paths
                     if trial_handler.task.file_diff_exclude_paths is not None
                     else terminal_bench_config.file_diff_exclude_paths
                 )
-                
+
                 file_diff_handler = FileDiffHandler(
-                    trial_handler._task_output_path, 
+                    trial_handler._task_output_path,
                     enabled=True,
                     exclude_paths=exclude_paths,
                     task_name=trial_handler.task_id
@@ -696,7 +696,7 @@ class Harness:
 
             pre_agent_pane = session.capture_pane(capture_entire=True)
             trial_handler.pre_agent_pane_path.write_text(pre_agent_pane)
-            
+
             # Inject delimiter to mark the end of pre-agent phase
             session.send_keys(["echo '=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ==='", "Enter"])
 
@@ -719,7 +719,7 @@ class Harness:
             full_pane = session.capture_pane(capture_entire=True)
             parts = full_pane.split('=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ===')
             post_agent_pane = parts[-1].strip()
-            
+
             trial_handler.agent_pane_path.write_text(post_agent_pane)
 
             # Capture snapshot after agent and create agent diff

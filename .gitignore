@@ -59,6 +59,8 @@ package-lock.yml
 *.sqlite
 *.duckdb
 *.duckdb.wal
+/shared/databases/postgres/images/*.tar
+/shared/databases/postgres/seeds/*.tgz
 
 # Temporary and dev files
 dev/
