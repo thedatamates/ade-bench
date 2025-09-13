@@ -57,7 +57,6 @@ class DuckDBToSnowflakeConverter:
 
         # Create output directory structure
         self.output_dir.mkdir(exist_ok=True)
-        (self.output_dir / "logs").mkdir(exist_ok=True)
 
     def _execute_queries(self, cursor, queries: str, description: str = ""):
         """Execute multiple SQL queries separated by semicolons."""
@@ -356,11 +355,6 @@ class DuckDBToSnowflakeConverter:
 
             results['converted'].append(conversion_result)
 
-        # Save results
-        results_path = self.output_dir / "logs" / "conversion_results.json"
-        with open(results_path, 'w') as f:
-            json.dump(results, f, indent=2)
-
         return results
 
 
@@ -434,8 +428,6 @@ def main():
             print(f"\nFailed conversions:")
             for item in results['failed']:
                 print(f"  ❌ {Path(item['duckdb_file']).name}: {', '.join(item['errors'])}")
-
-        print(f"\nDetailed results saved to: {converter.output_dir / 'logs' / 'conversion_results.json'}")
 
     except KeyboardInterrupt:
         print("\nConversion interrupted by user", file=sys.stderr)
