@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive DuckDB to PostgreSQL conversion script.
+Comprehensive DuckDB to PostgreSQL migration script.
 
 This script:
 1. Discovers DuckDB files in specified directories
@@ -11,7 +11,7 @@ This script:
 Usage:
     # Run from outside the project directory to avoid docker module conflict
     cd /tmp
-    python /scripts_python/convert_duckdb_to_postgres.py [options]
+    python /scripts_python/migrate_duckdb_to_postgres.py [options]
 
 Requirements:
     - pip install docker duckdb psycopg2-binary
@@ -61,11 +61,10 @@ except ImportError:
     docker_lib = None
 
 import duckdb
+from duckdb_utils import DuckDBExtractor
 
 # Configuration - modify these paths as needed
-import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DUCKDB_SOURCE_DIR = os.path.join(PROJECT_ROOT, "shared", "databases", "duckdb")
 POSTGRES_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "shared", "databases", "postgres")
 DEFAULT_PG_VERSION = "16"
 
@@ -77,112 +76,27 @@ class DuckDBToPostgresConverter:
         self.output_dir = Path(POSTGRES_OUTPUT_DIR).resolve()
         self.pg_version = pg_version
         self.docker_client = docker_lib.from_env() if DOCKER_AVAILABLE else None
-        self.excluded_files: Set[str] = set()
-
-        # Create output directory structure
-        self.output_dir.mkdir(exist_ok=True)
-        (self.output_dir / "seeds").mkdir(exist_ok=True)
-        (self.output_dir / "images").mkdir(exist_ok=True)
+        self.duckdb_extractor = DuckDBExtractor()
 
     def add_exclusions(self, exclusion_list: List[str]):
         """Add files to exclusion list."""
-        self.excluded_files.update(exclusion_list)
+        self.duckdb_extractor.add_exclusions(exclusion_list)
 
     def discover_duckdb_files(self, patterns: List[str] = None) -> List[Path]:
         """Discover DuckDB files in the configured source directory."""
-        if patterns is None:
-            patterns = ["*.duckdb", "*.db", "*.ddb"]
-
-        source_path = Path(DUCKDB_SOURCE_DIR).resolve()
-        if not source_path.exists():
-            print(f"Error: Source directory does not exist: {source_path}", file=sys.stderr)
-            return []
-
-        discovered_files = []
-        for pattern in patterns:
-            discovered_files.extend(source_path.glob(pattern))
-
-        # Remove duplicates and sort
-        return sorted(set(discovered_files))
+        return self.duckdb_extractor.discover_duckdb_files(patterns)
 
     def analyze_duckdb_schema(self, db_path: Path) -> Dict:
         """Analyze schema and tables in a DuckDB file."""
-        try:
-            with duckdb.connect(str(db_path), read_only=True) as conn:
-                # Get all schemas
-                schemas = conn.execute("""
-                    SELECT schema_name
-                    FROM information_schema.schemata
-                    WHERE schema_name NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                    ORDER BY schema_name
-                """).fetchall()
-
-                schema_info = {}
-                for (schema_name,) in schemas:
-                    # Get tables in this schema
-                    tables = conn.execute("""
-                        SELECT table_name, table_type
-                        FROM information_schema.tables
-                        WHERE table_schema = ? AND table_type = 'BASE TABLE'
-                        ORDER BY table_name
-                    """, [schema_name]).fetchall()
-
-                    if tables:
-                        schema_info[schema_name] = {
-                            'tables': [{'name': name, 'type': ttype} for name, ttype in tables],
-                            'table_count': len(tables)
-                        }
-
-                return {
-                    'file_path': str(db_path),
-                    'file_name': db_path.name,
-                    'schemas': schema_info,
-                    'total_tables': sum(info['table_count'] for info in schema_info.values())
-                }
-
-        except Exception as e:
-            return {
-                'file_path': str(db_path),
-                'file_name': db_path.name,
-                'error': str(e),
-                'schemas': {},
-                'total_tables': 0
-            }
+        return self.duckdb_extractor.analyze_duckdb_schema(db_path)
 
     def should_exclude_file(self, db_path: Path) -> bool:
         """Check if file should be excluded from conversion."""
-        file_name = db_path.name
-        file_stem = db_path.stem
-
-        # Check exact filename and stem
-        if file_name in self.excluded_files or file_stem in self.excluded_files:
-            return True
-
-        # Check if any exclusion pattern matches
-        for exclusion in self.excluded_files:
-            if exclusion in file_name or exclusion in file_stem:
-                return True
-
-        return False
+        return self.duckdb_extractor.should_exclude_file(db_path)
 
     def should_include_file(self, db_path: Path, include_list: List[str]) -> bool:
         """Check if file should be included in conversion."""
-        if not include_list:
-            return True  # If no include list, include all
-
-        file_name = db_path.name
-        file_stem = db_path.stem
-
-        # Check exact filename and stem
-        if file_name in include_list or file_stem in include_list:
-            return True
-
-        # Check if any include pattern matches
-        for include_pattern in include_list:
-            if include_pattern in file_name or include_pattern in file_stem:
-                return True
-
-        return False
+        return self.duckdb_extractor.should_include_file(db_path, include_list)
 
     @contextmanager
     def temporary_postgres_container(self, db_name: str, port: int = None):
@@ -440,21 +354,15 @@ exec /usr/local/bin/docker-entrypoint.sh "$@"
             self.add_exclusions(exclusion_list)
 
         # Discover DuckDB files
-        print(f"Discovering DuckDB files in {DUCKDB_SOURCE_DIR}...")
+        print(f"Discovering DuckDB files in {self.duckdb_extractor.source_dir}...")
         duckdb_files = self.discover_duckdb_files()
         print(f"Found {len(duckdb_files)} DuckDB files")
 
         # Filter files based on include/exclude logic
-        if include_list:
-            # If include list is specified, only include those files
-            filtered_files = [f for f in duckdb_files if self.should_include_file(f, include_list)]
-            print(f"Including {len(filtered_files)} files based on include list")
-        else:
-            # If no include list, exclude based on exclusion list
-            filtered_files = [f for f in duckdb_files if not self.should_exclude_file(f)]
-            excluded_count = len(duckdb_files) - len(filtered_files)
-            if excluded_count > 0:
-                print(f"Excluded {excluded_count} files based on exclusion list")
+        filtered_files = self.duckdb_extractor.filter_files(duckdb_files, include_list)
+        excluded_count = len(duckdb_files) - len(filtered_files)
+        if excluded_count > 0:
+            print(f"Excluded {excluded_count} files based on exclusion list")
 
         print(f"Processing {len(filtered_files)} files...")
 

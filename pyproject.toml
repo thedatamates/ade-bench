@@ -23,7 +23,8 @@ dependencies = [
     "openai>=1.0",
     "pandas>=2.0",
     "duckdb>=0.9",
-
+    "snowflake-connector-python>=3.0",
+    "pyarrow>=10.0",
 ]
 
 [project.optional-dependencies]

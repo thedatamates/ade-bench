@@ -1,12 +1,7 @@
-# DuckDB to PostgreSQL Converter
+# DuckDB to PostgreSQL Migration
 
-This directory contains a comprehensive script for converting DuckDB files to PostgreSQL seeds and Docker images.
+This directory contains a comprehensive script for migrating DuckDB files to PostgreSQL seeds and Docker images.
 
-## Files
-
-- `convert_duckdb_to_postgres.py` - Main conversion script
-- `example_usage.py` - Example showing how to use the converter programmatically
-- `README_duckdb_converter.md` - This documentation
 
 ## Overview
 
@@ -24,17 +19,16 @@ The converter performs the following operations:
 ```bash
 # Convert all DuckDB files (reads from shared/databases/duckdb/)
 # Run from outside project directory to avoid module conflicts
-cd /tmp
-python3 /path/to/scripts_python/convert_duckdb_to_postgres.py
+uv run scripts_python/migrate_duckdb_to_postgres.py
 
 # Dry run to see what would be converted
-python3 /path/to/scripts_python/convert_duckdb_to_postgres.py --dry-run
+uv run scripts_python/migrate_duckdb_to_postgres.py --dry-run
 
 # Convert with exclusions
-python3 /path/to/scripts_python/convert_duckdb_to_postgres.py --exclude workday test
+uv run scripts_python/migrate_duckdb_to_postgres.py --exclude workday test
 
 # Convert only specific files
-python3 /path/to/scripts_python/convert_duckdb_to_postgres.py --include activity airbnb
+uv run scripts_python/migrate_duckdb_to_postgres.py --include activity airbnb
 ```
 
 ### Advanced Usage
@@ -112,7 +106,7 @@ The script uses absolute paths, so it can be run from anywhere. It automatically
 You can also use the converter programmatically:
 
 ```python
-from convert_duckdb_to_postgres import DuckDBToPostgresConverter
+from migrate_duckdb_to_postgres import DuckDBToPostgresConverter
 
 # Create converter
 converter = DuckDBToPostgresConverter()

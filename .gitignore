@@ -61,6 +61,7 @@ package-lock.yml
 *.duckdb.wal
 /shared/databases/postgres/images/*.tar
 /shared/databases/postgres/seeds/*.tgz
+/shared/databases/snowflake/**/*.parquet
 
 # Temporary and dev files
 dev/
