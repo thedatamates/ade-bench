@@ -149,6 +149,18 @@ if __name__ == "__main__":
         default="html",
         help="Level of result logging. 'html' generates diffs and HTML dashboard (default), 'diffs_only' generates diffs only, 'none' disables both.",
     )
+    parser.add_argument(
+        "--db",
+        type=str,
+        required=True,
+        help="Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake)",
+    )
+    parser.add_argument(
+        "--project-type",
+        type=str,
+        required=True,
+        help="Project type to filter variants (e.g., dbt, other)",
+    )
     args = parser.parse_args()
 
     agent_kwargs = {}
@@ -180,6 +192,8 @@ if __name__ == "__main__":
         dataset_config=args.dataset_config,
         create_seed=args.create_seed,
         result_log_level=args.result_log_level,
+        db_type=args.db,
+        project_type=args.project_type,
     )
 
     results = harness.run()

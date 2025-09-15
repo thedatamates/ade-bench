@@ -147,21 +147,16 @@ class BenchmarkResults(BaseModel):
         return self.n_resolved / len(self.results)
 
 
-class DatabaseConfig(BaseModel):
-    """Configuration for task database."""
+class VariantConfig(BaseModel):
+    """Configuration for a task variant."""
 
-    source: str = Field(default="local", pattern="^(local|shared)$")
-    name: Optional[str] = None  # For shared databases
-    type: Optional[str] = Field(default=None, pattern="^(duckdb|sqlite|postgres)$")
-    path: Optional[str] = None  # For local databases
+    db_type: str = Field(pattern="^(duckdb|sqlite|postgres|snowflake)$")
+    db_name: str
+    project_type: str = Field(default="dbt", pattern="^(dbt|other)$")
+    project_name: str
+    migration_directory: Optional[str] = None  # Name of directory in shared/migrations
 
 
-class ProjectConfig(BaseModel):
-    """Configuration for task project."""
-
-    source: str = Field(default="local", pattern="^(local|shared)$")
-    name: Optional[str] = None  # For shared projects
-    type: str = Field(default="dbt", pattern="^(dbt|other)$")  # Project type
 
 
 class SolutionSeedConfig(BaseModel):
@@ -184,8 +179,7 @@ class TaskMetadata(BaseModel):
     timeout_seconds: int = 300
     test_type: str = "sql"
     db_type: str = "duckdb"
-    database: Optional[DatabaseConfig] = None
-    project: Optional[ProjectConfig] = None
+    variants: List[VariantConfig] = Field(default_factory=list)
 
 class TerminalCommand(BaseModel):
     command: str

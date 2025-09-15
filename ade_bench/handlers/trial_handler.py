@@ -10,7 +10,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 from ade_bench.utils.logger import logger
-from ade_bench.harness_models import DatabaseConfig, ProjectConfig, SolutionSeedConfig
+from ade_bench.harness_models import SolutionSeedConfig, VariantConfig
 from ade_bench.config import config
 
 
@@ -64,11 +64,11 @@ class Task(BaseModel):
         description="Name of the parser to use for test results",
     )
     max_agent_timeout_sec: float = Field(
-        default_factory=lambda: config.default_agent_timeout_sec, 
+        default_factory=lambda: config.default_agent_timeout_sec,
         description="Maximum timeout in seconds for the agent to run."
     )
     max_test_timeout_sec: float = Field(
-        default_factory=lambda: config.default_test_timeout_sec, 
+        default_factory=lambda: config.default_test_timeout_sec,
         description="Maximum timeout in seconds for each individual test"
     )
     test_scripts: list[str] = Field(
@@ -86,15 +86,9 @@ class Task(BaseModel):
         "you can provide an environment name. This will use the environment with the "
         "given name from the shared environment directory.",
     )
-    database: DatabaseConfig | None = Field(
-        default=None,
-        description="Database configuration for the task. Specifies whether to use "
-        "a shared database or local task-specific database.",
-    )
-    project: ProjectConfig | None = Field(
-        default=None,
-        description="Project configuration for the task. Specifies whether to use "
-        "a shared project or local task-specific project.",
+    variants: list[VariantConfig] = Field(
+        default_factory=list,
+        description="List of variants for the task. Each variant specifies database and project configurations.",
     )
     solution_seeds: list[str | dict] = Field(
         default=[],
@@ -112,7 +106,7 @@ class Task(BaseModel):
     @property
     def task_description_dict(self) -> dict[str, str]:
         return {task.key: task.description for task in self.descriptions}
-    
+
     def get_solution_seed_configs(self) -> list[SolutionSeedConfig]:
         """Parse solution_seeds into SolutionSeedConfig objects."""
         configs = []

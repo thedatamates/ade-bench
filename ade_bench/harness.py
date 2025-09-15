@@ -58,6 +58,8 @@ class Harness:
         dataset_config: Path | None = None,
         create_seed: bool = False,
         result_log_level: str = "html",
+        db_type: str | None = None,
+        project_type: str | None = None,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -89,6 +91,8 @@ class Harness:
                 - "html": Generate diffs and HTML dashboard (default)
                 - "diffs_only": Generate diffs only
                 - "none": No diffing or HTML generation
+            db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
+            project_type: Project type to filter variants (e.g., dbt, other).
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -100,6 +104,8 @@ class Harness:
         self._exclude_task_ids = exclude_task_ids
         self._create_seed = create_seed
         self._result_log_level = result_log_level
+        self._db_filter = db_type
+        self._project_type_filter = project_type
 
         self._output_path = output_path
         self._agent_name = agent_name
@@ -445,6 +451,7 @@ class Harness:
         terminal: Terminal,
         session: TmuxSession,
         trial_handler: TrialHandler,
+        config: dict | None = None,
     ) -> FailureMode:
         """Run setup.sh script if it exists in the task directory.
 
@@ -458,35 +465,68 @@ class Harness:
             self._logger.debug(f"No setup script found at {setup_script_path}")
             return FailureMode.NONE
 
-        log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
-
         # Get timeouts for this task
         timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
 
         try:
-            # Copy setup directory to container if it exists
-            if setup_dir_path.exists():
-
-                terminal.copy_to_container(
-                    paths=setup_dir_path,
-                    container_dir="/app/setup",
-                )
-
-            # Copy setup script to container (following oracle agent pattern)
+            # Copy setup script to container
             session.copy_to_container(
                 setup_script_path,
                 container_dir="/app",
                 container_filename="setup.sh",
             )
 
-            # Run the setup script (following oracle agent pattern)
+            # Copy setup directory to container if it exists
+            if setup_dir_path.exists():
+                terminal.copy_to_container(
+                    paths=setup_dir_path,
+                    container_dir="/app/setup",
+                )
+
+            # Handle migration if specified in config
+            if config and config.get("migration_directory"):
+                migration_dir_name = config["migration_directory"]
+                migration_dir_path = (
+                    Path(__file__).parent.parent / "shared" / "migrations" / migration_dir_name
+                )
+
+                if migration_dir_path.exists():
+
+                    # Copy migration script to container
+                    migration_script_path = migration_dir_path / "migration.sh"
+                    session.copy_to_container(
+                        migration_script_path,
+                        container_dir="/app",
+                        container_filename="migration.sh",
+                    )
+
+                    # Copy migration directory to container
+                    terminal.copy_to_container(
+                        paths=migration_dir_path,
+                        container_dir="/app/migration",
+                    )
+
+                    # Run migration.sh
+                    log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running migration script")
+                    session.send_keys(
+                        ["bash /app/migration.sh", "Enter"],
+                        max_timeout_sec=timeouts.setup,
+                        block=True,
+                    )
+
+                    log_harness_info(self._logger, trial_handler.task_id, "setup", "Migration complete")
+                else:
+                    self._logger.warning(f"Migration directory not found: {migration_dir_path}")
+
+            # Run setup.sh
+            log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
             session.send_keys(
                 ["bash /app/setup.sh", "Enter"],
                 max_timeout_sec=timeouts.setup,
                 block=True,
             )
 
-            log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script completed")
+            log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script complete")
 
         except TimeoutError:
             self._logger.warning(
@@ -543,6 +583,7 @@ class Harness:
     def _run_trial(
         self,
         trial_handler: TrialHandler,
+        config: dict,
     ) -> TrialResults:
         self._logger.debug(f"Running task: {trial_handler.task_id}")
 
@@ -563,88 +604,9 @@ class Harness:
             cleanup=self._cleanup,
             build_context_dir=trial_handler.input_path,
         ) as terminal:
-            # Copy database to container if specified
-            if trial_handler.task.database is not None:
-                db_config = trial_handler.task.database
-
-                if db_config.source == "shared" and db_config.name and db_config.type:
-                    # Copy shared database
-                    shared_db_path = (
-                        Path(__file__).parent.parent / "shared" / "databases" /
-                        db_config.type / f"{db_config.name}.{db_config.type}"
-                    )
-
-                    if not shared_db_path.exists():
-                        # Try alternate extensions for sqlite
-                        if db_config.type == "sqlite":
-                            for ext in ["db", "sqlite", "sqlite3"]:
-                                alt_path = shared_db_path.with_suffix(f".{ext}")
-                                if alt_path.exists():
-                                    shared_db_path = alt_path
-                                    break
-
-                    if shared_db_path.exists():
-                        self._logger.debug(f"Copying shared database {shared_db_path} to container")
-                        terminal.copy_to_container(
-                            paths=shared_db_path,
-                            container_dir="/app",
-                            container_filename=shared_db_path.name
-                        )
-                    else:
-                        self._logger.warning(f"Shared database not found: {shared_db_path}")
-
-                elif db_config.source == "local" and db_config.path:
-                    # Copy local database from task directory
-                    local_db_path = trial_handler.input_path / db_config.path
-                    if local_db_path.exists():
-                        self._logger.debug(f"Copying local database {local_db_path} to container")
-                        if local_db_path.is_dir():
-                            # Copy entire directory
-                            terminal.copy_to_container(
-                                paths=local_db_path,
-                                container_dir="/app"
-                            )
-                        else:
-                            # Copy single file
-                            terminal.copy_to_container(
-                                paths=local_db_path,
-                                container_dir="/app",
-                                container_filename=local_db_path.name
-                            )
-                    else:
-                        self._logger.warning(f"Local database not found: {local_db_path}")
-
-            # Copy project to container if specified
-            if trial_handler.task.project is not None:
-                project_config = trial_handler.task.project
-
-                if project_config.source == "shared" and project_config.name:
-                    # Copy shared project
-                    shared_project_path = (
-                        Path(__file__).parent.parent / "shared" / "projects" /
-                        project_config.type / project_config.name
-                    )
-
-                    if shared_project_path.exists():
-                        self._logger.debug(f"Copying shared project {shared_project_path} to container")
-                        terminal.copy_to_container(
-                            paths=shared_project_path,
-                            container_dir="/app"
-                        )
-                    else:
-                        self._logger.warning(f"Shared project not found: {shared_project_path}")
-
-                elif project_config.source == "local":
-                    # Copy local project from task directory
-                    local_project_path = trial_handler.input_path / "dbt_project"
-                    if local_project_path.exists():
-                        self._logger.debug(f"Copying local project {local_project_path} to container")
-                        terminal.copy_to_container(
-                            paths=local_project_path,
-                            container_dir="/app"
-                        )
-                    else:
-                        self._logger.warning(f"Local project not found: {local_project_path}")
+            # Setup database and project based on config
+            self._setup_db_resources(terminal, config)
+            self._setup_project_resources(terminal, config)
 
             gitignore_path = Path(__file__).parent.parent / "shared" / "defaults" / ".gitignore"
             if gitignore_path.exists():
@@ -682,7 +644,7 @@ class Harness:
                     log_harness_info(self._logger, trial_handler.task_id, "setup", "Captured snapshot")
 
             # Run setup script if it exists
-            setup_failure_mode = self._run_setup_script(terminal, session, trial_handler)
+            setup_failure_mode = self._run_setup_script(terminal, session, trial_handler, config=config)
 
             # If setup failed with timeout, stop the task immediately
             if setup_failure_mode == FailureMode.SETUP_TIMEOUT:
@@ -825,6 +787,55 @@ class Harness:
             self._logger.debug(f"Unresolved task {trial_handler.task_id}")
 
         return results
+
+    def _setup_db_resources(self, terminal: Terminal, config: dict) -> None:
+        """Setup database based on database/project configuration."""
+        # Copy shared database
+        db_type = config.get("db_type")
+        db_name = config.get("db_name")
+
+        if db_type == "duckdb":
+            shared_db_path = (
+                Path(__file__).parent.parent / "shared" / "databases" /
+                "duckdb" / f"{db_name}.duckdb"
+            )
+
+            if shared_db_path.exists():
+                self._logger.debug(f"Copying shared database {shared_db_path} to container")
+                terminal.copy_to_container(
+                    paths=shared_db_path,
+                    container_dir="/app",
+                    container_filename=shared_db_path.name
+                )
+            else:
+                self._logger.warning(f"Shared database not found: {shared_db_path}")
+
+        else:
+            self._logger.info(f"No setup required for {db_type}")
+
+    def _setup_project_resources(self, terminal: Terminal, config: dict) -> None:
+        """Setup project resources based on database/project configuration."""
+        # Copy shared project
+        project_type = config.get("project_type")
+        project_name = config.get("project_name")
+
+        ## dbt and dbt fusion projects use the same path
+        project_type_path = 'dbt' if project_type == 'dbt-fusion' else project_type
+
+        if project_name:
+            shared_project_path = (
+                Path(__file__).parent.parent / "shared" / "projects" /
+                project_type_path / project_name
+            )
+
+            if shared_project_path.exists():
+                self._logger.debug(f"Copying shared project {shared_project_path} to container")
+                terminal.copy_to_container(
+                    paths=shared_project_path,
+                    container_dir="/app"
+                )
+            else:
+                self._logger.warning(f"Shared project not found: {shared_project_path}")
 
     def _extract_table_schema(self, con, table_name: str) -> dict:
         """Extract schema information from a database table."""
@@ -1109,12 +1120,14 @@ class Harness:
         trial_name: str,
         task_path: Path,
         task_key: str,
+        config: dict,
     ) -> TrialResults:
         """Execute a single task and return its results.
 
         Args:
             task_path: Path to the task directory
-            task_key: Optional key for the specific task variant
+            task_key: Optional key for the specific task config
+            config: Optional database/project configuration dict
 
         Returns:
             TrialResults: The results of the trial execution
@@ -1127,7 +1140,7 @@ class Harness:
         )
 
         try:
-            trial_results = self._run_trial(trial_handler)
+            trial_results = self._run_trial(trial_handler, config)
 
             trial_handler.results_path.write_text(
                 trial_results.model_dump_json(indent=4)
@@ -1160,12 +1173,46 @@ class Harness:
     def _execute_tasks(self) -> BenchmarkResults:
         """Execute all tasks in parallel and collect their results."""
         results = BenchmarkResults()
-        max_workers = min(len(self._dataset), self._n_concurrent_trials)
+
+        # Get tasks that have matching database and project type
+        all_tasks = self._dataset
+        matching_tasks = []
+
+        for task_path, task_key in all_tasks:
+            trial_handler = TrialHandler(
+                trial_name="temp",
+                input_path=task_path,
+                task_key=task_key,
+            )
+            variants = [config.model_dump() for config in trial_handler.task.variants]
+
+            # Find the matching config
+            matching_config = None
+            for variant in variants:
+                if variant.get("db_type") == self._db_filter and variant.get("project_type") == self._project_type_filter:
+                    matching_config = variant
+                    break
+
+            if matching_config:
+                matching_tasks.append((task_path, task_key, matching_config))
+
+        # Log filtering summary
+        total_tasks = len(self._dataset)
+        matching_count = len(matching_tasks)
+        log_harness_info(self._logger, "HARNESS", "start", f"Running with {self._db_filter} + {self._project_type_filter}. Found {matching_count} tasks of {total_tasks} requested tasks.")
+
+        if not matching_tasks:
+            self._logger.warning("No tasks have matching database and project type configurations")
+            return results
+
+        # Calculate total number of tasks (matching tasks * attempts)
+        total_tasks = len(matching_tasks) * self._n_attempts
+        max_workers = min(total_tasks, self._n_concurrent_trials)
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # For each task and attempt, create a future
+            # For each matching task and attempt, create a future
             future_to_task = {}
-            for task_path, task_key in self._dataset:
+            for task_path, task_key, config in matching_tasks:
                 for attempt in range(1, self._n_attempts + 1):
                     trial_name = self._get_trial_name(task_path, task_key, attempt)
                     future = executor.submit(
@@ -1173,11 +1220,11 @@ class Harness:
                         trial_name=trial_name,
                         task_path=task_path,
                         task_key=task_key,
+                        config=config,
                     )
                     future_to_task[future] = (trial_name, attempt)
 
             # Track progress
-            total_tasks = len(self._dataset) * self._n_attempts
             completed_tasks = 0
 
             for future in as_completed(future_to_task):

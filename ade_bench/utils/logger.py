@@ -18,7 +18,7 @@ def log_harness_info(
 ) -> None:
     """
     Centralized info logging function for the harness.
-    
+
     Args:
         logger: The logger instance to use
         task: The task being run
@@ -35,8 +35,11 @@ def log_harness_info(
         ## SETUP
         "Capturing initial file snapshot...": "* · ·  Capturing initial file snapshot...",''
         "Captured snapshot": "* · ·  Captured snapshot.",
+        "Captured snapshot": "* · ·  Captured snapshot.",
+        "Running migration script": "* · ·  Running migration script...",
+        "Migration script complete": "* · ·  Migration script complete.",
         "Running setup script": "* · ·  Running setup script...",
-        "Setup script completed": "* · ·  Setup script completed.",
+        "Setup script complete": "* · ·  Setup script complete.",
         "Diffing the setup changes...": "* · ·  Diffing the setup changes...",
         "Captured setup diffs:": "✓ · ·  Captured setup diffs:",
         ## AGENT
@@ -58,14 +61,14 @@ def log_harness_info(
     }
 
     message_parts = message.split("|||")
-    
+
     # Transform the first part if it exists in mapping
     if message_parts[0] in message_transforms:
         message_parts[0] = message_transforms[message_parts[0]]
-    
+
     # Rejoin the parts
     message = " ".join(message_parts)
-        
+
     formatted_message = f"{timestamp.strftime('%H:%M:%S'):<8} | {task:<40} | {stage.upper():<12} | {message}"
     logger.info(formatted_message)
 
