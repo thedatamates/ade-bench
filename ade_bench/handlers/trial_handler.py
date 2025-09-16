@@ -163,11 +163,13 @@ class TrialHandler:
         input_path: Path,
         output_path: Path | None = None,
         task_key: str = "base",
+        variant_config: dict | None = None,
     ):
         self.trial_name = trial_name
         self.input_path = input_path
         self.output_path = output_path
         self.task_key = task_key
+        self.variant_config = variant_config or {}
 
         self._logger = logger.getChild(__name__)
         self.task = Task.from_yaml(self._task_config_path)
@@ -245,6 +247,16 @@ class TrialHandler:
         task_docker_compose_path = self.input_path / "docker-compose.yaml"
 
         if not task_docker_compose_path.exists():
+            # Try to use database-specific compose file based on variant config
+            db_type = self.variant_config.get("db_type")
+            if db_type:
+                db_specific_compose = self._defaults_path / f"docker-compose-{db_type}.yaml"
+                if db_specific_compose.exists():
+                    self._logger.debug(
+                        f"Using database-specific docker-compose file: {db_specific_compose}"
+                    )
+                    return db_specific_compose
+
             self._logger.debug(
                 f"No docker-compose.yaml file found for task {self.task_id}, using "
                 "default docker-compose.yaml."

@@ -144,10 +144,9 @@ if __name__ == "__main__":
         default="",
     )
     parser.add_argument(
-        "--result-log-level",
-        choices=["html", "diffs_only", "none"],
-        default="html",
-        help="Level of result logging. 'html' generates diffs and HTML dashboard (default), 'diffs_only' generates diffs only, 'none' disables both.",
+        "--disable-diffs",
+        action="store_true",
+        help="Disable file diffing and HTML generation.",
     )
     parser.add_argument(
         "--db",
@@ -196,7 +195,7 @@ if __name__ == "__main__":
         n_attempts=args.n_attempts,
         dataset_config=args.dataset_config,
         create_seed=args.create_seed,
-        result_log_level=args.result_log_level,
+        disable_diffs=args.disable_diffs,
         db_type=args.db,
         project_type=args.project_type,
         keep_alive=args.keep_alive,

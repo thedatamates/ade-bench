@@ -100,8 +100,10 @@ def _create_user_and_role(task_id: str) -> bool:
 
             # Grant privileges to the role
             grants_query = f"""
+                GRANT USAGE ON WAREHOUSE {creds['warehouse']} to {creds['role']};
                 GRANT USAGE ON DATABASE {creds['database']} TO ROLE {creds['role']};
                 GRANT CREATE SCHEMA ON DATABASE {creds['database']} TO ROLE {creds['role']};
+                GRANT CREATE TABLE ALL SCHEMAS IN DATABASE {creds['database']} TO ROLE {creds['role']};
                 GRANT USAGE, MODIFY ON ALL SCHEMAS IN DATABASE {creds['database']} TO ROLE {creds['role']};
                 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {creds['database']}.PUBLIC TO ROLE {creds['role']};
             """
@@ -123,9 +125,8 @@ def _create_user_and_role(task_id: str) -> bool:
         return False
 
 
-def setup_snowflake(terminal, session, variant: Dict[str, Any]) -> None:
+def setup_snowflake(terminal, session, task_id: str, variant: Dict[str, Any]) -> None:
     """Setup Snowflake by cloning database and creating user/role."""
-    task_id = variant.get('task_id')
     source_db = variant.get('db_name')
 
     # Clone the database

@@ -16,7 +16,7 @@ def _update_snowflake_creds(path: str, project_name: str, task_id: str) -> None:
     with open(path) as f:
         profiles = yaml.safe_load(f)
 
-    profiles[profile_name]['outputs']['dev']['account'] = creds['account']
+    profiles[profile_name]['outputs']['dev']['account'] = creds['account'].replace('.snowflakecomputing.com', '')
     profiles[profile_name]['outputs']['dev']['user'] = creds['user']
     profiles[profile_name]['outputs']['dev']['password'] = creds['password']
     profiles[profile_name]['outputs']['dev']['role'] = creds['role']
@@ -60,7 +60,7 @@ def _update_snowflake_files(session, project_name: str, task_id: str, project_di
 
 
 
-def setup_dbt_project(terminal, session, variant: Dict[str, Any], task_id: str = None) -> None:
+def setup_dbt_project(terminal, session, task_id: str, variant: Dict[str, Any]) -> None:
     """Setup dbt project by copying project files."""
     project_name = variant.get('project_name')
     project_type = variant.get('project_type')

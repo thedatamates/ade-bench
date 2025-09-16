@@ -33,7 +33,7 @@ class SetupOrchestrator:
             setup_duckdb(self.terminal, self.session, variant)
         elif db_type == 'snowflake':
             log_harness_info(self.logger, task_id, "setup", f"Setting up Snowflake database at|||{variant.get('db_name')}...")
-            setup_snowflake(self.terminal, self.session, variant)
+            setup_snowflake(self.terminal, self.session, task_id,variant)
             log_harness_info(self.logger, task_id, "setup", f"Snowflake setup complete.")
 
 
@@ -41,7 +41,7 @@ class SetupOrchestrator:
         project_type = variant.get('project_type')
         if project_type in ['dbt', 'dbt-fusion']:
             log_harness_info(self.logger, task_id, "setup", f"Setting up dbt project...")
-            setup_dbt_project(self.terminal, self.session, variant, task_id)
+            setup_dbt_project(self.terminal, self.session, task_id, variant)
 
 
         # Take snapshot after migrations but before main setup script

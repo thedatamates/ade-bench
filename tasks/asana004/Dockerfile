@@ -7,7 +7,9 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir \
     dbt-core==1.9.6 \
     dbt-duckdb==1.9.3 \
-    duckdb==1.3.0
+    duckdb==1.3.0 \
+    dbt-snowflake==1.10.2 \
+    snowflake-connector-python==3.11.0
 
 # Set up workspace
 WORKDIR /app

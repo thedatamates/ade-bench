@@ -58,7 +58,7 @@ class Harness:
         n_attempts: int = 1,
         dataset_config: Path | None = None,
         create_seed: bool = False,
-        result_log_level: str = "html",
+        disable_diffs: bool = False,
         db_type: str | None = None,
         project_type: str | None = None,
         keep_alive: bool = False,
@@ -89,10 +89,7 @@ class Harness:
             dataset_config: Path to a YAML configuration file for the dataset.
                 If provided, this will override dataset_path, task_ids, n_tasks,
                 and exclude_task_ids.
-            result_log_level: Level of result logging. Options:
-                - "html": Generate diffs and HTML dashboard (default)
-                - "diffs_only": Generate diffs only
-                - "none": No diffing or HTML generation
+            disable_diffs: If True, disables file diffing and HTML generation.
             db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
             project_type: Project type to filter variants (e.g., dbt, other).
             keep_alive: If True, keep containers alive when tasks fail for debugging.
@@ -106,7 +103,7 @@ class Harness:
         self._task_ids = task_ids
         self._exclude_task_ids = exclude_task_ids
         self._create_seed = create_seed
-        self._result_log_level = result_log_level
+        self._disable_diffs = disable_diffs
         self._db_filter = db_type
         self._project_type_filter = project_type
         self._keep_alive = keep_alive
@@ -543,7 +540,7 @@ class Harness:
 
             # Initialize file diffing if enabled
             file_diff_handler = None
-            if self._result_log_level in ["html", "diffs_only"]:
+            if not self._disable_diffs:
                 # Use task-level exclusions if available, otherwise use global config
                 exclude_paths = (
                     trial_handler.task.file_diff_exclude_paths
@@ -1004,6 +1001,7 @@ class Harness:
             input_path=task_path,
             output_path=self._run_path,
             task_key=task_key,
+            variant_config=config,
         )
 
         try:
@@ -1129,7 +1127,7 @@ class Harness:
         self._update_metadata_on_end(results=results)
 
         # Generate HTML results dashboard
-        if self._result_log_level == "html":
+        if not self._disable_diffs:
             try:
                 from scripts_python.generate_results_html import ResultsHTMLGenerator
                 generator = ResultsHTMLGenerator(self._run_path)

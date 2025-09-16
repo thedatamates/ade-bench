@@ -81,10 +81,11 @@ uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
 
 ## Docker Setup
 
-Three base images provided:
+Four base images provided:
 - `Dockerfile.dbt-duckdb`: For DuckDB-based tasks
 - `Dockerfile.dbt-sqlite`: For SQLite-based tasks
 - `Dockerfile.dbt-postgres`: For PostgreSQL-based tasks
+- `Dockerfile.dbt-snowflake`: For Snowflake-based tasks
 
 Default docker-compose files handle:
 - Container networking
@@ -95,6 +96,7 @@ Database support:
 - **DuckDB**: File-based, great for analytical workloads
 - **SQLite**: File-based, lightweight and simple
 - **PostgreSQL**: Server-based, full-featured RDBMS
+- **Snowflake**: Cloud-based data warehouse with dbt integration
 
 ## Shared Database System
 
@@ -106,6 +108,7 @@ shared/databases/
 ├── duckdb/       # DuckDB database files
 ├── sqlite/       # SQLite database files
 ├── postgres/     # PostgreSQL initialization scripts
+├── snowflake/    # Snowflake initialization scripts
 └── catalog.yaml  # Database metadata
 ```
 
