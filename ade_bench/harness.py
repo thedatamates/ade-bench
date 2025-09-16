@@ -751,15 +751,21 @@ class Harness:
 
         log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables:|||{tables_to_extract}")
 
+        # Get the current running variant information directly from the trial handler
+        variant_db_type = trial_handler.variant_config.get('db_type', '')
+        variant_db_name = trial_handler.variant_config.get('db_name', '')
+
+        if variant_db_type == 'duckdb':
+            self._extract_duckdb_csv(terminal, trial_handler, variant_db_name, tables_to_extract, task_config)
+        else:
+            log_harness_info(self._logger, trial_handler.task_id, "seed", f"CSV extraction not supported for db_type:|||{variant_db_type}")
+
+    def _extract_duckdb_csv(self, terminal: Terminal, trial_handler: TrialHandler, db_name: str, tables_to_extract: list, task_config: dict) -> None:
+        """Extract CSV files from DuckDB database."""
         # Create output directory
         task_seeds_dir = trial_handler.input_path / "seeds"
         task_seeds_dir.mkdir(parents=True, exist_ok=True)
 
-        # Get database type and name
-        # db_type = task_config.get('db_type', 'duckdb')
-        db_name = task_config.get('database', {}).get('name', '')
-
-        # Use docker cp command to copy database file
         try:
             import tempfile
             import os
@@ -808,7 +814,7 @@ class Harness:
                 if all_schemas:
                     no_op_path = task_seeds_dir / "_no-op.txt"
 
-                    # Get project name from task config
+                    # Get project name from current variant
                     project_name = task_config.get('project', {}).get('name', 'default')
 
                     # Create the seeds section in proper YAML format
@@ -829,6 +835,7 @@ class Harness:
                             '+column_types': column_types
                         }
 
+                    import yaml
                     with open(no_op_path, 'w') as f:
                         f.write('\n\n')  # Add two blank lines at the start
                         yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)

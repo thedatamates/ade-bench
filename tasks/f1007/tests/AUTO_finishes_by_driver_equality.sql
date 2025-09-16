@@ -1,5 +1,5 @@
 -- Define columns to compare
-{% set table_name = 'most_laps' %}
+{% set table_name = 'finishes_by_driver' %}
 
 {% set cols_to_include = [
     

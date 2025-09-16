@@ -62,9 +62,10 @@ def log_harness_info(
         "dbt test summary:": "✓ ✓ ✓  ",
 
         ## SEED
-        "Extracting tables:": "✓ ✓ ⤴  Extracting tables:",
-        "Exported": "✓ ✓ ⤴  Exported",
-        "Generated _no-op.txt file:": "✓ ✓ ⤴  Generated _no-op.txt file:",
+        "Extracting tables:": "✓ ✓ ⤴  ",
+        "Exported": "✓ ✓ ⤴  ",
+        "Generated _no-op.txt file:": "✓ ✓ ⤴  ",
+        "CSV extraction not supported for db_type:": "✓ ✓ ⤴  ",
     }
 
     message_parts = message.split("|||")

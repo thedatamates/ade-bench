@@ -27,4 +27,4 @@ variants:
 - db_type: duckdb
   db_name: analytics_engineering
   project_type: dbt
-  project_name: analytics_engineering
+  project_name: empty

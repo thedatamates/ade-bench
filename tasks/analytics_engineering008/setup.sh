@@ -1,3 +1,1 @@
 #!/bin/bash
-
-rm -r *
