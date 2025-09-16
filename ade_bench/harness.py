@@ -50,7 +50,6 @@ class Harness:
         cleanup: bool = False,
         log_level: int = logging.INFO,
         task_ids: list[str] | None = None,
-        n_tasks: int | None = None,
         max_episodes: int = 50,
         upload_results: bool = False,
         n_concurrent_trials: int = 4,
@@ -78,7 +77,6 @@ class Harness:
             cleanup: Whether to remove the Docker image after the run.
             log_level: The logging level to use (debug, info, warning, error, critical).
             task_ids: The IDs of the tasks to run. If None, all tasks will be run.
-            n_tasks: The number of tasks to run. If None, all tasks will be run.
             max_episodes: The maximum number of episodes to run for the
                 interactive agent.
             upload_results: Whether to upload results to S3.
@@ -87,7 +85,7 @@ class Harness:
             exclude_task_ids: List of task IDs to exclude from the run.
             n_attempts: Number of attempts to make for each task.
             dataset_config: Path to a YAML configuration file for the dataset.
-                If provided, this will override dataset_path, task_ids, n_tasks,
+                If provided, this will override dataset_path, task_ids,
                 and exclude_task_ids.
             disable_diffs: If True, disables file diffing and HTML generation.
             db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
@@ -99,7 +97,6 @@ class Harness:
 
         self._dataset_path = dataset_path
         self._dataset_config = dataset_config
-        self._n_tasks = n_tasks
         self._task_ids = task_ids
         self._exclude_task_ids = exclude_task_ids
         self._create_seed = create_seed
@@ -164,20 +161,16 @@ class Harness:
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 
     def _init_dataset(self) -> None:
-        if self._dataset_config:
-            if self._task_ids or self._n_tasks:
-                raise ValueError(
-                    "Cannot specify both dataset_config and task_ids/n_tasks"
-                )
-
-            self._dataset = Dataset.from_yaml(self._dataset_config)
-        else:
+        if self._task_ids:
+            # Use task_ids when specific tasks are provided
             self._dataset = Dataset(
                 dataset_path=self._dataset_path,
                 task_ids=self._task_ids,
-                n_tasks=self._n_tasks,
                 exclude_task_ids=self._exclude_task_ids,
             )
+        else:
+            # Use YAML config when no specific task_ids are provided (i.e., "all" was used)
+            self._dataset = Dataset.from_yaml(self._dataset_config)
 
     def _init_logger(self) -> None:
         file_handler = logging.FileHandler(self._log_output_path)
@@ -955,7 +948,6 @@ class Harness:
             log_level=self._log_level,
             task_ids=self._dataset.task_ids,
             exclude_task_ids=self._exclude_task_ids,
-            n_tasks=self._n_tasks,
             n_concurrent_trials=self._n_concurrent_trials,
             n_attempts=self._n_attempts,
             max_episodes=self._max_episodes,

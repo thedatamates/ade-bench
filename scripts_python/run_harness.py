@@ -14,19 +14,6 @@ from scripts_python.summarize_results import display_detailed_results
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    dataset_group = parser.add_mutually_exclusive_group()
-    dataset_group.add_argument(
-        "--dataset-path",
-        type=Path,
-        default=Path("tasks"),
-        help="Path to the dataset directory",
-    )
-    dataset_group.add_argument(
-        "--dataset-config",
-        type=Path,
-        help="Path to a YAML configuration file for the dataset",
-    )
-
     parser.add_argument(
         "--output-path",
         type=Path,
@@ -34,19 +21,12 @@ if __name__ == "__main__":
         help="Path to the output directory",
     )
 
-    task_group = parser.add_mutually_exclusive_group()
-    task_group.add_argument(
+    parser.add_argument(
         "-t", "--tasks",
         type=str,
         nargs="+",
-        help=("Task ID(s) to run. Cannot be used with --n-tasks or --dataset-config"),
-    )
-    task_group.add_argument(
-        "--n-tasks",
-        type=int,
-        help=(
-            "Number of tasks to run. Cannot be used with --tasks or --dataset-config"
-        ),
+        required=True,
+        help=("Task ID(s) to run. Use 'all' to run all tasks from the YAML configuration"),
     )
 
     parser.add_argument(
@@ -167,17 +147,25 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # Handle special case for "all" - load from YAML config
+    dataset_config = Path("datasets/ade-bench-core.yaml")
+    dataset_path = Path("tasks")
+    task_ids = args.tasks
+
+    if len(args.tasks) == 1 and args.tasks[0].lower() == "all":
+        task_ids = None
+
     agent_kwargs = {}
 
     match args.agent:
         case AgentName.ORACLE:
-            agent_kwargs["dataset_path"] = args.dataset_path
+            agent_kwargs["dataset_path"] = dataset_path
         case _:
             if args.agent_args:
                 agent_kwargs["additional_args"] = args.agent_args
 
     harness = Harness(
-        dataset_path=args.dataset_path,
+        dataset_path=dataset_path,
         output_path=args.output_path,
         run_id=args.run_id,
         agent_name=args.agent,
@@ -186,14 +174,13 @@ if __name__ == "__main__":
         no_rebuild=args.no_rebuild,
         cleanup=args.cleanup,
         log_level=args.log_level,
-        task_ids=args.tasks,
-        n_tasks=args.n_tasks,
+        task_ids=task_ids,
         max_episodes=args.max_episodes,
         upload_results=args.upload_results,
         n_concurrent_trials=args.n_concurrent_trials,
         exclude_task_ids=set(args.exclude_tasks) if args.exclude_tasks else None,
         n_attempts=args.n_attempts,
-        dataset_config=args.dataset_config,
+        dataset_config=dataset_config,
         create_seed=args.create_seed,
         disable_diffs=args.disable_diffs,
         db_type=args.db,
