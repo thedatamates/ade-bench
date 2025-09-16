@@ -25,7 +25,7 @@ descriptions:
       - time_to_first_response_minutes
       - time_to_first_close_minutes
       - time_to_last_close_minutes
-      
+
       All the "time_to" metrics should be calculated in minutes, rounded to 2 decimal places.
 author_name: test
 author_email: test
@@ -48,14 +48,9 @@ test_setup: |-
 solution_seeds:
   - table_name: intercom__conversation_metrics
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: intercom
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: intercom
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: intercom
+  project_type: dbt
+  project_name: intercom

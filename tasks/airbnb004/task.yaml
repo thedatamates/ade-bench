@@ -13,19 +13,14 @@ difficulty: medium
 category: data-transformation
 tags:
   - dbt
-  - macros  
+  - macros
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: airbnb
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: airbnb
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: airbnb
+  project_type: dbt
+  project_name: airbnb

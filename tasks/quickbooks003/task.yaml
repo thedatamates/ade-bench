@@ -34,14 +34,9 @@ solution_seeds:
     - source_relation
     - customer_vendor_address_line
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: quickbooks
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: quickbooks
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: quickbooks
+  project_type: dbt
+  project_name: quickbooks

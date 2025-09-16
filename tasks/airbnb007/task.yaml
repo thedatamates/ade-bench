@@ -12,7 +12,7 @@ difficulty: hard
 category: model-creation
 tags:
   - dbt
-  - naming 
+  - naming
 timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
@@ -25,14 +25,9 @@ solution_seeds:
   - table_name: daily_agg_nps_reviews
   - table_name: listing_agg_nps_reviews
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: airbnb
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: airbnb
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: airbnb
+  project_type: dbt
+  project_name: airbnb

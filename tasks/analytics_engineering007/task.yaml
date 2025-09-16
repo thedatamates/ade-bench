@@ -41,14 +41,9 @@ solution_seeds:
     exclude_columns:
       - insertion_timestamp
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: analytics_engineering
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: analytics_engineering
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: analytics_engineering
+  project_type: dbt
+  project_name: analytics_engineering
