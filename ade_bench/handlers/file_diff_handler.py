@@ -391,7 +391,10 @@ class FileDiffHandler:
             return
 
         # Capture snapshot
+        log_harness_info(self._logger, self.task_name, phase, f"Capturing snapshot...")
         snapshot = self.capture_snapshot(container)
+        log_harness_info(self._logger, self.task_name, phase, f"Captured snapshot.")
+
         if snapshot and self.get_snapshot_count() >= 2:
             # Create diff with previous snapshot
             log_harness_info(self._logger, self.task_name, phase, f"Diffing the {phase} changes...")
@@ -402,7 +405,6 @@ class FileDiffHandler:
             if diff:
                 diff_summary = f"Captured {phase} diffs:|||{len(diff.added_files)} added, {len(diff.removed_files)} removed, {len(diff.modified_files)} modified files"
                 log_harness_info(self._logger, self.task_name, phase, diff_summary)
-
 
                 # Save detailed diff info to trial log
                 self._save_diff_to_trial_log(phase, diff)

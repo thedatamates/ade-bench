@@ -5,7 +5,7 @@ asana-duckdb:
       type: duckdb
       path: "./asana.duckdb"
 
-asana-snowfalke:
+asana-snowflake:
   target: dev
   outputs:
     dev:

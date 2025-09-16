@@ -138,6 +138,15 @@ class DockerComposeManager:
         except Exception as e:
             self._logger.error(f"Error cleaning up docker compose services: {e}")
 
+    def stop_services_only(self) -> None:
+        """Stop docker compose services but keep containers alive for debugging."""
+        try:
+            # Just stop the services without removing containers
+            self._run_docker_compose_command(["stop"])
+            self._logger.info("Docker compose services stopped. Containers kept alive for debugging.")
+        except Exception as e:
+            self._logger.error(f"Error stopping docker compose services: {e}")
+
     @staticmethod
     def _create_tar_archive(
         paths: list[Path], container_filename: str | None

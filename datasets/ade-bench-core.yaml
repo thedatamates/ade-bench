@@ -19,16 +19,16 @@ task_ids:
   # - analytics_engineering005
   # - analytics_engineering006
   # - analytics_engineering007
-  # - asana001
-  # - asana002
-  # - asana003
-  # - asana004
-  # - asana005
+  - asana001
+  - asana002
+  - asana003
+  - asana004
+  - asana005
   # - empty001
   # - f1001
-  - f1002
+  # - f1002
   # - f1003
-  - f1004
+  # - f1004
   # - f1005
   # - f1006
   # - f1007

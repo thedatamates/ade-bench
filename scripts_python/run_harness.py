@@ -161,6 +161,11 @@ if __name__ == "__main__":
         required=True,
         help="Project type to filter variants (e.g., dbt, other)",
     )
+    parser.add_argument(
+        "--keep-alive",
+        action="store_true",
+        help="Keep containers alive when tasks fail for debugging",
+    )
     args = parser.parse_args()
 
     agent_kwargs = {}
@@ -194,6 +199,7 @@ if __name__ == "__main__":
         result_log_level=args.result_log_level,
         db_type=args.db,
         project_type=args.project_type,
+        keep_alive=args.keep_alive,
     )
 
     results = harness.run()

@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir \
 # Set up workspace
 WORKDIR /app
 
-CMD ["bash"] 
+CMD ["bash"]

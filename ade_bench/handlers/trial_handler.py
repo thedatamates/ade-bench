@@ -205,8 +205,8 @@ class TrialHandler:
     @property
     def docker_image_prefix(self) -> str:
         if self.task.env_name is not None:
-            return f"t-bench__env__{self.task.env_name}"
-        return f"t-bench__{self.task_id}".replace(".", "-")
+            return f"ade-bench__env__{self.task.env_name}"
+        return f"ade-bench__{self.task_id}".replace(".", "-")
 
     @property
     def client_container_name(self) -> str:

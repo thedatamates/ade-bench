@@ -25,6 +25,7 @@ from ade_bench.harness_models import (
     RunMetadata,
     TrialResults,
 )
+from ade_bench.setup.setup_orchestrator import SetupOrchestrator
 from ade_bench.llms.base_llm import ContextLengthExceededError, ParseError
 from ade_bench.parsers.base_parser import UnitTestStatus
 from ade_bench.terminal.docker_compose_manager import DockerComposeManager
@@ -60,6 +61,7 @@ class Harness:
         result_log_level: str = "html",
         db_type: str | None = None,
         project_type: str | None = None,
+        keep_alive: bool = False,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -93,6 +95,7 @@ class Harness:
                 - "none": No diffing or HTML generation
             db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
             project_type: Project type to filter variants (e.g., dbt, other).
+            keep_alive: If True, keep containers alive when tasks fail for debugging.
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -106,6 +109,10 @@ class Harness:
         self._result_log_level = result_log_level
         self._db_filter = db_type
         self._project_type_filter = project_type
+        self._keep_alive = keep_alive
+
+        # Initialize setup orchestrator for variant-specific setup
+        self._setup_orchestrator = SetupOrchestrator()
 
         self._output_path = output_path
         self._agent_name = agent_name
@@ -446,139 +453,55 @@ class Harness:
 
         return None, FailureMode.NONE
 
-    def _run_setup_script(
+    # COMPREHENSIVE SETUP SCRIPT
+    def _run_setup(
         self,
         terminal: Terminal,
         session: TmuxSession,
         trial_handler: TrialHandler,
-        config: dict | None = None,
+        config: dict,
+        file_diff_handler=None,
     ) -> FailureMode:
-        """Run setup.sh script if it exists in the task directory.
-
-        Returns:
-            FailureMode indicating success or type of failure
         """
-        setup_script_path = trial_handler.input_path / "setup.sh"
-        setup_dir_path = trial_handler.input_path / "setup"
+        Run comprehensive setup including files, migration, and scripts.
+        """
+        import asyncio
+        from .utils.timeout_manager import TimeoutManager
 
-        if not setup_script_path.exists():
-            self._logger.debug(f"No setup script found at {setup_script_path}")
+        # Get timeout for setup
+        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
+
+        try:
+            # Create setup orchestrator with terminal and session for harness-specific operations
+            setup_orchestrator = SetupOrchestrator(
+                logger=self._logger,
+                terminal=terminal,
+                session=session,
+                file_diff_handler=file_diff_handler
+            )
+
+            # Run setup with timeout using asyncio
+            async def run_setup():
+                loop = asyncio.get_event_loop()
+                task = loop.run_in_executor(
+                    None,
+                    setup_orchestrator.setup_task,
+                    trial_handler.task_id,
+                    config
+                )
+                return await asyncio.wait_for(task, timeout=timeouts.setup)
+
+            # Run the async function
+            asyncio.run(run_setup())
+
             return FailureMode.NONE
 
-        # Get timeouts for this task
-        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
-
-        try:
-            # Copy setup script to container
-            session.copy_to_container(
-                setup_script_path,
-                container_dir="/app",
-                container_filename="setup.sh",
-            )
-
-            # Copy setup directory to container if it exists
-            if setup_dir_path.exists():
-                terminal.copy_to_container(
-                    paths=setup_dir_path,
-                    container_dir="/app/setup",
-                )
-
-            # Handle migration if specified in config
-            if config and config.get("migration_directory"):
-                migration_dir_name = config["migration_directory"]
-                migration_dir_path = (
-                    Path(__file__).parent.parent / "shared" / "migrations" / migration_dir_name
-                )
-
-                if migration_dir_path.exists():
-
-                    # Copy migration script to container
-                    migration_script_path = migration_dir_path / "migration.sh"
-                    session.copy_to_container(
-                        migration_script_path,
-                        container_dir="/app",
-                        container_filename="migration.sh",
-                    )
-
-                    # Copy migration directory to container
-                    terminal.copy_to_container(
-                        paths=migration_dir_path,
-                        container_dir="/app/migration",
-                    )
-
-                    # Run migration.sh
-                    log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running migration script")
-                    session.send_keys(
-                        ["bash /app/migration.sh", "Enter"],
-                        max_timeout_sec=timeouts.setup,
-                        block=True,
-                    )
-
-                    log_harness_info(self._logger, trial_handler.task_id, "setup", "Migration complete")
-                else:
-                    self._logger.warning(f"Migration directory not found: {migration_dir_path}")
-
-            # Run setup.sh
-            log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
-            session.send_keys(
-                ["bash /app/setup.sh", "Enter"],
-                max_timeout_sec=timeouts.setup,
-                block=True,
-            )
-
-            log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script complete")
-
-        except TimeoutError:
-            self._logger.warning(
-                f"Setup script timed out after {timeouts.setup}s for task {trial_handler.task_id}"
-            )
-            # Kill the session to stop the setup script
-            try:
-                session.kill_session()
-                self._logger.info(f"Killed setup session for timed-out task {trial_handler.task_id}")
-            except Exception as e:
-                self._logger.error(f"Failed to kill session after setup timeout: {e}")
-
-            # Don't try to cleanup after killing session - it will fail
+        except asyncio.TimeoutError:
+            self._logger.warning(f"Setup timed out after {timeouts.setup}s for task {trial_handler.task_id}")
             return FailureMode.SETUP_TIMEOUT
-
         except Exception as e:
-            self._logger.error(
-                f"Error running setup script for task {trial_handler.task_id}: {e}"
-            )
-            # Still try cleanup for non-timeout errors
-            self._cleanup_setup_files(session, setup_dir_path, trial_handler)
-            return FailureMode.UNKNOWN
-
-        # Normal completion - do cleanup
-        self._cleanup_setup_files(session, setup_dir_path, trial_handler)
-        return FailureMode.NONE
-
-    def _cleanup_setup_files(self, session: TmuxSession, setup_dir_path: Path, trial_handler: TrialHandler) -> None:
-        """Clean up setup files from container after setup script runs."""
-        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
-
-        try:
-            cleanup_commands = ["rm -f /app/setup.sh"]
-            if setup_dir_path.exists():
-                cleanup_commands.append("rm -rf /app/setup")
-
-            for command in cleanup_commands:
-                session.send_keys(
-                    [command, "Enter"],
-                    max_timeout_sec=timeouts.cleanup,
-                    block=True,
-                )
-            self._logger.debug("Setup files cleaned up from container")
-        except TimeoutError:
-            self._logger.warning(f"Cleanup timed out for task {trial_handler.task_id}, skipping")
-            # If cleanup times out, kill the session to prevent hanging
-            try:
-                session.kill_session()
-            except:
-                pass
-        except Exception as cleanup_error:
-            self._logger.warning(f"Failed to cleanup setup files: {cleanup_error}")
+            self._logger.error(f"Setup failed for task {trial_handler.task_id}: {e}")
+            return FailureMode.SETUP_FAILED
 
     def _run_trial(
         self,
@@ -603,11 +526,8 @@ class Harness:
             no_rebuild=self._no_rebuild,
             cleanup=self._cleanup,
             build_context_dir=trial_handler.input_path,
+            keep_alive=self._keep_alive,
         ) as terminal:
-            # Setup database and project based on config
-            self._setup_db_resources(terminal, config)
-            self._setup_project_resources(terminal, config)
-
             gitignore_path = Path(__file__).parent.parent / "shared" / "defaults" / ".gitignore"
             if gitignore_path.exists():
                 self._logger.debug("Copying .gitignore to container")
@@ -637,14 +557,14 @@ class Harness:
                     exclude_paths=exclude_paths,
                     task_name=trial_handler.task_id
                 )
-                # Capture initial snapshot before setup
-                log_harness_info(self._logger, trial_handler.task_id, "setup", "Capturing initial file snapshot...")
-                initial_snapshot = file_diff_handler.capture_snapshot(terminal.container)
-                if initial_snapshot:
-                    log_harness_info(self._logger, trial_handler.task_id, "setup", "Captured snapshot")
 
-            # Run setup script if it exists
-            setup_failure_mode = self._run_setup_script(terminal, session, trial_handler, config=config)
+
+            #########################################################
+            #########################################################
+            # RUN COMPREHENSIVE SETUP SCRIPT
+            setup_failure_mode = self._run_setup(terminal, session, trial_handler, config, file_diff_handler)
+            #########################################################
+            #########################################################
 
             # If setup failed with timeout, stop the task immediately
             if setup_failure_mode == FailureMode.SETUP_TIMEOUT:
@@ -661,10 +581,6 @@ class Harness:
 
             # Inject delimiter to mark the end of pre-agent phase
             session.send_keys(["echo '=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ==='", "Enter"])
-
-            # Capture snapshot after setup and create setup diff
-            if file_diff_handler:
-                file_diff_handler.handle_phase_diffing(terminal.container, "setup", trial_handler.task_id, self._logger)
 
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
@@ -787,55 +703,6 @@ class Harness:
             self._logger.debug(f"Unresolved task {trial_handler.task_id}")
 
         return results
-
-    def _setup_db_resources(self, terminal: Terminal, config: dict) -> None:
-        """Setup database based on database/project configuration."""
-        # Copy shared database
-        db_type = config.get("db_type")
-        db_name = config.get("db_name")
-
-        if db_type == "duckdb":
-            shared_db_path = (
-                Path(__file__).parent.parent / "shared" / "databases" /
-                "duckdb" / f"{db_name}.duckdb"
-            )
-
-            if shared_db_path.exists():
-                self._logger.debug(f"Copying shared database {shared_db_path} to container")
-                terminal.copy_to_container(
-                    paths=shared_db_path,
-                    container_dir="/app",
-                    container_filename=shared_db_path.name
-                )
-            else:
-                self._logger.warning(f"Shared database not found: {shared_db_path}")
-
-        else:
-            self._logger.info(f"No setup required for {db_type}")
-
-    def _setup_project_resources(self, terminal: Terminal, config: dict) -> None:
-        """Setup project resources based on database/project configuration."""
-        # Copy shared project
-        project_type = config.get("project_type")
-        project_name = config.get("project_name")
-
-        ## dbt and dbt fusion projects use the same path
-        project_type_path = 'dbt' if project_type == 'dbt-fusion' else project_type
-
-        if project_name:
-            shared_project_path = (
-                Path(__file__).parent.parent / "shared" / "projects" /
-                project_type_path / project_name
-            )
-
-            if shared_project_path.exists():
-                self._logger.debug(f"Copying shared project {shared_project_path} to container")
-                terminal.copy_to_container(
-                    paths=shared_project_path,
-                    container_dir="/app"
-                )
-            else:
-                self._logger.warning(f"Shared project not found: {shared_project_path}")
 
     def _extract_table_schema(self, con, table_name: str) -> dict:
         """Extract schema information from a database table."""

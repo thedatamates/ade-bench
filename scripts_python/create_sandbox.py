@@ -8,7 +8,13 @@ import sys
 import shutil
 import yaml
 import argparse
+import logging
 from pathlib import Path
+
+# Add the project root to the Python path so we can import ade_bench modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from ade_bench.setup.setup_orchestrator import SetupOrchestrator
 
 
 def check_task_exists(task_name):
@@ -223,7 +229,7 @@ def main():
 
     task_name = args.task
     db_type = args.db
-    project_type = args.type
+    project_type = args.project_type
 
     print(f"Creating sandbox for task: {task_name}")
     print(f"Database type: {db_type}")
@@ -267,6 +273,13 @@ def main():
 
     # Step 8: Copy shared scripts
     if not copy_shared_scripts():
+        sys.exit(1)
+
+    # Step 9: Run variant-specific setup
+    print(f"✓ Running variant-specific setup...")
+    setup_orchestrator = SetupOrchestrator()
+    if not setup_orchestrator.setup_task(task_name, variant):
+        print(f"❌ Variant-specific setup failed for task '{task_name}'")
         sys.exit(1)
 
     print("-" * 50)
