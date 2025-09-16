@@ -84,9 +84,6 @@ class Harness:
             n_concurrent_trials: Maximum number of tasks to run concurrently.
             exclude_task_ids: List of task IDs to exclude from the run.
             n_attempts: Number of attempts to make for each task.
-            dataset_config: Path to a YAML configuration file for the dataset.
-                If provided, this will override dataset_path, task_ids,
-                and exclude_task_ids.
             disable_diffs: If True, disables file diffing and HTML generation.
             db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
             project_type: Project type to filter variants (e.g., dbt, other).
