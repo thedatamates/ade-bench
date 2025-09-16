@@ -103,7 +103,7 @@ def _create_user_and_role(task_id: str) -> bool:
                 GRANT USAGE ON WAREHOUSE {creds['warehouse']} to {creds['role']};
                 GRANT USAGE ON DATABASE {creds['database']} TO ROLE {creds['role']};
                 GRANT CREATE SCHEMA ON DATABASE {creds['database']} TO ROLE {creds['role']};
-                GRANT CREATE TABLE ALL SCHEMAS IN DATABASE {creds['database']} TO ROLE {creds['role']};
+                GRANT CREATE TABLE ON ALL SCHEMAS IN DATABASE {creds['database']} TO ROLE {creds['role']};
                 GRANT USAGE, MODIFY ON ALL SCHEMAS IN DATABASE {creds['database']} TO ROLE {creds['role']};
                 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {creds['database']}.PUBLIC TO ROLE {creds['role']};
             """
