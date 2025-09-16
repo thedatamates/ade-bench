@@ -78,14 +78,11 @@ def _clone_database(source_db: str, target_db: str) -> bool:
         return False
 
 
-def _create_user_and_role(task_id: str) -> bool:
+def _create_user_and_role(creds: Dict[str, str]) -> bool:
     """Create user and role for the database."""
     try:
         with _get_snowflake_connection() as conn:
             cursor = conn.cursor()
-
-            # Create user with task_id as username (prefixed with ade_bench_)
-            creds = generate_task_snowflake_credentials(task_id)
 
             # Use the target database
             use_db_query = f"USE DATABASE {creds['database']}"
@@ -127,12 +124,16 @@ def _create_user_and_role(task_id: str) -> bool:
 
 def setup_snowflake(terminal, session, task_id: str, variant: Dict[str, Any]) -> None:
     """Setup Snowflake by cloning database and creating user/role."""
+    creds = generate_task_snowflake_credentials(task_id)
     source_db = variant.get('db_name')
+    target_db = creds['database']
+
+
 
     # Clone the database
-    if not _clone_database(source_db, task_id):
+    if not _clone_database(source_db, target_db):
         return
 
     # Create user and role
-    if not _create_user_and_role(task_id):
+    if not _create_user_and_role(creds):
         return

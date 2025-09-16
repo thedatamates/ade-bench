@@ -10,10 +10,10 @@ from typing import Dict, Any
 
 def generate_task_snowflake_credentials(task_id: str) -> Dict[str, str]:
     """Generate Snowflake credentials for a specific task (the user created during setup)."""
-    username = f"ade_bench_{task_id}".upper()
+    username = f"temp_ade_bench_{task_id}".upper()
     password = f"ade_bench_{task_id}_password_123"
     role_name = f"{username}_ROLE"
-    database_name = task_id
+    database_name = f"temp_{task_id}"
 
     return {
         'account': os.getenv('SNOWFLAKE_ACCOUNT'),
