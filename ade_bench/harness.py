@@ -236,7 +236,7 @@ class Harness:
         if trial_handler.task.test_setup:
             # Create a temporary directory and file
             with tempfile.TemporaryDirectory() as temp_dir:
-                test_setup_path = Path(temp_dir) / "test_setup.sh"
+                test_setup_path = Path(temp_dir) / "test-setup.sh"
 
                 with open(test_setup_path, 'w') as f:
                     f.write("#!/bin/bash\n")
@@ -247,10 +247,10 @@ class Harness:
                 terminal.copy_to_container(
                     paths=[test_setup_path],
                     container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
-                    container_filename="test_setup.sh"
+                    container_filename="test-setup.sh"
                 )
                 # Make it executable using the container's exec_run method
-                terminal.container.exec_run(f"chmod +x {DockerComposeManager.CONTAINER_TEST_DIR}/test_setup.sh")
+                terminal.container.exec_run(f"chmod +x {DockerComposeManager.CONTAINER_TEST_DIR}/test-setup.sh")
 
     def _run_tests(
         self,
