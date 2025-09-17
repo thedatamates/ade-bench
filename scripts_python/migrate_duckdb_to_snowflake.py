@@ -160,7 +160,7 @@ class DuckDBToSnowflakeConverter:
                 columns = []
                 for field in schema:
                     sf_type = self._arrow_to_snowflake_type(field.type)
-                    columns.append(f'"{field.name}" {sf_type}')
+                    columns.append(f'{field.name} {sf_type}')
 
                 ddl = f"""
                 CREATE OR REPLACE TABLE {table_name} (

@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y \
+    tmux asciinema \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir \
+    dbt-core==1.10.11 \
+    dbt-snowflake==1.10.2 \
+    snowflake-connector-python==3.13.1
+
+# Set up workspace
+WORKDIR /app
+
+CMD ["bash"]

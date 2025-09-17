@@ -2,7 +2,7 @@ task_id: f1002
 status: ready
 title: Add new stats models based on yml config
 notes: |-
-  Driver names are excluded from comparisons because the results are limited to top 20, there are ties in the 20th position, and different drivers sometimes are chosen in the top 20. 
+  Driver names are excluded from comparisons because the results are limited to top 20, there are ties in the 20th position, and different drivers sometimes are chosen in the top 20.
   Solving this issue is in f1003
 descriptions:
   - key: base
@@ -35,14 +35,9 @@ solution_seeds:
     exclude_columns:
     - driver_full_name
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: f1
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: f1
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: f1
+  project_type: dbt
+  project_name: f1

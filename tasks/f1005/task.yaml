@@ -26,14 +26,9 @@ solution_seeds:
   - table_name: constructor_points
   - table_name: driver_points
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: f1
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: f1
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: f1
+  project_type: dbt
+  project_name: f1

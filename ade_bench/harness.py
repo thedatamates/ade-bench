@@ -25,6 +25,7 @@ from ade_bench.harness_models import (
     RunMetadata,
     TrialResults,
 )
+from ade_bench.setup.setup_orchestrator import SetupOrchestrator
 from ade_bench.llms.base_llm import ContextLengthExceededError, ParseError
 from ade_bench.parsers.base_parser import UnitTestStatus
 from ade_bench.terminal.docker_compose_manager import DockerComposeManager
@@ -34,6 +35,7 @@ from ade_bench.utils.dataset import Dataset
 from ade_bench.utils.logger import logger, log_harness_info
 from ade_bench.utils.test_generator import generate_solution_tests
 from ade_bench.utils.timeout_manager import TimeoutManager
+from ade_bench.utils.debug_breakpoint import breakpoint, DebugBreakpointException
 
 
 class Harness:
@@ -49,7 +51,6 @@ class Harness:
         cleanup: bool = False,
         log_level: int = logging.INFO,
         task_ids: list[str] | None = None,
-        n_tasks: int | None = None,
         max_episodes: int = 50,
         upload_results: bool = False,
         n_concurrent_trials: int = 4,
@@ -57,7 +58,10 @@ class Harness:
         n_attempts: int = 1,
         dataset_config: Path | None = None,
         create_seed: bool = False,
-        result_log_level: str = "html",
+        disable_diffs: bool = False,
+        db_type: str | None = None,
+        project_type: str | None = None,
+        keep_alive: bool = False,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -74,7 +78,6 @@ class Harness:
             cleanup: Whether to remove the Docker image after the run.
             log_level: The logging level to use (debug, info, warning, error, critical).
             task_ids: The IDs of the tasks to run. If None, all tasks will be run.
-            n_tasks: The number of tasks to run. If None, all tasks will be run.
             max_episodes: The maximum number of episodes to run for the
                 interactive agent.
             upload_results: Whether to upload results to S3.
@@ -82,24 +85,26 @@ class Harness:
             n_concurrent_trials: Maximum number of tasks to run concurrently.
             exclude_task_ids: List of task IDs to exclude from the run.
             n_attempts: Number of attempts to make for each task.
-            dataset_config: Path to a YAML configuration file for the dataset.
-                If provided, this will override dataset_path, task_ids, n_tasks,
-                and exclude_task_ids.
-            result_log_level: Level of result logging. Options:
-                - "html": Generate diffs and HTML dashboard (default)
-                - "diffs_only": Generate diffs only
-                - "none": No diffing or HTML generation
+            disable_diffs: If True, disables file diffing and HTML generation.
+            db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
+            project_type: Project type to filter variants (e.g., dbt, other).
+            keep_alive: If True, keep containers alive when tasks fail for debugging.
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
 
         self._dataset_path = dataset_path
         self._dataset_config = dataset_config
-        self._n_tasks = n_tasks
         self._task_ids = task_ids
         self._exclude_task_ids = exclude_task_ids
         self._create_seed = create_seed
-        self._result_log_level = result_log_level
+        self._disable_diffs = disable_diffs
+        self._db_filter = db_type
+        self._project_type_filter = project_type
+        self._keep_alive = keep_alive
+
+        # Initialize setup orchestrator for variant-specific setup
+        self._setup_orchestrator = SetupOrchestrator()
 
         self._output_path = output_path
         self._agent_name = agent_name
@@ -154,20 +159,16 @@ class Harness:
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 
     def _init_dataset(self) -> None:
-        if self._dataset_config:
-            if self._task_ids or self._n_tasks:
-                raise ValueError(
-                    "Cannot specify both dataset_config and task_ids/n_tasks"
-                )
-
-            self._dataset = Dataset.from_yaml(self._dataset_config)
-        else:
+        if self._task_ids:
+            # Use task_ids when specific tasks are provided
             self._dataset = Dataset(
                 dataset_path=self._dataset_path,
                 task_ids=self._task_ids,
-                n_tasks=self._n_tasks,
                 exclude_task_ids=self._exclude_task_ids,
             )
+        else:
+            # Use YAML config when no specific task_ids are provided (i.e., "all" was used)
+            self._dataset = Dataset.from_yaml(self._dataset_config)
 
     def _init_logger(self) -> None:
         file_handler = logging.FileHandler(self._log_output_path)
@@ -440,109 +441,61 @@ class Harness:
 
         return None, FailureMode.NONE
 
-    def _run_setup_script(
+    # COMPREHENSIVE SETUP SCRIPT
+    def _run_setup(
         self,
         terminal: Terminal,
         session: TmuxSession,
         trial_handler: TrialHandler,
+        config: dict,
+        file_diff_handler=None,
     ) -> FailureMode:
-        """Run setup.sh script if it exists in the task directory.
-
-        Returns:
-            FailureMode indicating success or type of failure
         """
-        setup_script_path = trial_handler.input_path / "setup.sh"
-        setup_dir_path = trial_handler.input_path / "setup"
+        Run comprehensive setup including files, migration, and scripts.
+        """
+        import asyncio
+        from .utils.timeout_manager import TimeoutManager
 
-        if not setup_script_path.exists():
-            self._logger.debug(f"No setup script found at {setup_script_path}")
+        # Get timeout for setup
+        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
+
+        try:
+            # Create setup orchestrator with terminal and session for harness-specific operations
+            setup_orchestrator = SetupOrchestrator(
+                logger=self._logger,
+                terminal=terminal,
+                session=session,
+                file_diff_handler=file_diff_handler,
+                trial_handler=trial_handler
+            )
+
+            # Run setup with timeout using asyncio
+            async def run_setup():
+                loop = asyncio.get_event_loop()
+                task = loop.run_in_executor(
+                    None,
+                    setup_orchestrator.setup_task,
+                    trial_handler.task_id,
+                    config
+                )
+                return await asyncio.wait_for(task, timeout=timeouts.setup)
+
+            # Run the async function
+            asyncio.run(run_setup())
+
             return FailureMode.NONE
 
-        log_harness_info(self._logger, trial_handler.task_id, "setup", f"Running setup script")
-
-        # Get timeouts for this task
-        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
-
-        try:
-            # Copy setup directory to container if it exists
-            if setup_dir_path.exists():
-
-                terminal.copy_to_container(
-                    paths=setup_dir_path,
-                    container_dir="/app/setup",
-                )
-
-            # Copy setup script to container (following oracle agent pattern)
-            session.copy_to_container(
-                setup_script_path,
-                container_dir="/app",
-                container_filename="setup.sh",
-            )
-
-            # Run the setup script (following oracle agent pattern)
-            session.send_keys(
-                ["bash /app/setup.sh", "Enter"],
-                max_timeout_sec=timeouts.setup,
-                block=True,
-            )
-
-            log_harness_info(self._logger, trial_handler.task_id, "setup", "Setup script completed")
-
-        except TimeoutError:
-            self._logger.warning(
-                f"Setup script timed out after {timeouts.setup}s for task {trial_handler.task_id}"
-            )
-            # Kill the session to stop the setup script
-            try:
-                session.kill_session()
-                self._logger.info(f"Killed setup session for timed-out task {trial_handler.task_id}")
-            except Exception as e:
-                self._logger.error(f"Failed to kill session after setup timeout: {e}")
-
-            # Don't try to cleanup after killing session - it will fail
+        except asyncio.TimeoutError:
+            self._logger.warning(f"Setup timed out after {timeouts.setup}s for task {trial_handler.task_id}")
             return FailureMode.SETUP_TIMEOUT
-
         except Exception as e:
-            self._logger.error(
-                f"Error running setup script for task {trial_handler.task_id}: {e}"
-            )
-            # Still try cleanup for non-timeout errors
-            self._cleanup_setup_files(session, setup_dir_path, trial_handler)
-            return FailureMode.UNKNOWN
-
-        # Normal completion - do cleanup
-        self._cleanup_setup_files(session, setup_dir_path, trial_handler)
-        return FailureMode.NONE
-
-    def _cleanup_setup_files(self, session: TmuxSession, setup_dir_path: Path, trial_handler: TrialHandler) -> None:
-        """Clean up setup files from container after setup script runs."""
-        timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
-
-        try:
-            cleanup_commands = ["rm -f /app/setup.sh"]
-            if setup_dir_path.exists():
-                cleanup_commands.append("rm -rf /app/setup")
-
-            for command in cleanup_commands:
-                session.send_keys(
-                    [command, "Enter"],
-                    max_timeout_sec=timeouts.cleanup,
-                    block=True,
-                )
-            self._logger.debug("Setup files cleaned up from container")
-        except TimeoutError:
-            self._logger.warning(f"Cleanup timed out for task {trial_handler.task_id}, skipping")
-            # If cleanup times out, kill the session to prevent hanging
-            try:
-                session.kill_session()
-            except:
-                pass
-        except Exception as cleanup_error:
-            self._logger.warning(f"Failed to cleanup setup files: {cleanup_error}")
+            self._logger.error(f"Setup failed for task {trial_handler.task_id}: {e}")
+            return FailureMode.SETUP_FAILED
 
     def _run_trial(
         self,
         trial_handler: TrialHandler,
+        config: dict,
     ) -> TrialResults:
         self._logger.debug(f"Running task: {trial_handler.task_id}")
 
@@ -562,90 +515,8 @@ class Harness:
             no_rebuild=self._no_rebuild,
             cleanup=self._cleanup,
             build_context_dir=trial_handler.input_path,
+            keep_alive=self._keep_alive,
         ) as terminal:
-            # Copy database to container if specified
-            if trial_handler.task.database is not None:
-                db_config = trial_handler.task.database
-
-                if db_config.source == "shared" and db_config.name and db_config.type:
-                    # Copy shared database
-                    shared_db_path = (
-                        Path(__file__).parent.parent / "shared" / "databases" /
-                        db_config.type / f"{db_config.name}.{db_config.type}"
-                    )
-
-                    if not shared_db_path.exists():
-                        # Try alternate extensions for sqlite
-                        if db_config.type == "sqlite":
-                            for ext in ["db", "sqlite", "sqlite3"]:
-                                alt_path = shared_db_path.with_suffix(f".{ext}")
-                                if alt_path.exists():
-                                    shared_db_path = alt_path
-                                    break
-
-                    if shared_db_path.exists():
-                        self._logger.debug(f"Copying shared database {shared_db_path} to container")
-                        terminal.copy_to_container(
-                            paths=shared_db_path,
-                            container_dir="/app",
-                            container_filename=shared_db_path.name
-                        )
-                    else:
-                        self._logger.warning(f"Shared database not found: {shared_db_path}")
-
-                elif db_config.source == "local" and db_config.path:
-                    # Copy local database from task directory
-                    local_db_path = trial_handler.input_path / db_config.path
-                    if local_db_path.exists():
-                        self._logger.debug(f"Copying local database {local_db_path} to container")
-                        if local_db_path.is_dir():
-                            # Copy entire directory
-                            terminal.copy_to_container(
-                                paths=local_db_path,
-                                container_dir="/app"
-                            )
-                        else:
-                            # Copy single file
-                            terminal.copy_to_container(
-                                paths=local_db_path,
-                                container_dir="/app",
-                                container_filename=local_db_path.name
-                            )
-                    else:
-                        self._logger.warning(f"Local database not found: {local_db_path}")
-
-            # Copy project to container if specified
-            if trial_handler.task.project is not None:
-                project_config = trial_handler.task.project
-
-                if project_config.source == "shared" and project_config.name:
-                    # Copy shared project
-                    shared_project_path = (
-                        Path(__file__).parent.parent / "shared" / "projects" /
-                        project_config.type / project_config.name
-                    )
-
-                    if shared_project_path.exists():
-                        self._logger.debug(f"Copying shared project {shared_project_path} to container")
-                        terminal.copy_to_container(
-                            paths=shared_project_path,
-                            container_dir="/app"
-                        )
-                    else:
-                        self._logger.warning(f"Shared project not found: {shared_project_path}")
-
-                elif project_config.source == "local":
-                    # Copy local project from task directory
-                    local_project_path = trial_handler.input_path / "dbt_project"
-                    if local_project_path.exists():
-                        self._logger.debug(f"Copying local project {local_project_path} to container")
-                        terminal.copy_to_container(
-                            paths=local_project_path,
-                            container_dir="/app"
-                        )
-                    else:
-                        self._logger.warning(f"Local project not found: {local_project_path}")
-
             gitignore_path = Path(__file__).parent.parent / "shared" / "defaults" / ".gitignore"
             if gitignore_path.exists():
                 self._logger.debug("Copying .gitignore to container")
@@ -661,7 +532,7 @@ class Harness:
 
             # Initialize file diffing if enabled
             file_diff_handler = None
-            if self._result_log_level in ["html", "diffs_only"]:
+            if not self._disable_diffs:
                 # Use task-level exclusions if available, otherwise use global config
                 exclude_paths = (
                     trial_handler.task.file_diff_exclude_paths
@@ -675,14 +546,20 @@ class Harness:
                     exclude_paths=exclude_paths,
                     task_name=trial_handler.task_id
                 )
-                # Capture initial snapshot before setup
-                log_harness_info(self._logger, trial_handler.task_id, "setup", "Capturing initial file snapshot...")
-                initial_snapshot = file_diff_handler.capture_snapshot(terminal.container)
-                if initial_snapshot:
-                    log_harness_info(self._logger, trial_handler.task_id, "setup", "Captured snapshot")
 
-            # Run setup script if it exists
-            setup_failure_mode = self._run_setup_script(terminal, session, trial_handler)
+
+            #########################################################
+            #########################################################
+            # RUN COMPREHENSIVE SETUP SCRIPT
+            try:
+
+                setup_failure_mode = self._run_setup(terminal, session, trial_handler, config, file_diff_handler)
+            except DebugBreakpointException as e:
+                self._logger.info(f"Debug breakpoint hit during setup for task {trial_handler.task_id}: {e}")
+                results.failure_mode = FailureMode.BREAKPOINT
+                return results
+            #########################################################
+            #########################################################
 
             # If setup failed with timeout, stop the task immediately
             if setup_failure_mode == FailureMode.SETUP_TIMEOUT:
@@ -700,20 +577,21 @@ class Harness:
             # Inject delimiter to mark the end of pre-agent phase
             session.send_keys(["echo '=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ==='", "Enter"])
 
-            # Capture snapshot after setup and create setup diff
-            if file_diff_handler:
-                file_diff_handler.handle_phase_diffing(terminal.container, "setup", trial_handler.task_id, self._logger)
-
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent...")
-            agent_result, agent_failure_mode = self._run_agent(
-                session=session,
-                agent=task_agent,
-                trial_handler=trial_handler,
-                task_name=trial_handler.task_id,
-            )
+            try:
+                agent_result, agent_failure_mode = self._run_agent(
+                    session=session,
+                    agent=task_agent,
+                    trial_handler=trial_handler,
+                    task_name=trial_handler.task_id,
+                )
+            except DebugBreakpointException as e:
+                self._logger.info(f"Debug breakpoint hit during agent execution for task {trial_handler.task_id}: {e}")
+                results.failure_mode = FailureMode.BREAKPOINT
+                return results
 
             # Capture the full pane and split on delimiter to get post-agent content
             full_pane = session.capture_pane(capture_entire=True)
@@ -769,11 +647,16 @@ class Harness:
                     "tests"
                 )
 
-            test_failure_mode = self._run_tests(
-                terminal=terminal,
-                session=session,
-                trial_handler=trial_handler,
-            )
+            try:
+                test_failure_mode = self._run_tests(
+                    terminal=terminal,
+                    session=session,
+                    trial_handler=trial_handler,
+                )
+            except DebugBreakpointException as e:
+                self._logger.info(f"Debug breakpoint hit during test execution for task {trial_handler.task_id}: {e}")
+                results.failure_mode = FailureMode.BREAKPOINT
+                return results
 
             post_agent_pane = session.capture_pane(capture_entire=True)
             trial_handler.post_agent_pane_path.write_text(post_agent_pane)
@@ -886,15 +769,21 @@ class Harness:
 
         log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables:|||{tables_to_extract}")
 
+        # Get the current running variant information directly from the trial handler
+        variant_db_type = trial_handler.variant_config.get('db_type', '')
+        variant_db_name = trial_handler.variant_config.get('db_name', '')
+
+        if variant_db_type == 'duckdb':
+            self._extract_duckdb_csv(terminal, trial_handler, variant_db_name, tables_to_extract, task_config)
+        else:
+            log_harness_info(self._logger, trial_handler.task_id, "seed", f"CSV extraction not supported for db_type:|||{variant_db_type}")
+
+    def _extract_duckdb_csv(self, terminal: Terminal, trial_handler: TrialHandler, db_name: str, tables_to_extract: list, task_config: dict) -> None:
+        """Extract CSV files from DuckDB database."""
         # Create output directory
         task_seeds_dir = trial_handler.input_path / "seeds"
         task_seeds_dir.mkdir(parents=True, exist_ok=True)
 
-        # Get database type and name
-        # db_type = task_config.get('db_type', 'duckdb')
-        db_name = task_config.get('database', {}).get('name', '')
-
-        # Use docker cp command to copy database file
         try:
             import tempfile
             import os
@@ -943,7 +832,7 @@ class Harness:
                 if all_schemas:
                     no_op_path = task_seeds_dir / "_no-op.txt"
 
-                    # Get project name from task config
+                    # Get project name from current variant
                     project_name = task_config.get('project', {}).get('name', 'default')
 
                     # Create the seeds section in proper YAML format
@@ -964,6 +853,7 @@ class Harness:
                             '+column_types': column_types
                         }
 
+                    import yaml
                     with open(no_op_path, 'w') as f:
                         f.write('\n\n')  # Add two blank lines at the start
                         yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)
@@ -1080,7 +970,6 @@ class Harness:
             log_level=self._log_level,
             task_ids=self._dataset.task_ids,
             exclude_task_ids=self._exclude_task_ids,
-            n_tasks=self._n_tasks,
             n_concurrent_trials=self._n_concurrent_trials,
             n_attempts=self._n_attempts,
             max_episodes=self._max_episodes,
@@ -1109,12 +998,14 @@ class Harness:
         trial_name: str,
         task_path: Path,
         task_key: str,
+        config: dict,
     ) -> TrialResults:
         """Execute a single task and return its results.
 
         Args:
             task_path: Path to the task directory
-            task_key: Optional key for the specific task variant
+            task_key: Optional key for the specific task config
+            config: Optional database/project configuration dict
 
         Returns:
             TrialResults: The results of the trial execution
@@ -1124,10 +1015,11 @@ class Harness:
             input_path=task_path,
             output_path=self._run_path,
             task_key=task_key,
+            variant_config=config,
         )
 
         try:
-            trial_results = self._run_trial(trial_handler)
+            trial_results = self._run_trial(trial_handler, config)
 
             trial_handler.results_path.write_text(
                 trial_results.model_dump_json(indent=4)
@@ -1160,12 +1052,46 @@ class Harness:
     def _execute_tasks(self) -> BenchmarkResults:
         """Execute all tasks in parallel and collect their results."""
         results = BenchmarkResults()
-        max_workers = min(len(self._dataset), self._n_concurrent_trials)
+
+        # Get tasks that have matching database and project type
+        all_tasks = self._dataset
+        matching_tasks = []
+
+        for task_path, task_key in all_tasks:
+            trial_handler = TrialHandler(
+                trial_name="temp",
+                input_path=task_path,
+                task_key=task_key,
+            )
+            variants = [config.model_dump() for config in trial_handler.task.variants]
+
+            # Find the matching config
+            matching_config = None
+            for variant in variants:
+                if variant.get("db_type") == self._db_filter and variant.get("project_type") == self._project_type_filter:
+                    matching_config = variant
+                    break
+
+            if matching_config:
+                matching_tasks.append((task_path, task_key, matching_config))
+
+        # Log filtering summary
+        total_tasks = len(self._dataset)
+        matching_count = len(matching_tasks)
+        log_harness_info(self._logger, "HARNESS", "start", f"Running with {self._db_filter} + {self._project_type_filter}. Found {matching_count} tasks of {total_tasks} requested tasks.")
+
+        if not matching_tasks:
+            self._logger.warning("No tasks have matching database and project type configurations")
+            return results
+
+        # Calculate total number of tasks (matching tasks * attempts)
+        total_tasks = len(matching_tasks) * self._n_attempts
+        max_workers = min(total_tasks, self._n_concurrent_trials)
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # For each task and attempt, create a future
+            # For each matching task and attempt, create a future
             future_to_task = {}
-            for task_path, task_key in self._dataset:
+            for task_path, task_key, config in matching_tasks:
                 for attempt in range(1, self._n_attempts + 1):
                     trial_name = self._get_trial_name(task_path, task_key, attempt)
                     future = executor.submit(
@@ -1173,11 +1099,11 @@ class Harness:
                         trial_name=trial_name,
                         task_path=task_path,
                         task_key=task_key,
+                        config=config,
                     )
                     future_to_task[future] = (trial_name, attempt)
 
             # Track progress
-            total_tasks = len(self._dataset) * self._n_attempts
             completed_tasks = 0
 
             for future in as_completed(future_to_task):
@@ -1215,7 +1141,7 @@ class Harness:
         self._update_metadata_on_end(results=results)
 
         # Generate HTML results dashboard
-        if self._result_log_level == "html":
+        if not self._disable_diffs:
             try:
                 from scripts_python.generate_results_html import ResultsHTMLGenerator
                 generator = ResultsHTMLGenerator(self._run_path)

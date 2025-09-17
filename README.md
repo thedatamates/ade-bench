@@ -117,21 +117,14 @@ After each experiment completes, ADE-Bench automatically generates an HTML dashb
 
 ### Result Logging
 
-ADE-Bench provides three levels of result logging via the `--result-log-level` argument:
-
-- **`html`** (default): Generates file diffs and HTML dashboard
-- **`diffs_only`**: Generates file diffs only (no HTML dashboard)
-- **`none`**: No file diffing or HTML generation
+ADE-Bench generates file diffs and an HTML dashboard by default. You can disable this with the `--disable-diffs` flag:
 
 ```bash
 # Full HTML dashboard with diffs (default)
 uv run scripts_python/run_harness.py --agent oracle --task-ids airbnb001
 
-# Diffs only, no HTML dashboard
-uv run scripts_python/run_harness.py --agent oracle --result-log-level diffs_only --task-ids airbnb001
-
-# No diffing or HTML generation
-uv run scripts_python/run_harness.py --agent oracle --result-log-level none --task-ids airbnb001
+# Disable file diffing and HTML generation
+uv run scripts_python/run_harness.py --agent oracle --disable-diffs --task-ids airbnb001
 ```
 
 ## Task Structure

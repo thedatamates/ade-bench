@@ -19,14 +19,9 @@ timeout_seconds: 500
 parser_name: dbt
 db_type: duckdb
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: shopify
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: shopify_analytics
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: shopify
+  project_type: dbt
+  project_name: shopify_analytics

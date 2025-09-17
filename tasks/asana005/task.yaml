@@ -47,14 +47,14 @@ solution_seeds:
     exclude_columns:
       - days_open
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: asana
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: asana
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: asana
+  project_type: dbt
+  project_name: asana
+- db_type: snowflake
+  db_name: asana
+  project_type: dbt
+  project_name: asana
+  migration_directory: asana__duckdb_to_snowflake

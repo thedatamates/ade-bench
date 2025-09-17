@@ -39,14 +39,9 @@ solution_seeds:
     exclude_columns:
     - rank
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: f1
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: f1
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: f1
+  project_type: dbt
+  project_name: f1

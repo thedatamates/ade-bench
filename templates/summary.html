@@ -13,12 +13,12 @@
             padding: 20px;
             line-height: 1.4;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-        
+
         h1 {
             color: #569cd6;
             font-size: 24px;
@@ -26,7 +26,7 @@
             border-bottom: 2px solid #3c3c3c;
             padding-bottom: 10px;
         }
-        
+
         .experiment-info {
             background-color: #2d2d30;
             padding: 15px;
@@ -34,18 +34,18 @@
             margin-bottom: 20px;
             border: 1px solid #3c3c3c;
         }
-        
+
         .experiment-info h2 {
             color: #4ec9b0;
             margin: 0 0 10px 0;
             font-size: 18px;
         }
-        
+
         .experiment-info p {
             margin: 5px 0;
             color: #9cdcfe;
         }
-        
+
         /* Style for tabulate-generated table */
         table {
             width: 100%;
@@ -53,8 +53,9 @@
             border: 1px solid #3c3c3c;
             overflow: hidden;
             margin: 20px 0;
+            font-size: 12px;
         }
-        
+
         table thead th {
             background-color: #2d2d30;
             color: #569cd6;
@@ -63,39 +64,39 @@
             font-weight: bold;
             border: 1px solid #3c3c3c;
         }
-        
+
         table thead th:last-child {
             border-right: none;
         }
-        
+
         table tbody td {
             padding: 10px 8px;
             border-bottom: 1px solid #3c3c3c;
             border-right: 1px solid #3c3c3c;
             vertical-align: middle;
         }
-        
+
         table tbody td:last-child {
             border-right: none;
         }
-        
+
         /* Style for total row (last row) */
         table tbody tr:last-child {
             background-color: #1e1e1e;
             border-top: 2px solid #569cd6;
             font-weight: bold;
         }
-        
+
         table tbody tr:last-child td {
             border-top: 2px solid #569cd6;
         }
-        
+
         /* Style for task ID column (first column) */
         table tbody td:first-child {
             color: #4ec9b0;
             font-weight: bold;
         }
-        
+
         /* Style for status column (second column) */
         table tbody td:nth-child(2) {
             padding: 4px 8px;
@@ -105,34 +106,34 @@
             text-align: center;
             vertical-align: middle;
         }
-        
+
         /* Status color coding classes */
         .status-success {
             background-color: rgba(13, 79, 13, 0.3);
             color: #4ec9b0;
         }
-        
+
         .status-failure {
             background-color: rgba(79, 13, 13, 0.3);
             color: #f44747;
         }
-        
+
         .status-timeout {
             background-color: rgba(79, 79, 13, 0.3);
             color: #dcdcaa;
         }
-        
+
         .status-error {
             background-color: rgba(79, 13, 13, 0.3);
             color: #f44747;
         }
-        
+
         .links {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
-        
+
         .link {
             padding: 4px 8px;
             background-color: #3c3c3c;
@@ -142,12 +143,12 @@
             font-size: 11px;
             transition: background-color 0.2s;
         }
-        
+
         .link:hover {
             background-color: #4a4a4a;
             color: #d4d4d4;
         }
-        
+
         .link.logs { color: #4ec9b0; }
         .link.results { color: #dcdcaa; }
         .link.panes { color: #569cd6; }
@@ -157,7 +158,7 @@
 <body>
     <div class="container">
         <h1>Experiment Results</h1>
-        
+
         <div class="experiment-info">
             <h2>{{ experiment_id }}</h2>
             <p><strong>Started:</strong> {{ start_time }}</p>
@@ -166,12 +167,12 @@
             <p><strong>Successful:</strong> {{ successful_tasks }}</p>
             <p><strong>Failed:</strong> {{ failed_tasks }}</p>
         </div>
-        
+
         <table>
              <!-- To be filled by generate_results_html.py -->
         </table>
     </div>
-    
+
     <script>
         // Add status classes to the second column based on content
         document.addEventListener('DOMContentLoaded', function() {
@@ -190,6 +191,6 @@
             });
         });
     </script>
-    
+
 </body>
 </html>

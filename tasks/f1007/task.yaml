@@ -28,17 +28,11 @@ db_type: duckdb
 solution_seeds:
   - table_name: driver_wins_by_season
   - table_name: stg_f1_dataset__results
-  - table_name: most_wins
-  - table_name: most_laps
+  - table_name: finishes_by_driver
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: f1
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: f1
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: f1
+  project_type: dbt
+  project_name: f1

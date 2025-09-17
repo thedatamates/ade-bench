@@ -1,28 +1,12 @@
-version: '3.8'
-
 services:
   client:
     build:
-      context: ${ADE_BENCH_BUILD_CONTEXT_DIR:-/Users/paulthurlow/tdm/ade-bench}
-      dockerfile: ${ADE_BENCH_DOCKERFILE_PATH:-docker/base/Dockerfile.dbt-duckdb}
-    image: ${ADE_BENCH_CLIENT_IMAGE_NAME}
-    container_name: ${ADE_BENCH_CLIENT_CONTAINER_NAME}
+      context: ${T_BENCH_TASK_BUILD_CONTEXT_DIR}/../..
+      dockerfile: docker/base/Dockerfile.dbt-duckdb
+    image: ${T_BENCH_TASK_DOCKER_CLIENT_IMAGE_NAME}
+    container_name: ${T_BENCH_TASK_DOCKER_CLIENT_CONTAINER_NAME}
     command: [ "sh", "-c", "sleep infinity" ]
     environment:
-      - TEST_DIR=${ADE_BENCH_TEST_DIR}
-      - DBT_PROFILES_DIR=/root/.dbt
-      - DBT_PROJECT_DIR=/dbt_project
-      - DATABASE_TYPE=${ADE_BENCH_DB_TYPE}
-      - DATABASE_NAME=${ADE_BENCH_DB_NAME}
+      - TEST_DIR=${T_BENCH_TEST_DIR}
     volumes:
-      - ${ADE_BENCH_LOGS_PATH}:${ADE_BENCH_CONTAINER_LOGS_PATH}
-      - ${ADE_BENCH_DBT_PROJECT_PATH}:/dbt_project
-      - ${ADE_BENCH_DATA_PATH}:/data
-    networks:
-      - ade-network
-    working_dir: /dbt_project
-
-networks:
-  ade-network:
-    name: ${ADE_BENCH_NAME_PREFIX}__network
-    driver: bridge
+      - ${T_BENCH_TASK_LOGS_PATH}:${T_BENCH_CONTAINER_LOGS_PATH}

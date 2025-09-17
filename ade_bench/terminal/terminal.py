@@ -82,6 +82,11 @@ class Terminal:
 
         self._sessions.clear()
 
+    def stop_services_only(self) -> None:
+        """Stop docker compose services but keep containers alive for debugging."""
+        self._compose_manager.stop_services_only()
+        self._sessions.clear()
+
     def copy_to_container(
         self,
         paths: list[Path] | Path,
@@ -105,6 +110,7 @@ def spin_up_terminal(
     no_rebuild: bool = False,
     cleanup: bool = False,
     build_context_dir: Path | None = None,
+    keep_alive: bool = False,
 ) -> Generator[Terminal, None, None]:
     terminal = Terminal(
         client_container_name=client_container_name,
@@ -122,4 +128,9 @@ def spin_up_terminal(
         terminal.start()
         yield terminal
     finally:
-        terminal.stop()
+        # Only cleanup if keep_alive is False or if the task succeeded
+        if not keep_alive:
+            terminal.stop()
+        else:
+            # If keep_alive is True, just stop the services but don't remove containers
+            terminal.stop_services_only()

@@ -30,7 +30,6 @@ class OracleAgent(BaseAgent):
         self,
         dataset_path: Path,
         task_ids: list[str] | None = None,
-        n_tasks: int | None = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -38,7 +37,6 @@ class OracleAgent(BaseAgent):
         self._dataset = Dataset(
             dataset_path=dataset_path,
             task_ids=task_ids,
-            n_tasks=n_tasks,
         )
 
         self._logger = logger.getChild(__name__)
@@ -85,7 +83,7 @@ class OracleAgent(BaseAgent):
                     solutions_path,
                     container_dir="/oracle/solutions",
                 )
-            
+
             session.copy_to_container(
                 solution["path"],
                 container_dir="/oracle",

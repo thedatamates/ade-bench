@@ -10,7 +10,7 @@ from ruamel.yaml.scalarstring import LiteralScalarString
 
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 from ade_bench.utils.logger import logger
-from ade_bench.harness_models import DatabaseConfig, ProjectConfig, SolutionSeedConfig
+from ade_bench.harness_models import SolutionSeedConfig, VariantConfig
 from ade_bench.config import config
 
 
@@ -64,11 +64,11 @@ class Task(BaseModel):
         description="Name of the parser to use for test results",
     )
     max_agent_timeout_sec: float = Field(
-        default_factory=lambda: config.default_agent_timeout_sec, 
+        default_factory=lambda: config.default_agent_timeout_sec,
         description="Maximum timeout in seconds for the agent to run."
     )
     max_test_timeout_sec: float = Field(
-        default_factory=lambda: config.default_test_timeout_sec, 
+        default_factory=lambda: config.default_test_timeout_sec,
         description="Maximum timeout in seconds for each individual test"
     )
     test_scripts: list[str] = Field(
@@ -86,15 +86,9 @@ class Task(BaseModel):
         "you can provide an environment name. This will use the environment with the "
         "given name from the shared environment directory.",
     )
-    database: DatabaseConfig | None = Field(
-        default=None,
-        description="Database configuration for the task. Specifies whether to use "
-        "a shared database or local task-specific database.",
-    )
-    project: ProjectConfig | None = Field(
-        default=None,
-        description="Project configuration for the task. Specifies whether to use "
-        "a shared project or local task-specific project.",
+    variants: list[VariantConfig] = Field(
+        default_factory=list,
+        description="List of variants for the task. Each variant specifies database and project configurations.",
     )
     solution_seeds: list[str | dict] = Field(
         default=[],
@@ -112,7 +106,7 @@ class Task(BaseModel):
     @property
     def task_description_dict(self) -> dict[str, str]:
         return {task.key: task.description for task in self.descriptions}
-    
+
     def get_solution_seed_configs(self) -> list[SolutionSeedConfig]:
         """Parse solution_seeds into SolutionSeedConfig objects."""
         configs = []
@@ -169,11 +163,13 @@ class TrialHandler:
         input_path: Path,
         output_path: Path | None = None,
         task_key: str = "base",
+        variant_config: dict | None = None,
     ):
         self.trial_name = trial_name
         self.input_path = input_path
         self.output_path = output_path
         self.task_key = task_key
+        self.variant_config = variant_config or {}
 
         self._logger = logger.getChild(__name__)
         self.task = Task.from_yaml(self._task_config_path)
@@ -211,8 +207,8 @@ class TrialHandler:
     @property
     def docker_image_prefix(self) -> str:
         if self.task.env_name is not None:
-            return f"t-bench__env__{self.task.env_name}"
-        return f"t-bench__{self.task_id}".replace(".", "-")
+            return f"ade-bench__env__{self.task.env_name}"
+        return f"ade-bench__{self.task_id}".replace(".", "-")
 
     @property
     def client_container_name(self) -> str:
@@ -251,6 +247,16 @@ class TrialHandler:
         task_docker_compose_path = self.input_path / "docker-compose.yaml"
 
         if not task_docker_compose_path.exists():
+            # Try to use database-specific compose file based on variant config
+            db_type = self.variant_config.get("db_type")
+            if db_type:
+                db_specific_compose = self._defaults_path / f"docker-compose-{db_type}.yaml"
+                if db_specific_compose.exists():
+                    self._logger.debug(
+                        f"Using database-specific docker-compose file: {db_specific_compose}"
+                    )
+                    return db_specific_compose
+
             self._logger.debug(
                 f"No docker-compose.yaml file found for task {self.task_id}, using "
                 "default docker-compose.yaml."
@@ -345,3 +351,56 @@ class TrialHandler:
     @property
     def agent_logging_dir(self) -> Path:
         return self._task_output_path / "agent-logs"
+
+    # Setup-related path properties
+    @property
+    def task_setup_script_path(self) -> Path:
+        """Path to the task's setup.sh script."""
+        return self.input_path / "setup.sh"
+
+    @property
+    def task_setup_dir_path(self) -> Path:
+        """Path to the task's setup directory."""
+        return self.input_path / "setup"
+
+    @property
+    def shared_databases_path(self) -> Path:
+        """Path to the shared databases directory."""
+        return self._shared_path / "databases"
+
+    @property
+    def shared_duckdb_path(self) -> Path:
+        """Path to the shared DuckDB databases directory."""
+        return self.shared_databases_path / "duckdb"
+
+    @property
+    def shared_snowflake_path(self) -> Path:
+        """Path to the shared Snowflake databases directory."""
+        return self.shared_databases_path / "snowflake"
+
+    @property
+    def shared_projects_path(self) -> Path:
+        """Path to the shared projects directory."""
+        return self._shared_path / "projects"
+
+    @property
+    def shared_migrations_path(self) -> Path:
+        """Path to the shared migrations directory."""
+        return self._shared_path / "migrations"
+
+    def get_duckdb_file_path(self, db_name: str) -> Path:
+        """Get the path to a specific DuckDB database file."""
+        return self.shared_duckdb_path / f"{db_name}.duckdb"
+
+    def get_dbt_project_path(self, project_name: str, project_type: str = "dbt") -> Path:
+        """Get the path to a specific dbt project directory."""
+        project_type_path = 'dbt' if project_type == 'dbt-fusion' else project_type
+        return self.shared_projects_path / project_type_path / project_name
+
+    def get_migration_path(self, migration_directory: str) -> Path:
+        """Get the path to a specific migration directory."""
+        return self.shared_migrations_path / migration_directory
+
+    def get_migration_script_path(self, migration_directory: str) -> Path:
+        """Get the path to a specific migration script."""
+        return self.get_migration_path(migration_directory) / "migration.sh"

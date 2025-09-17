@@ -37,14 +37,9 @@ test_setup: |-
 solution_seeds:
   - table_name: intercom__threads
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: intercom
-  type: duckdb
-
-# Use shared project instead of local project
-project:
-  source: shared
-  name: intercom
-  type: dbt
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: intercom
+  project_type: dbt
+  project_name: intercom
