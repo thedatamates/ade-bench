@@ -35,6 +35,7 @@ from ade_bench.utils.dataset import Dataset
 from ade_bench.utils.logger import logger, log_harness_info
 from ade_bench.utils.test_generator import generate_solution_tests
 from ade_bench.utils.timeout_manager import TimeoutManager
+from ade_bench.utils.debug_breakpoint import breakpoint, DebugBreakpointException
 
 
 class Harness:
@@ -549,7 +550,13 @@ class Harness:
             #########################################################
             #########################################################
             # RUN COMPREHENSIVE SETUP SCRIPT
-            setup_failure_mode = self._run_setup(terminal, session, trial_handler, config, file_diff_handler)
+            try:
+
+                setup_failure_mode = self._run_setup(terminal, session, trial_handler, config, file_diff_handler)
+            except DebugBreakpointException as e:
+                self._logger.info(f"Debug breakpoint hit during setup for task {trial_handler.task_id}: {e}")
+                results.failure_mode = FailureMode.BREAKPOINT
+                return results
             #########################################################
             #########################################################
 
@@ -573,12 +580,17 @@ class Harness:
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent...")
-            agent_result, agent_failure_mode = self._run_agent(
-                session=session,
-                agent=task_agent,
-                trial_handler=trial_handler,
-                task_name=trial_handler.task_id,
-            )
+            try:
+                agent_result, agent_failure_mode = self._run_agent(
+                    session=session,
+                    agent=task_agent,
+                    trial_handler=trial_handler,
+                    task_name=trial_handler.task_id,
+                )
+            except DebugBreakpointException as e:
+                self._logger.info(f"Debug breakpoint hit during agent execution for task {trial_handler.task_id}: {e}")
+                results.failure_mode = FailureMode.BREAKPOINT
+                return results
 
             # Capture the full pane and split on delimiter to get post-agent content
             full_pane = session.capture_pane(capture_entire=True)
@@ -634,11 +646,16 @@ class Harness:
                     "tests"
                 )
 
-            test_failure_mode = self._run_tests(
-                terminal=terminal,
-                session=session,
-                trial_handler=trial_handler,
-            )
+            try:
+                test_failure_mode = self._run_tests(
+                    terminal=terminal,
+                    session=session,
+                    trial_handler=trial_handler,
+                )
+            except DebugBreakpointException as e:
+                self._logger.info(f"Debug breakpoint hit during test execution for task {trial_handler.task_id}: {e}")
+                results.failure_mode = FailureMode.BREAKPOINT
+                return results
 
             post_agent_pane = session.capture_pane(capture_entire=True)
             trial_handler.post_agent_pane_path.write_text(post_agent_pane)
