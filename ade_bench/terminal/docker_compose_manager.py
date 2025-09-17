@@ -24,10 +24,13 @@ class DockerComposeEnvVars(EnvModel):
 
 
 class DockerComposeManager:
-    CONTAINER_LOGS_PATH = "/logs"
+    CONTAINER_LOGS_PATH = Path("/logs")
     CONTAINER_TEST_DIR = Path("/tests")
     CONTAINER_SEEDS_DIR = Path("/seeds")
     CONTAINER_SOLUTIONS_DIR = Path("/solutions")
+    CONTAINER_APP_DIR = Path("/app")
+    CONTAINER_SETUP_DIR = Path("/app/setup")
+    CONTAINER_MIGRATION_DIR = Path("/app/migration")
 
     def __init__(
         self,
@@ -69,7 +72,7 @@ class DockerComposeManager:
             task_docker_client_image_name=self._client_image_name,
             task_docker_client_container_name=self._client_container_name,
             task_docker_name_prefix=self._docker_name_prefix,
-            container_logs_path=self.CONTAINER_LOGS_PATH,
+            container_logs_path=str(self.CONTAINER_LOGS_PATH),
             test_dir=str(self.CONTAINER_TEST_DIR),
             task_build_context_dir=(
                 str(self._build_context_dir.absolute())

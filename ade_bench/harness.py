@@ -465,7 +465,8 @@ class Harness:
                 logger=self._logger,
                 terminal=terminal,
                 session=session,
-                file_diff_handler=file_diff_handler
+                file_diff_handler=file_diff_handler,
+                trial_handler=trial_handler
             )
 
             # Run setup with timeout using asyncio

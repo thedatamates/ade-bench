@@ -351,3 +351,56 @@ class TrialHandler:
     @property
     def agent_logging_dir(self) -> Path:
         return self._task_output_path / "agent-logs"
+
+    # Setup-related path properties
+    @property
+    def task_setup_script_path(self) -> Path:
+        """Path to the task's setup.sh script."""
+        return self.input_path / "setup.sh"
+
+    @property
+    def task_setup_dir_path(self) -> Path:
+        """Path to the task's setup directory."""
+        return self.input_path / "setup"
+
+    @property
+    def shared_databases_path(self) -> Path:
+        """Path to the shared databases directory."""
+        return self._shared_path / "databases"
+
+    @property
+    def shared_duckdb_path(self) -> Path:
+        """Path to the shared DuckDB databases directory."""
+        return self.shared_databases_path / "duckdb"
+
+    @property
+    def shared_snowflake_path(self) -> Path:
+        """Path to the shared Snowflake databases directory."""
+        return self.shared_databases_path / "snowflake"
+
+    @property
+    def shared_projects_path(self) -> Path:
+        """Path to the shared projects directory."""
+        return self._shared_path / "projects"
+
+    @property
+    def shared_migrations_path(self) -> Path:
+        """Path to the shared migrations directory."""
+        return self._shared_path / "migrations"
+
+    def get_duckdb_file_path(self, db_name: str) -> Path:
+        """Get the path to a specific DuckDB database file."""
+        return self.shared_duckdb_path / f"{db_name}.duckdb"
+
+    def get_dbt_project_path(self, project_name: str, project_type: str = "dbt") -> Path:
+        """Get the path to a specific dbt project directory."""
+        project_type_path = 'dbt' if project_type == 'dbt-fusion' else project_type
+        return self.shared_projects_path / project_type_path / project_name
+
+    def get_migration_path(self, migration_directory: str) -> Path:
+        """Get the path to a specific migration directory."""
+        return self.shared_migrations_path / migration_directory
+
+    def get_migration_script_path(self, migration_directory: str) -> Path:
+        """Get the path to a specific migration script."""
+        return self.get_migration_path(migration_directory) / "migration.sh"

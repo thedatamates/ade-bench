@@ -122,7 +122,7 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
         return False
 
 
-def setup_snowflake(terminal, session, task_id: str, variant: Dict[str, Any]) -> None:
+def setup_snowflake(terminal, session, task_id: str, variant: Dict[str, Any], trial_handler) -> None:
     """Setup Snowflake by cloning database and creating user/role."""
     creds = generate_task_snowflake_credentials(task_id)
     source_db = variant.get('db_name')

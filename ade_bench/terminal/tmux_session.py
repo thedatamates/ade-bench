@@ -68,13 +68,13 @@ class TmuxSession:
     @property
     def logging_path(self) -> Path:
         return (
-            Path(DockerComposeManager.CONTAINER_LOGS_PATH) / f"{self._session_name}.log"
+            DockerComposeManager.CONTAINER_LOGS_PATH / f"{self._session_name}.log"
         )
 
     @property
     def _recording_path(self) -> Path:
         return (
-            Path(DockerComposeManager.CONTAINER_LOGS_PATH)
+            DockerComposeManager.CONTAINER_LOGS_PATH
             / f"{self._session_name}.cast"
         )
 
@@ -321,7 +321,7 @@ class TmuxSession:
             result = self.container.exec_run([
                 "tmux", "kill-session", "-t", self._session_name
             ])
-            
+
             if result.exit_code == 0:
                 self._logger.debug(f"Successfully killed tmux session {self._session_name}")
             else:
@@ -329,7 +329,7 @@ class TmuxSession:
                     f"Failed to kill tmux session {self._session_name}, "
                     f"exit code: {result.exit_code}"
                 )
-                
+
         except Exception as e:
             self._logger.error(
                 f"Error killing tmux session {self._session_name}: {e}"

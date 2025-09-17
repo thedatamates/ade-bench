@@ -2,11 +2,11 @@
 dbt setup functions.
 """
 
-import os
 import yaml
 from pathlib import Path
 from typing import Dict, Any
 from .setup_utils import generate_task_snowflake_credentials, update_file_in_container
+from ..terminal.docker_compose_manager import DockerComposeManager
 
 def _update_snowflake_creds(path: str, project_name: str, task_id: str) -> None:
     """Update the profiles.yml file with task-specific Snowflake credentials."""
@@ -60,7 +60,7 @@ def _update_snowflake_files(session, project_name: str, task_id: str, project_di
 
 
 
-def setup_dbt_project(terminal, session, task_id: str, variant: Dict[str, Any]) -> None:
+def setup_dbt_project(terminal, session, task_id: str, variant: Dict[str, Any], trial_handler) -> None:
     """Setup dbt project by copying project files."""
     project_name = variant.get('project_name')
     project_type = variant.get('project_type')
@@ -68,12 +68,13 @@ def setup_dbt_project(terminal, session, task_id: str, variant: Dict[str, Any]) 
     if not project_name:
         return
 
-    # Determine the project directory based on project_type
-    project_type_path = 'dbt' if project_type == 'dbt-fusion' else project_type
-    shared_project_dir = Path(__file__).parent.parent.parent / "shared" / "projects" / project_type_path / project_name
+    shared_project_dir = trial_handler.get_dbt_project_path(project_name, project_type)
 
     if shared_project_dir.exists():
-        terminal.copy_to_container(paths=shared_project_dir, container_dir="/app")
+        terminal.copy_to_container(
+            paths=shared_project_dir,
+            container_dir=str(DockerComposeManager.CONTAINER_APP_DIR)
+        )
 
         if variant.get('db_type') == 'snowflake' and task_id:
             _update_snowflake_files(session, project_name, task_id, shared_project_dir)
