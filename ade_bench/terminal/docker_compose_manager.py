@@ -30,7 +30,7 @@ class DockerComposeManager:
     CONTAINER_SOLUTIONS_DIR = Path("/solutions")
     CONTAINER_APP_DIR = Path("/app")
     CONTAINER_SETUP_DIR = Path("/app/setup")
-    CONTAINER_MIGRATION_DIR = Path("/app/migration")
+    CONTAINER_MIGRATION_DIR = Path("/app/migrations")
 
     def __init__(
         self,

@@ -8,10 +8,15 @@ RUN apt-get update && apt-get install -y \
     && chmod +x /usr/bin/yq \
     && rm -rf /var/lib/apt/lists/*
 
+# Install dbt Fusion
+RUN curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update
+
+# Install Snowflake connector (still needed for Snowflake connections)
 RUN pip install --no-cache-dir \
-    dbt-core==1.10.11 \
-    dbt-snowflake==1.10.2 \
     snowflake-connector-python==3.13.1
+
+# Add dbtf to PATH
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Set up workspace
 WORKDIR /app

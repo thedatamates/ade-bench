@@ -152,7 +152,7 @@ class VariantConfig(BaseModel):
 
     db_type: str = Field(pattern="^(duckdb|sqlite|postgres|snowflake)$")
     db_name: str
-    project_type: str = Field(default="dbt", pattern="^(dbt|other)$")
+    project_type: str = Field(default="dbt", pattern="^(dbt|dbt-fusion)$")
     project_name: str
     migration_directory: Optional[str] = None  # Name of directory in shared/migrations
 

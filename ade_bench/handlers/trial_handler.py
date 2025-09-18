@@ -246,24 +246,23 @@ class TrialHandler:
 
         task_docker_compose_path = self.input_path / "docker-compose.yaml"
 
-        if not task_docker_compose_path.exists():
-            # Try to use database-specific compose file based on variant config
+        if task_docker_compose_path.exists():
+            # Use task-specific docker-compose file if it exists
+            return task_docker_compose_path
+
+        else:
+            project_type = self.variant_config.get("project_type")
             db_type = self.variant_config.get("db_type")
-            if db_type:
-                db_specific_compose = self._defaults_path / f"docker-compose-{db_type}.yaml"
-                if db_specific_compose.exists():
-                    self._logger.debug(
-                        f"Using database-specific docker-compose file: {db_specific_compose}"
-                    )
-                    return db_specific_compose
 
-            self._logger.debug(
-                f"No docker-compose.yaml file found for task {self.task_id}, using "
-                "default docker-compose.yaml."
-            )
-            return self._default_docker_compose_path
-
-        return task_docker_compose_path
+            # Use database-specific docker-compose file if it exists
+            if db_type == "snowflake" and project_type == "dbt-fusion":
+                return self._defaults_path / "docker-compose-dbtf-snowflake.yaml"
+            elif db_type == "snowflake" and project_type == "dbt":
+                return self._defaults_path / "docker-compose-dbt-snowflake.yaml"
+            elif db_type == "duckdb":
+                return self._defaults_path / "docker-compose-dbt-duckdb.yaml"
+            else:
+                return self._default_docker_compose_path
 
     @property
     def solution_path(self) -> Path:

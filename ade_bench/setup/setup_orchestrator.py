@@ -26,6 +26,13 @@ class SetupOrchestrator:
         log_harness_info(self.logger, task_id, "setup", f"Starting task setup...")
 
 
+        # Set up the project
+        project_type = variant.get('project_type')
+        if project_type in ['dbt', 'dbt-fusion']:
+            log_harness_info(self.logger, task_id, "setup", f"Setting up dbt project...")
+            setup_dbt_project(self.terminal, self.session, task_id, variant, self.trial_handler)
+
+
         # Set up the database
         db_type = variant.get('db_type')
         if db_type == 'duckdb':
@@ -37,14 +44,7 @@ class SetupOrchestrator:
             log_harness_info(self.logger, task_id, "setup", f"Snowflake setup complete.")
 
 
-        # Set up the project
-        project_type = variant.get('project_type')
-        if project_type in ['dbt', 'dbt-fusion']:
-            log_harness_info(self.logger, task_id, "setup", f"Setting up dbt project...")
-            setup_dbt_project(self.terminal, self.session, task_id, variant, self.trial_handler)
-
-
-        # Take snapshot after migrations but before main setup script
+        # Take snapshot before migrations and main setup script
         if self.file_diff_handler:
             # Logging is contained in snapshot
             self.file_diff_handler.handle_phase_diffing(self.terminal.container, "setup", task_id, self.logger)

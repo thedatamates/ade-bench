@@ -40,7 +40,7 @@ vars:
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   main:
-    +all_varchar: true  # 强制所有列为字符串
+    +all_varchar: true
     +column_types:
       _fivetran_synced: timestamp
     user_data:
