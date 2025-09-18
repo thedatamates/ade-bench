@@ -256,11 +256,11 @@ class TrialHandler:
 
             # Use database-specific docker-compose file if it exists
             if db_type == "snowflake" and project_type == "dbt-fusion":
-                return self._defaults_path / "docker-compose-dbtf-snowflake.yaml"
+                return self._defaults_path / "docker-compose-snowflake-dbtf.yaml"
             elif db_type == "snowflake" and project_type == "dbt":
-                return self._defaults_path / "docker-compose-dbt-snowflake.yaml"
+                return self._defaults_path / "docker-compose-snowflake-dbt.yaml"
             elif db_type == "duckdb":
-                return self._defaults_path / "docker-compose-dbt-duckdb.yaml"
+                return self._defaults_path / "docker-compose-duckdb-dbt.yaml"
             else:
                 return self._default_docker_compose_path
 

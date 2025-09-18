@@ -1,6 +1,5 @@
 #!/bin/bash
 
-## Fix the error by changing the data type of the underlying table. 
 ## MOVE FILES
 SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
 
