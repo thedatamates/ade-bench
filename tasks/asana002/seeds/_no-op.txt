@@ -6,9 +6,9 @@ seeds:
       +column_types:
         project_id: varchar
         project_name: varchar
-        number_of_open_tasks: hugeint
-        number_of_assigned_open_tasks: hugeint
-        number_of_tasks_completed: hugeint
+        number_of_open_tasks: bigint
+        number_of_assigned_open_tasks: bigint
+        number_of_tasks_completed: bigint
         avg_close_time_days: double
         avg_close_time_assigned_days: double
         project_link: varchar
@@ -30,9 +30,9 @@ seeds:
         tag_id: varchar
         tag_name: varchar
         created_at: timestamp
-        number_of_open_tasks: hugeint
-        number_of_assigned_open_tasks: hugeint
-        number_of_tasks_completed: hugeint
+        number_of_open_tasks: bigint
+        number_of_assigned_open_tasks: bigint
+        number_of_tasks_completed: bigint
         avg_days_open: double
         avg_days_assigned: double
     solution__asana__task:
@@ -110,11 +110,11 @@ seeds:
     solution__int_asana__project_task_metrics:
       +column_types:
         project_id: varchar
-        number_of_open_tasks: hugeint
-        number_of_assigned_open_tasks: hugeint
-        number_of_tasks_completed: hugeint
-        number_of_assigned_tasks_completed: hugeint
-        total_days_open: hugeint
-        total_days_assigned_last_user: hugeint
+        number_of_open_tasks: bigint
+        number_of_assigned_open_tasks: bigint
+        number_of_tasks_completed: bigint
+        number_of_assigned_tasks_completed: bigint
+        total_days_open: bigint
+        total_days_assigned_last_user: bigint
         avg_close_time_days: double
         avg_close_time_assigned_days: double

@@ -847,7 +847,11 @@ class Harness:
                         table_name = schema['name']
                         column_types = {}
                         for col in schema['columns']:
-                            column_types[col['name']] = col['type']
+                            # Convert hugeint to bigint for Snowflake compatibility
+                            col_type = col['type']
+                            if col_type.lower() == 'hugeint':
+                                col_type = 'bigint'
+                            column_types[col['name']] = col_type
 
                         seeds_content['seeds'][project_name][table_name] = {
                             '+column_types': column_types

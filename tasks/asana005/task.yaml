@@ -53,8 +53,15 @@ variants:
   db_name: asana
   project_type: dbt
   project_name: asana
+
 - db_type: snowflake
   db_name: asana
   project_type: dbt
   project_name: asana
   migration_directory: asana__duckdb_to_snowflake
+
+- db_type: snowflake
+  db_name: asana
+  project_type: dbt-fusion
+  project_name: asana
+  migration_directory: asana__duckdb_to_snowflake_dbtf

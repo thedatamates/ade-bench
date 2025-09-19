@@ -6,9 +6,9 @@ seeds:
       +column_types:
         project_id: varchar
         project_name: varchar
-        number_of_open_tasks: hugeint
-        number_of_assigned_open_tasks: hugeint
-        number_of_tasks_completed: hugeint
+        number_of_open_tasks: bigint
+        number_of_assigned_open_tasks: bigint
+        number_of_tasks_completed: bigint
         avg_close_time_days: double
         avg_close_time_assigned_days: double
         project_link: varchar

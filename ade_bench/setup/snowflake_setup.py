@@ -95,16 +95,34 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
             """
             _execute_queries(cursor, role_query)
 
-            # Grant privileges to the role
-            grants_query = f"""
-                GRANT USAGE ON WAREHOUSE {creds['warehouse']} to {creds['role']};
-                GRANT USAGE ON DATABASE {creds['database']} TO ROLE {creds['role']};
-                GRANT CREATE SCHEMA ON DATABASE {creds['database']} TO ROLE {creds['role']};
-                GRANT CREATE TABLE ON ALL SCHEMAS IN DATABASE {creds['database']} TO ROLE {creds['role']};
-                GRANT USAGE, MODIFY ON ALL SCHEMAS IN DATABASE {creds['database']} TO ROLE {creds['role']};
-                GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {creds['database']}.PUBLIC TO ROLE {creds['role']};
+            # Create grants query template
+            grants_template = """
+                GRANT USAGE ON WAREHOUSE {warehouse} to {role};
+                GRANT USAGE ON DATABASE {database} TO ROLE {role};
+                GRANT CREATE SCHEMA ON DATABASE {database} TO ROLE {role};
+                GRANT CREATE TABLE ON ALL SCHEMAS IN DATABASE {database} TO ROLE {role};
+                GRANT CREATE TABLE ON FUTURE SCHEMAS IN DATABASE {database} TO ROLE {role};
+                GRANT USAGE, MODIFY ON ALL SCHEMAS IN DATABASE {database} TO ROLE {role};
+                GRANT USAGE, MODIFY ON FUTURE SCHEMAS IN DATABASE {database} TO ROLE {role};
+                GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {database}.PUBLIC TO ROLE {role};
+                GRANT SELECT, INSERT, UPDATE, DELETE ON FUTURE TABLES IN SCHEMA {database}.PUBLIC TO ROLE {role};
             """
-            _execute_queries(cursor, grants_query)
+
+            # Grant privileges to task role
+            task_grants_query = grants_template.format(
+                warehouse=creds['warehouse'],
+                database=creds['database'],
+                role=creds['role']
+            )
+            _execute_queries(cursor, task_grants_query)
+
+            # Grant privileges to admin role
+            admin_grants_query = grants_template.format(
+                warehouse=creds['warehouse'],
+                database=creds['database'],
+                role=os.getenv('SNOWFLAKE_ROLE', 'ACCOUNTADMIN')
+            )
+            _execute_queries(cursor, admin_grants_query)
 
             # Drop and create user
             user_query = f"""
@@ -127,8 +145,6 @@ def setup_snowflake(terminal, session, task_id: str, variant: Dict[str, Any], tr
     creds = generate_task_snowflake_credentials(task_id)
     source_db = variant.get('db_name')
     target_db = creds['database']
-
-
 
     # Clone the database
     if not _clone_database(source_db, target_db):

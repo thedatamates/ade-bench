@@ -1,0 +1,21 @@
+CREATE TABLE customer(id INTEGER, company VARCHAR, last_name VARCHAR, first_name VARCHAR, email_address INTEGER, job_title VARCHAR, business_phone VARCHAR, home_phone INTEGER, mobile_phone INTEGER, fax_number VARCHAR, address VARCHAR, city VARCHAR, state_province VARCHAR, zip_postal_code INTEGER, country_region VARCHAR, web_page INTEGER, notes INTEGER, attachments INTEGER);;
+CREATE TABLE employees(id INTEGER, company VARCHAR, last_name VARCHAR, first_name VARCHAR, email_address VARCHAR, job_title VARCHAR, business_phone VARCHAR, home_phone VARCHAR, mobile_phone INTEGER, fax_number VARCHAR, address VARCHAR, city VARCHAR, state_province VARCHAR, zip_postal_code INTEGER, country_region VARCHAR, web_page VARCHAR, notes VARCHAR, attachments INTEGER);;
+CREATE TABLE employee_privileges(employee_id INTEGER, privilege_id INTEGER);;
+CREATE TABLE inventory_transactions(id INTEGER, transaction_type INTEGER, transaction_created_date VARCHAR, transaction_modified_date VARCHAR, product_id INTEGER, quantity INTEGER, purchase_order_id INTEGER, customer_order_id INTEGER, "comments" VARCHAR);;
+CREATE TABLE inventory_transaction_types(id INTEGER, type_name VARCHAR);;
+CREATE TABLE invoices(id INTEGER, order_id INTEGER, invoice_date VARCHAR, due_date INTEGER, tax INTEGER, shipping INTEGER, amount_due INTEGER);;
+CREATE TABLE orders(id INTEGER, employee_id INTEGER, customer_id INTEGER, order_date VARCHAR, shipped_date VARCHAR, shipper_id INTEGER, ship_name VARCHAR, ship_address VARCHAR, ship_city VARCHAR, ship_state_province VARCHAR, ship_zip_postal_code INTEGER, ship_country_region VARCHAR, shipping_fee INTEGER, taxes INTEGER, payment_type VARCHAR, paid_date VARCHAR, notes INTEGER, tax_rate INTEGER, tax_status_id INTEGER, status_id INTEGER);;
+CREATE TABLE orders_status(id INTEGER, status_name VARCHAR);;
+CREATE TABLE orders_tax_status(id INTEGER, tax_status_name VARCHAR);;
+CREATE TABLE order_details(id INTEGER, order_id INTEGER, product_id INTEGER, quantity INTEGER, unit_price DOUBLE, discount INTEGER, status_id INTEGER, date_allocated INTEGER, purchase_order_id INTEGER, inventory_id INTEGER);;
+CREATE TABLE order_details_status(id INTEGER, status VARCHAR);;
+CREATE TABLE "privileges"(id INTEGER, privilege_name VARCHAR);;
+CREATE TABLE products(supplier_ids VARCHAR, id INTEGER, product_code VARCHAR, product_name VARCHAR, description INTEGER, standard_cost DOUBLE, list_price DOUBLE, reorder_level INTEGER, target_level INTEGER, quantity_per_unit VARCHAR, discontinued INTEGER, minimum_reorder_quantity INTEGER, category VARCHAR, attachments INTEGER);;
+CREATE TABLE purchase_orders(id INTEGER, supplier_id INTEGER, created_by INTEGER, submitted_date VARCHAR, creation_date VARCHAR, status_id INTEGER, expected_date INTEGER, shipping_fee INTEGER, taxes INTEGER, payment_date INTEGER, payment_amount INTEGER, payment_method VARCHAR, notes VARCHAR, approved_by INTEGER, approved_date VARCHAR, submitted_by INTEGER);;
+CREATE TABLE purchase_order_details(id INTEGER, purchase_order_id INTEGER, product_id INTEGER, quantity INTEGER, unit_cost DOUBLE, date_received VARCHAR, posted_to_inventory INTEGER, inventory_id INTEGER);;
+CREATE TABLE purchase_order_status(id INTEGER, status VARCHAR);;
+CREATE TABLE sales_reports(group_by VARCHAR, display VARCHAR, title VARCHAR, filter_row_source VARCHAR, "default" INTEGER);;
+CREATE TABLE shippers(id INTEGER, company VARCHAR, last_name INTEGER, first_name INTEGER, email_address INTEGER, job_title INTEGER, business_phone INTEGER, home_phone INTEGER, mobile_phone INTEGER, fax_number INTEGER, address VARCHAR, city VARCHAR, state_province VARCHAR, zip_postal_code INTEGER, country_region VARCHAR, web_page INTEGER, notes INTEGER, attachments INTEGER);;
+CREATE TABLE strings(string_id INTEGER, string_data VARCHAR);;
+CREATE TABLE suppliers(id INTEGER, company VARCHAR, last_name VARCHAR, first_name VARCHAR, email_address INTEGER, job_title VARCHAR, business_phone INTEGER, home_phone INTEGER, mobile_phone INTEGER, fax_number INTEGER, address INTEGER, city INTEGER, state_province INTEGER, zip_postal_code INTEGER, country_region INTEGER, web_page INTEGER, notes INTEGER, attachments INTEGER);;
+

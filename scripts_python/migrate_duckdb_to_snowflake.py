@@ -22,10 +22,8 @@ Requirements:
 import argparse
 import os
 import sys
-import tempfile
 from pathlib import Path
-from typing import Dict, List, Set, Optional
-import json
+from typing import Dict, List, Optional
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -38,8 +36,6 @@ except ImportError:
     SNOWFLAKE_AVAILABLE = False
     snowflake = None
 
-import pyarrow as pa
-import pyarrow.parquet as pq
 from duckdb_utils import DuckDBExtractor
 
 # Configuration - modify these paths as needed
@@ -62,8 +58,8 @@ class DuckDBToSnowflakeConverter:
         """Execute multiple SQL queries separated by semicolons."""
         for query in queries.split(";"):
             query = query.strip()
-            if query:  # Skip empty queries
-                print(f"  - {query}")
+            if query:
+                # print(f"  - {query}")
                 cursor.execute(query)
 
     def add_exclusions(self, exclusion_list: List[str]):
@@ -137,62 +133,65 @@ class DuckDBToSnowflakeConverter:
 
 
     def load_parquet_to_snowflake(self, parquet_path: Path, db_name: str, schema_name: str, table_name: str) -> bool:
-        """Load a Parquet file into Snowflake."""
+        """Load a Parquet file into Snowflake using internal stage and COPY INTO."""
         try:
             with self.get_snowflake_connection() as conn:
                 cursor = conn.cursor()
 
-                # Use the target database
+                # Use the target database and schema
+                cursor.execute(f"USE DATABASE {db_name}")
+                cursor.execute(f"USE SCHEMA {schema_name}")
+
+                # Create a temporary internal stage for this table
                 stage_name = f"temp_stage_{table_name.lower()}"
-                stage_query = f"""
-                    USE DATABASE {db_name};
-                    USE SCHEMA {schema_name};
-                    CREATE OR REPLACE STAGE {stage_name};
-                    PUT file://{parquet_path} @{stage_name};
+                file_format_name = f"temp_parquet_format_{table_name.lower()}"
+
+                # Create file format and stage
+                create_file_format_query = f"CREATE OR REPLACE FILE FORMAT {file_format_name} TYPE = PARQUET USE_LOGICAL_TYPE = TRUE;"
+                cursor.execute(create_file_format_query)
+
+                create_stage_query = f"CREATE OR REPLACE STAGE {stage_name} FILE_FORMAT={file_format_name};"
+                cursor.execute(create_stage_query)
+
+                # Upload the Parquet file to the stage
+                put_query = f"PUT file://{parquet_path} @{stage_name} AUTO_COMPRESS=FALSE OVERWRITE=TRUE;"
+                cursor.execute(put_query)
+
+                # Create table using Snowflake's schema inference from Parquet
+                create_table_query = f"""
+                CREATE OR REPLACE TABLE {table_name}
+                USING TEMPLATE (
+                    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
+                    FROM TABLE(
+                        INFER_SCHEMA(
+                            LOCATION=>'@{stage_name}/{parquet_path.name}',
+                            FILE_FORMAT=>'{file_format_name}',
+                            IGNORE_CASE => TRUE
+                        )
+                    )
+                );
                 """
-                self._execute_queries(cursor, stage_query)
-
-                # Create table structure based on Parquet schema
-                parquet_file = pq.ParquetFile(parquet_path)
-                schema = parquet_file.schema_arrow
-
-                # Convert Arrow schema to Snowflake DDL
-                columns = []
-                for field in schema:
-                    sf_type = self._arrow_to_snowflake_type(field.type)
-                    columns.append(f'{field.name} {sf_type}')
-
-                ddl = f"""
-                CREATE OR REPLACE TABLE {table_name} (
-                    {', '.join(columns)}
-                )
-                """
-                print(f"    - {ddl.strip()}")
-                cursor.execute(ddl)
-                print(f"    ✅ Created table structure: {table_name}")
+                cursor.execute(create_table_query)
 
                 # Load data from stage into table using COPY INTO
                 copy_query = f"""
                 COPY INTO {table_name}
                 FROM @{stage_name}/{parquet_path.name}
-                FILE_FORMAT = (TYPE = 'PARQUET')
-                MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
-                ON_ERROR = 'CONTINUE'
+                FILE_FORMAT=(FORMAT_NAME='{file_format_name}')
+                MATCH_BY_COLUMN_NAME=CASE_INSENSITIVE
+                ON_ERROR=CONTINUE
                 """
-                print(f"    - {copy_query.strip()}")
                 cursor.execute(copy_query)
 
                 # Verify data was loaded
                 count_query = f'SELECT COUNT(*) FROM {table_name}'
-                print(f"    - {count_query}")
                 cursor.execute(count_query)
                 count = cursor.fetchone()[0]
                 print(f"    ✅ Loaded {count} rows into {table_name}")
 
-                # Clean up stage
-                drop_stage_query = f"DROP STAGE IF EXISTS {stage_name}"
-                print(f"    - {drop_stage_query}")
-                cursor.execute(drop_stage_query)
+                # Clean up stage and file format
+                cursor.execute(f"DROP STAGE IF EXISTS {stage_name}")
+                cursor.execute(f"DROP FILE FORMAT IF EXISTS {file_format_name}")
 
                 return True
 
@@ -202,11 +201,11 @@ class DuckDBToSnowflakeConverter:
 
     def _extract_table_name(self, parquet_filename: str) -> str:
         """Extract table name from Parquet filename."""
-        # Format: {db_name}_main_{table_name}.parquet
-        # We want just the table name (the part after the last underscore before .parquet)
+        # For database export: just the filename without extension
+        # For individual table export: {db_name}_main_{table_name}.parquet
         name_without_ext = parquet_filename.replace('.parquet', '')
 
-        # Split by underscores and find where 'main' is
+        # Check if it's the old format with underscores and 'main'
         parts = name_without_ext.split('_')
         try:
             main_index = parts.index('main')
@@ -216,35 +215,11 @@ class DuckDBToSnowflakeConverter:
         except ValueError:
             pass
 
-        # Fallback: use filename without extension
+        # For database export format, just use the filename without extension
         return name_without_ext
 
-    def _arrow_to_snowflake_type(self, arrow_type) -> str:
-        """Convert Arrow type to Snowflake type."""
-        type_mapping = {
-            pa.int8(): "TINYINT",
-            pa.int16(): "SMALLINT",
-            pa.int32(): "INTEGER",
-            pa.int64(): "BIGINT",
-            pa.uint8(): "TINYINT",
-            pa.uint16(): "SMALLINT",
-            pa.uint32(): "INTEGER",
-            pa.uint64(): "BIGINT",
-            pa.float32(): "FLOAT",
-            pa.float64(): "DOUBLE",
-            pa.string(): "VARCHAR",
-            pa.binary(): "BINARY",
-            pa.bool_(): "BOOLEAN",
-            pa.date32(): "DATE",
-            pa.timestamp('ns'): "TIMESTAMP_NTZ",
-            pa.timestamp('us'): "TIMESTAMP_NTZ",
-            pa.timestamp('ms'): "TIMESTAMP_NTZ",
-            pa.timestamp('s'): "TIMESTAMP_NTZ",
-        }
 
-        return type_mapping.get(arrow_type, "VARCHAR")
-
-    def convert_duckdb_to_snowflake(self, duckdb_path: Path, db_name: str = None) -> Optional[Dict]:
+    def convert_duckdb_to_snowflake(self, duckdb_path: Path, db_name: str = None, use_database_export: bool = False) -> Optional[Dict]:
         """Convert a DuckDB file to Snowflake database."""
         if db_name is None:
             db_name = duckdb_path.stem
@@ -280,11 +255,20 @@ class DuckDBToSnowflakeConverter:
             db_parquet_dir.mkdir(exist_ok=True)
 
             # Export all tables to Parquet using shared utility
-            parquet_results = self.duckdb_extractor.export_all_tables_to_parquet(
-                duckdb_path,
-                db_parquet_dir,
-                db_name
-            )
+            if use_database_export:
+                # Use the more efficient database export
+                parquet_results = self.duckdb_extractor.export_database_to_parquet(
+                    duckdb_path,
+                    self.output_dir,
+                    db_name
+                )
+            else:
+                # Use individual table export (original method)
+                parquet_results = self.duckdb_extractor.export_all_tables_to_parquet(
+                    duckdb_path,
+                    db_parquet_dir,
+                    db_name
+                )
 
             if not parquet_results['success']:
                 results['errors'].append(parquet_results['error'])
@@ -313,7 +297,7 @@ class DuckDBToSnowflakeConverter:
             results['errors'].append(str(e))
             return results
 
-    def convert_all(self, exclusion_list: List[str] = None, include_list: List[str] = None) -> Dict:
+    def convert_all(self, exclusion_list: List[str] = None, include_list: List[str] = None, use_database_export: bool = False) -> Dict:
         """Convert all discovered DuckDB files to Snowflake databases."""
         if exclusion_list:
             self.add_exclusions(exclusion_list)
@@ -344,7 +328,7 @@ class DuckDBToSnowflakeConverter:
             print(f"\n[{i}/{len(filtered_files)}] Processing {duckdb_path.name}...")
 
             # Convert to Snowflake
-            conversion_result = self.convert_duckdb_to_snowflake(duckdb_path)
+            conversion_result = self.convert_duckdb_to_snowflake(duckdb_path, use_database_export=use_database_export)
 
             if conversion_result is None or conversion_result.get('errors'):
                 results['failed'].append({
@@ -378,6 +362,13 @@ def main():
         action="store_true"
     )
 
+    parser.add_argument(
+        "--use-database-export",
+        action="store_true",
+        help="Use DuckDB's EXPORT DATABASE command for more efficient export (default: use individual table export)"
+    )
+
+
     args = parser.parse_args()
 
     # Check if Snowflake is available
@@ -408,14 +399,14 @@ def main():
 
     # Perform conversion
     try:
-        results = converter.convert_all(args.exclude, args.include)
+        results = converter.convert_all(args.exclude, args.include, args.use_database_export)
 
         # Print summary
         print(f"\n{'='*60}")
         print("CONVERSION SUMMARY")
         print(f"{'='*60}")
-        print(f"Total discovered: {results['total_discovered']}")
-        print(f"Total processed: {results['total_processed']}")
+        print(f"Total DuckDB files discovered: {results['total_discovered']}")
+        print(f"Total DuckDB files processed: {results['total_processed']}")
         print(f"Successfully converted: {len(results['converted'])}")
         print(f"Failed: {len(results['failed'])}")
 

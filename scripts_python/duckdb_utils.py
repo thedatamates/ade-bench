@@ -9,11 +9,8 @@ including schema analysis, file discovery, and data export capabilities.
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Optional
+from typing import Dict, List, Set
 import duckdb
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
 
 
 class DuckDBExtractor:
@@ -135,28 +132,26 @@ class DuckDBExtractor:
         return False
 
     def export_table_to_parquet(self, duckdb_path: Path, schema_name: str, table_name: str, output_path: Path) -> bool:
-        """Export a single table from DuckDB to Parquet format."""
+        """Export a single table from DuckDB to Parquet format using direct DuckDB export."""
         try:
             with duckdb.connect(str(duckdb_path), read_only=True) as conn:
-                # Read data from DuckDB
+                # First check if table is empty
                 if schema_name == 'main':
-                    query = f'SELECT * FROM "{table_name}"'
+                    count_query = f'SELECT COUNT(*) FROM "{table_name}"'
                 else:
-                    query = f'SELECT * FROM {schema_name}."{table_name}"'
+                    count_query = f'SELECT COUNT(*) FROM {schema_name}."{table_name}"'
 
-                df = conn.execute(query).df()
+                row_count = conn.execute(count_query).fetchone()[0]
 
-                if df.empty:
-                    print(f"    ⚠️  Table {table_name} is empty, skipping...")
-                    return True
+                # Use DuckDB's direct export to Parquet
+                if schema_name == 'main':
+                    export_query = f'COPY (SELECT * FROM "{table_name}") TO "{output_path}" (FORMAT PARQUET, COMPRESSION ZSTD)'
+                else:
+                    export_query = f'COPY (SELECT * FROM {schema_name}."{table_name}") TO "{output_path}" (FORMAT PARQUET, COMPRESSION ZSTD)'
 
-                # Convert to PyArrow table
-                table = pa.Table.from_pandas(df)
+                conn.execute(export_query)
 
-                # Write to Parquet
-                pq.write_table(table, output_path)
-
-                print(f"    ✅ Exported {table_name} ({len(df)} rows) -> {output_path.name}")
+                print(f"    ✅ Exported {table_name} ({row_count} rows) -> {output_path.name}")
                 return True
 
         except Exception as e:
@@ -229,53 +224,61 @@ class DuckDBExtractor:
 
         return results
 
-    def get_table_dataframe(self, duckdb_path: Path, schema_name: str, table_name: str) -> Optional[pd.DataFrame]:
-        """Get a table as a pandas DataFrame from DuckDB."""
+    def export_database_to_parquet(self, duckdb_path: Path, output_dir: Path, db_name: str = None) -> Dict:
+        """
+        Export entire DuckDB database to Parquet using DuckDB's EXPORT DATABASE command.
+        This is more efficient than exporting tables individually.
+
+        Args:
+            duckdb_path: Path to the DuckDB file
+            output_dir: Directory to write Parquet files
+            db_name: Name for the database (used in file naming)
+
+        Returns:
+            Dictionary with export results
+        """
+        if db_name is None:
+            db_name = duckdb_path.stem
+
         try:
             with duckdb.connect(str(duckdb_path), read_only=True) as conn:
-                if schema_name == 'main':
-                    query = f'SELECT * FROM "{table_name}"'
-                else:
-                    query = f'SELECT * FROM {schema_name}."{table_name}"'
+                # Create database-specific subdirectory
+                db_parquet_dir = output_dir / db_name
+                db_parquet_dir.mkdir(exist_ok=True)
 
-                return conn.execute(query).df()
+                # Use DuckDB's EXPORT DATABASE command
+                export_query = f"EXPORT DATABASE '{db_parquet_dir}' (FORMAT PARQUET, COMPRESSION ZSTD);"
+                print(f"  Exporting entire database using: {export_query}")
+                conn.execute(export_query)
 
-        except Exception as e:
-            print(f"Error reading table {schema_name}.{table_name}: {e}", file=sys.stderr)
-            return None
+                # Count exported files
+                parquet_files = list(db_parquet_dir.glob("**/*.parquet"))
 
-    def get_table_schema_info(self, duckdb_path: Path, schema_name: str, table_name: str) -> Optional[Dict]:
-        """Get detailed schema information for a specific table."""
-        try:
-            with duckdb.connect(str(duckdb_path), read_only=True) as conn:
-                # Get column information
-                columns = conn.execute("""
-                    SELECT column_name, data_type, is_nullable, column_default
-                    FROM information_schema.columns
-                    WHERE table_schema = ? AND table_name = ?
-                    ORDER BY ordinal_position
-                """, [schema_name, table_name]).fetchall()
-
-                if not columns:
-                    return None
+                print(f"  ✅ Exported {len(parquet_files)} Parquet files to {db_parquet_dir}")
 
                 return {
-                    'schema': schema_name,
-                    'table': table_name,
-                    'columns': [
+                    'success': True,
+                    'tables_exported': len(parquet_files),
+                    'parquet_files': [
                         {
-                            'name': col[0],
-                            'type': col[1],
-                            'nullable': col[2] == 'YES',
-                            'default': col[3]
+                            'schema': 'main',  # DuckDB export doesn't preserve schema info easily
+                            'table': f.stem,
+                            'file_path': str(f),
+                            'filename': f.name
                         }
-                        for col in columns
-                    ]
+                        for f in parquet_files
+                    ],
+                    'errors': []
                 }
 
         except Exception as e:
-            print(f"Error getting schema info for {schema_name}.{table_name}: {e}", file=sys.stderr)
-            return None
+            print(f"  ❌ Error exporting database: {e}", file=sys.stderr)
+            return {
+                'success': False,
+                'error': str(e),
+                'tables_exported': 0,
+                'parquet_files': []
+            }
 
     def filter_files(self, files: List[Path], include_list: List[str] = None) -> List[Path]:
         """Filter files based on include/exclude logic."""

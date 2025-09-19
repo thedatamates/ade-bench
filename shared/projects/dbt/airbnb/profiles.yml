@@ -1,7 +1,21 @@
-airbnb:
+airbnb-duckdb:
   target: dev
   outputs:
     dev:
       type: duckdb
       path: "./airbnb.duckdb"
       schema: main
+
+airbnb-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>
