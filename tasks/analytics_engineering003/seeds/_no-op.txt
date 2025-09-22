@@ -22,4 +22,3 @@ seeds:
         web_page: integer
         notes: integer
         attachments: integer
-        insertion_timestamp: timestamp with time zone

@@ -21,8 +21,7 @@ WITH source AS (
         od.inventory_id,
         CAST(STRPTIME(o.order_date, '%m/%d/%Y %H:%M:%S') AS DATE) AS order_date,
         o.shipped_date,
-        o.paid_date,
-        get_current_timestamp() AS insertion_timestamp
+        o.paid_date
     FROM {{ ref('stg_orders') }} o
     LEFT JOIN {{ ref('stg_order_details') }} od
     ON od.order_id = o.id
@@ -50,7 +49,6 @@ SELECT
     inventory_id,
     order_date,
     shipped_date,
-    paid_date,
-    insertion_timestamp
+    paid_date
 FROM unique_source
 WHERE row_number = 1

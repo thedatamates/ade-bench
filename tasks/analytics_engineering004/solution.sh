@@ -24,8 +24,7 @@ WITH source AS (
         i.quantity,
         i.purchase_order_id,
         i.customer_order_id,
-        i.comments,
-        get_current_timestamp() AS insertion_timestamp,
+        i.comments
 FROM {{ ref('fact_inventory') }} i
 LEFT JOIN {{ ref('dim_products') }} p
 ON p.product_id = i.product_id

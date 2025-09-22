@@ -19,8 +19,7 @@ WITH source AS (
         quantity,
         purchase_order_id,
         customer_order_id,
-        comments,
-        get_current_timestamp() AS insertion_timestamp
+        comments
     FROM {{ ref('stg_inventory_transactions') }}
 ),
 
@@ -40,8 +39,7 @@ SELECT
     quantity,
     purchase_order_id,
     customer_order_id,
-    comments,
-    insertion_timestamp
+    comments
 FROM unique_source
 WHERE row_number = 1
 EOF
@@ -71,8 +69,7 @@ WITH source AS (
         od.inventory_id,
         CAST(STRPTIME(o.order_date, '%m/%d/%Y %H:%M:%S') AS DATE) AS order_date,
         o.shipped_date,
-        o.paid_date,
-        get_current_timestamp() AS insertion_timestamp
+        o.paid_date
     FROM {{ ref('stg_orders') }} o
     LEFT JOIN {{ ref('stg_order_details') }} od
     ON od.order_id = o.id
@@ -100,8 +97,7 @@ SELECT
     inventory_id,
     order_date,
     shipped_date,
-    paid_date,
-    insertion_timestamp
+    paid_date
 FROM unique_source
 WHERE row_number = 1
 EOF

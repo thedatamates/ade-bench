@@ -1,7 +1,21 @@
-analytics_engineering:
+analytics_engineering-duckdb:
   target: dev
   outputs:
     dev:
       type: duckdb
       path: "./analytics_engineering.duckdb"
       schema: main
+
+analytics_engineering-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>

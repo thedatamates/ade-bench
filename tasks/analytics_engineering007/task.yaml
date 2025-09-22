@@ -26,20 +26,10 @@ test_setup: |-
 # Tables to compare for solution
 solution_seeds:
   - table_name: fact_sales
-    exclude_columns:
-      - insertion_timestamp
   - table_name: fact_inventory
-    exclude_columns:
-      - insertion_timestamp
   - table_name: dim_products
-    exclude_columns:
-      - insertion_timestamp
   - table_name: obt_product_inventory
-    exclude_columns:
-      - insertion_timestamp
   - table_name: obt_sales_overview
-    exclude_columns:
-      - insertion_timestamp
 
 # Variants for different database and project combinations
 variants:

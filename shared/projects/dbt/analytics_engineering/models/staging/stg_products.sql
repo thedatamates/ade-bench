@@ -18,6 +18,5 @@ with source as (
     where supplier_ids not like '%;%'
 )
 select
-    *,
-    get_current_timestamp() as ingestion_timestamp
+    *
 from source

@@ -15,8 +15,7 @@ WITH source AS (
         quantity,
         purchase_order_id,
         customer_order_id,
-        comments,
-        get_current_timestamp() AS insertion_timestamp
+        comments
     FROM {{ ref('stg_inventory_transactions') }}
 ),
 
@@ -36,7 +35,6 @@ SELECT
     quantity,
     purchase_order_id,
     customer_order_id,
-    comments,
-    insertion_timestamp
+    comments
 FROM unique_source
 WHERE row_number = 1

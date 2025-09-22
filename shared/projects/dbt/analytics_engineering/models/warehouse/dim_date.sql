@@ -12,8 +12,8 @@ SELECT
     STRFTIME('%A', d)           AS day_name,     -- Format day name (e.g., Monday)
     (CASE WHEN STRFTIME('%w', d) IN ('0', '6') THEN 0 ELSE 1 END) AS day_is_weekday -- Check if it's a weekday
 FROM (
-    SELECT 
+    SELECT
         CAST(generate_series AS DATE) AS d  -- Cast timestamp to date
-    FROM 
+    FROM
         generate_series(TIMESTAMP '2014-01-01', TIMESTAMP '2050-01-01', INTERVAL 1 DAY) -- Generate date series
 ) AS foo

@@ -1,5 +1,5 @@
 WITH source AS (
-    SELECT  
+    SELECT
         p.id AS product_id,
         p.product_code,
         p.product_name,
@@ -13,8 +13,7 @@ WITH source AS (
         p.discontinued,
         p.minimum_reorder_quantity,
         p.category,
-        p.attachments,
-        get_current_timestamp() AS insertion_timestamp
+        p.attachments
     FROM {{ ref('stg_products') }} p
     LEFT JOIN {{ ref('stg_suppliers') }} s
     ON s.id = p.supplier_id
@@ -40,7 +39,6 @@ SELECT
     discontinued,
     minimum_reorder_quantity,
     category,
-    attachments,
-    insertion_timestamp
+    attachments
 FROM unique_source
 WHERE row_number = 1

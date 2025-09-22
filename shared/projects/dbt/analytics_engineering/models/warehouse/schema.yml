@@ -72,5 +72,3 @@ models:
         description: "The date the purchase order was approved."
       - name: submitted_by
         description: "Employee ID of the person who submitted the purchase order."
-      - name: insertion_timestamp
-        description: "Timestamp of when the record was inserted into the fact table."

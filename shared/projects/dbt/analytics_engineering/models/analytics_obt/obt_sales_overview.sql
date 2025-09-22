@@ -64,8 +64,7 @@ WITH source AS (
         s.inventory_id,
         s.order_date,
         s.shipped_date,
-        s.paid_date,
-        get_current_timestamp() AS insertion_timestamp
+        s.paid_date
     FROM {{ ref('fact_sales') }} s
     LEFT JOIN {{ ref('dim_customer') }} c
     ON c.customer_id = s.customer_id

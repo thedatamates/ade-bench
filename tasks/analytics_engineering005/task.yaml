@@ -23,8 +23,6 @@ test_setup: |-
 # Tables to compare for solution
 solution_seeds:
   - table_name: fact_inventory
-    exclude_columns:
-      - insertion_timestamp
 
 # Variants for different database and project combinations
 variants:

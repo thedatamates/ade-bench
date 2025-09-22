@@ -40,5 +40,3 @@ models:
         description: "The cost per unit of the product."
       - name: status_id
         description: "The status of the purchase order."
-      - name: insertion_timestamp
-        description: "The timestamp when the record was inserted."

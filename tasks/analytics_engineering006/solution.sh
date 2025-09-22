@@ -3,7 +3,7 @@
 # Create the dim_products model
 cat > models/warehouse/dim_products.sql << 'EOF'
 WITH source AS (
-    SELECT  
+    SELECT
         p.id AS product_id,
         p.product_code,
         p.product_name,
@@ -17,8 +17,7 @@ WITH source AS (
         p.discontinued,
         p.minimum_reorder_quantity,
         p.category,
-        p.attachments,
-        get_current_timestamp() AS insertion_timestamp
+        p.attachments
     FROM {{ ref('stg_products') }} p
     LEFT JOIN {{ ref('stg_suppliers') }} s
     ON s.id = p.supplier_id
@@ -44,8 +43,7 @@ SELECT
     discontinued,
     minimum_reorder_quantity,
     category,
-    attachments,
-    insertion_timestamp
+    attachments
 FROM unique_source
 WHERE row_number = 1
 EOF
@@ -69,8 +67,7 @@ WITH source AS (
         quantity,
         purchase_order_id,
         customer_order_id,
-        comments,
-        get_current_timestamp() AS insertion_timestamp
+        comments
     FROM {{ ref('stg_inventory_transactions') }}
 ),
 
@@ -90,8 +87,7 @@ SELECT
     quantity,
     purchase_order_id,
     customer_order_id,
-    comments,
-    insertion_timestamp
+    comments
 FROM unique_source
 WHERE row_number = 1
 EOF
@@ -121,8 +117,7 @@ WITH source AS (
         i.quantity,
         i.purchase_order_id,
         i.customer_order_id,
-        i.comments,
-        get_current_timestamp() AS insertion_timestamp,
+        i.comments
 FROM {{ ref('fact_inventory') }} i
 LEFT JOIN {{ ref('dim_products') }} p
 ON p.product_id = i.product_id

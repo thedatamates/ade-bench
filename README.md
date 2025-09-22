@@ -224,4 +224,25 @@ uv run ruff check --fix .
 ## Notes
 
 - Solutions scripts can take variablees for db types and project types, see airbnb.
--
+
+
+## Migrating between databases
+
+To migrate DuckDB databases to Snowflake, run the following script:
+
+```
+$ uv run scripts_python/migrate_duckdb_to_snowflake.py --use-database-export
+```
+The `--use-database-export` flag is not necessary, but is recommended.
+
+This will migrate all the DuckDB databases. You can include and exclude specific ones using `--include` and `--exclude`
+```
+# Only foo.duckdb and bar.duckdb
+$ uv run scripts_python/migrate_duckdb_to_snowflake.py --include foo bar
+
+# All but bar.duckdb
+$ uv run scripts_python/migrate_duckdb_to_snowflake.py --exclude bar
+
+## Snowflake cleanup
+
+Writes lots of stuff; you can wipe it by running this, and then running all of the `DROP ...` commands.

@@ -358,11 +358,6 @@ def main():
     )
 
     parser.add_argument(
-        "--dry-run",
-        action="store_true"
-    )
-
-    parser.add_argument(
         "--use-database-export",
         action="store_true",
         help="Use DuckDB's EXPORT DATABASE command for more efficient export (default: use individual table export)"
@@ -378,24 +373,6 @@ def main():
 
     # Create converter
     converter = DuckDBToSnowflakeConverter()
-
-    if args.dry_run:
-        # Just show what would be converted
-        if args.exclude:
-            converter.add_exclusions(args.exclude)
-
-        duckdb_files = converter.discover_duckdb_files()
-
-        if args.include:
-            filtered_files = [f for f in duckdb_files if converter.should_include_file(f, args.include)]
-            print(f"Would convert {len(filtered_files)} files (include mode):")
-        else:
-            filtered_files = [f for f in duckdb_files if not converter.should_exclude_file(f)]
-            print(f"Would convert {len(filtered_files)} files (exclude mode):")
-
-        for f in filtered_files:
-            print(f"  - {f}")
-        return
 
     # Perform conversion
     try:

@@ -23,8 +23,7 @@ SELECT
     country_region,
     web_page,
     notes,
-    attachments,
-    get_current_timestamp() as insertion_timestamp,
+    attachments
 FROM {{ ref('stg_customer') }}
 ),
 
@@ -52,8 +51,7 @@ SELECT
     country_region,
     web_page,
     notes,
-    attachments,
-    insertion_timestamp
+    attachments
 FROM unique_source
 WHERE row_number = 1
 EOF

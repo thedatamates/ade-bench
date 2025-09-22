@@ -6,7 +6,7 @@
 ] %}
 
 {% set cols_to_exclude = [
-    'insertion_timestamp'
+    
 ] %}
 
 
@@ -23,7 +23,7 @@
 
 {% if table_a is none or table_b is none %}
     select 1
-{% else %}    
+{% else %}
     {{ dbt_utils.test_equality(
         model=ref(answer_key),
         compare_model=ref(table_name),
