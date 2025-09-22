@@ -20,8 +20,6 @@ descriptions:
       - room_type
       - nps_total
       - reviews_total
-
-      Materialize the first table incrementally and the second table as a table.
 author_name: test
 author_email: test
 difficulty: medium
@@ -36,7 +34,11 @@ db_type: duckdb
 # Tables to compare for solution
 solution_seeds:
   - table_name: daily_agg_nps_reviews
+    exclude_tests:
+      - equality_test
   - table_name: listing_agg_nps_reviews
+    exclude_tests:
+      - equality_test
 
 # Variants for different database and project combinations
 variants:

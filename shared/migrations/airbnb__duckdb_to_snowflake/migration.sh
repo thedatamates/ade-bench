@@ -17,6 +17,9 @@ files=(
     "models/dim/dim_listings.sql"
     "models/dim/dim_listings_hosts.sql"
     "models/fact/fct_reviews.sql"
+    "models/source/src_hosts.sql"
+    "models/source/src_listings.sql"
+    "models/source/src_reviews.sql"
 )
 
 for file in "${files[@]}"; do

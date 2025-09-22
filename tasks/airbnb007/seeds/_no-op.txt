@@ -38,7 +38,7 @@ seeds:
         nps_daily: double
         reviews_daily: bigint
         nps_28d: double
-        reviews_28d: hugeint
+        reviews_28d: bigint
     solution__listing_agg_nps_reviews:
       +column_types:
         LISTING_ID: integer

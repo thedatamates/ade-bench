@@ -113,7 +113,7 @@ if __name__ == "__main__":
         help="Number of attempts to make for each task.",
     )
     parser.add_argument(
-        "--create-seed",
+        "--seed",
         action="store_true",
         help="Extract specified tables as CSV files after harness run completes",
     )
@@ -124,7 +124,7 @@ if __name__ == "__main__":
         default="",
     )
     parser.add_argument(
-        "--disable-diffs",
+        "--no-diffs",
         action="store_true",
         help="Disable file diffing and HTML generation.",
     )
@@ -141,7 +141,7 @@ if __name__ == "__main__":
         help="Project type to filter variants (e.g., dbt, other)",
     )
     parser.add_argument(
-        "--keep-alive",
+        "--persist",
         action="store_true",
         help="Keep containers alive when tasks fail for debugging",
     )
@@ -181,11 +181,11 @@ if __name__ == "__main__":
         exclude_task_ids=set(args.exclude_tasks) if args.exclude_tasks else None,
         n_attempts=args.n_attempts,
         dataset_config=dataset_config,
-        create_seed=args.create_seed,
-        disable_diffs=args.disable_diffs,
+        create_seed=args.seed,
+        disable_diffs=args.no_diffs,
         db_type=args.db,
         project_type=args.project_type,
-        keep_alive=args.keep_alive,
+        keep_alive=args.persist,
     )
 
     results = harness.run()

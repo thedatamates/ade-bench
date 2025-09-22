@@ -1,12 +1,32 @@
 #!/bin/bash
 SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
 
-cp $SOLUTIONS_DIR/dim_hosts.sql models/dim_hosts.sql
-cp $SOLUTIONS_DIR/dim_listings.sql models/dim_listings.sql
-cp $SOLUTIONS_DIR/dim_listings_hosts.sql models/dim_listings_hosts.sql
-cp $SOLUTIONS_DIR/fct_reviews.sql models/fct_reviews.sql
-cp $SOLUTIONS_DIR/daily_agg_nps_reviews.sql models/daily_agg_nps_reviews.sql
-cp $SOLUTIONS_DIR/listing_agg_nps_reviews.sql models/listing_agg_nps_reviews.sql
+## Update schema config in solution files by db type
+files=(
+    "dim_hosts.sql"
+    "dim_listings.sql"
+    "dim_listings_hosts.sql"
+    "fct_reviews.sql"
+    "daily_agg_nps_reviews.sql"
+    "listing_agg_nps_reviews.sql"
+)
 
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    replace='schema="main"'
+else
+    replace='schema="public"'
+fi
+
+for file in "${files[@]}"; do
+    find='schema="main"'
+    sed -i "s/${find}/${replace}/g" $SOLUTIONS_DIR/$file
+done
+
+## Copy solution files
+for file in "${files[@]}"; do
+    cp $SOLUTIONS_DIR/$file models/$file
+done
+
+## Run dbt
 dbt deps
 dbt run

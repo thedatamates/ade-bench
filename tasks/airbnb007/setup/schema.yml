@@ -20,7 +20,7 @@ models:
     description: |
       Calculates daily and rolling 28-day NPS scores, using positive reviews as promoters and negative reviews as detractor
     config:
-      materialized: incremental
+      materialized: table
     columns:
       - name: review_date
       - name: nps_daily

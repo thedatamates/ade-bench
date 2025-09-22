@@ -138,6 +138,75 @@ Each task contains:
 - `solution.sh` – The oracle solution script that directly modifies files.
 - `solutions/` – (Optional) Reference materials that are copied to `/solutions` in the container and can be used by setup.sh and solution.sh scripts.
 
+## Solution Seeds and Test Generation
+
+ADE-Bench automatically generates test files (prefixed with `AUTO_`) to validate that agent-generated tables match expected solution seeds. This is configured in the `task.yaml` file using the `solution_seeds` field.
+
+**Important**: Before generating new AUTO_ tests, ADE-Bench automatically removes any existing AUTO_ test files to ensure a clean slate for each task run.
+
+### Basic Configuration
+
+```yaml
+# In task.yaml
+solution_seeds:
+  - table_name: daily_agg_reviews
+  - table_name: listing_agg_reviews
+```
+
+This generates two test files for each table:
+- `AUTO_{table_name}_equality.sql` - Tests that the generated table matches the solution seed
+- `AUTO_{table_name}_existence.sql` - Tests that the table exists
+
+### Advanced Configuration
+
+You can customize test generation with column exclusions and test exclusions:
+
+```yaml
+solution_seeds:
+  - table_name: daily_agg_reviews
+    exclude_columns:
+      - insertion_timestamp
+      - last_modified
+    exclude_tests:
+      - equality_test
+  - table_name: listing_agg_reviews
+    exclude_tests:
+      - existence_test
+```
+
+#### Configuration Options
+
+- **`exclude_columns`**: List of columns to exclude from equality tests (useful for timestamps, IDs, etc.)
+- **`exclude_tests`**: List of test types to skip generation for:
+  - `"equality_test"` - Skip the equality comparison test
+  - `"existence_test"` - Skip the table existence test
+
+#### Example Use Cases
+
+```yaml
+# Skip equality test for tables with non-deterministic columns
+solution_seeds:
+  - table_name: user_activity
+    exclude_columns:
+      - created_at
+      - session_id
+    exclude_tests:
+      - equality_test
+
+# Only test table existence (skip content comparison)
+solution_seeds:
+  - table_name: temp_processing_table
+    exclude_tests:
+      - equality_test
+
+# Skip both tests (no AUTO_ files generated)
+solution_seeds:
+  - table_name: debug_table
+    exclude_tests:
+      - equality_test
+      - existence_test
+```
+
 ## Development
 
 ```bash
@@ -151,3 +220,8 @@ uv run pytest
 uv run black .
 uv run ruff check --fix .
 ```
+
+## Notes
+
+- Solutions scripts can take variablees for db types and project types, see airbnb.
+-

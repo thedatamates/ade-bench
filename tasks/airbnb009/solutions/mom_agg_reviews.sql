@@ -12,14 +12,14 @@ WITH review_cte AS (
 	FROM {{ref('fct_reviews')}}
 
 	{% if is_incremental() %}
-	WHERE REVIEW_DATE::DATE BETWEEN (SELECT MAX(REVIEW_DATE::DATE) - 29 FROM {{ref('fct_reviews')}}) 
+	WHERE REVIEW_DATE::DATE BETWEEN (SELECT MAX(REVIEW_DATE::DATE) - 29 FROM {{ref('fct_reviews')}})
 							AND (SELECT MAX(REVIEW_DATE::DATE) FROM {{ref('fct_reviews')}})
 	{% endif %}
 ),
 
 dates_cte AS (
 	SELECT DATE_ACTUAL
-	FROM airbnb.main.dim_dates
+	FROM {{ ref('dim_dates') }}
 	-- THIS IS THE FIX
 	WHERE DATE_ACTUAL >= (SELECT min(REVIEW_DATE::DATE) FROM review_cte)
 		AND DATE_ACTUAL <= (SELECT max(REVIEW_DATE::DATE) FROM review_cte)
@@ -33,9 +33,9 @@ final_cte AS (
 SELECT
 	COUNT(*) AS REVIEW_TOTALS ,
 	review_cte.REVIEW_SENTIMENT ,
-	dates_cte.DATE_ACTUAL AS AGGREGATION_DATE 
+	dates_cte.DATE_ACTUAL AS AGGREGATION_DATE
 FROM dates_cte
-LEFT JOIN review_cte 
+LEFT JOIN review_cte
 	/* joining by last 30 days range so we can get the last 30 days aggregation for each date */
 	ON review_cte.REVIEW_DATE::DATE BETWEEN dates_cte.DATE_ACTUAL::DATE - 29
 				  		      AND dates_cte.DATE_ACTUAL::DATE
@@ -47,7 +47,7 @@ GROUP BY
 SELECT
 	*,
 	/*using LAG with 29 days as offset to calculate month over month metrics */
-	ROUND(((REVIEW_TOTALS * 100) / LAG(REVIEW_TOTALS,29) OVER (PARTITION BY REVIEW_SENTIMENT 
+	ROUND(((REVIEW_TOTALS * 100) / LAG(REVIEW_TOTALS,29) OVER (PARTITION BY REVIEW_SENTIMENT
 																ORDER BY AGGREGATION_DATE ASC) - 100),2) AS MOM,
-	{{dbt_utils.generate_surrogate_key(['AGGREGATION_DATE','REVIEW_SENTIMENT'])}} AS DATE_SENTIMENT_ID
+	{{dbt_utils.generate_surrogate_key(['AGGREGATION_DATE::DATE','REVIEW_SENTIMENT'])}} AS DATE_SENTIMENT_ID
 FROM final_cte

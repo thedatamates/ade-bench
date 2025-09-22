@@ -580,6 +580,10 @@ class Harness:
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
+            # Set variant configuration for oracle agent
+            if hasattr(task_agent, 'set_variant_config'):
+                task_agent.set_variant_config(config)
+
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent...")
             try:
                 agent_result, agent_failure_mode = self._run_agent(
@@ -833,7 +837,7 @@ class Harness:
                     no_op_path = task_seeds_dir / "_no-op.txt"
 
                     # Get project name from current variant
-                    project_name = task_config.get('project', {}).get('name', 'default')
+                    project_name = trial_handler.variant_config.get('project_name', 'default')
 
                     # Create the seeds section in proper YAML format
                     seeds_content = {

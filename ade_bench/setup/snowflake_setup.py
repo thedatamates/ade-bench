@@ -102,10 +102,14 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
                 GRANT CREATE SCHEMA ON DATABASE {database} TO ROLE {role};
                 GRANT CREATE TABLE ON ALL SCHEMAS IN DATABASE {database} TO ROLE {role};
                 GRANT CREATE TABLE ON FUTURE SCHEMAS IN DATABASE {database} TO ROLE {role};
+                GRANT CREATE VIEW ON ALL SCHEMAS IN DATABASE {database} TO ROLE {role};
+                GRANT CREATE VIEW ON FUTURE SCHEMAS IN DATABASE {database} TO ROLE {role};
                 GRANT USAGE, MODIFY ON ALL SCHEMAS IN DATABASE {database} TO ROLE {role};
                 GRANT USAGE, MODIFY ON FUTURE SCHEMAS IN DATABASE {database} TO ROLE {role};
                 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {database}.PUBLIC TO ROLE {role};
                 GRANT SELECT, INSERT, UPDATE, DELETE ON FUTURE TABLES IN SCHEMA {database}.PUBLIC TO ROLE {role};
+                GRANT SELECT, INSERT, UPDATE, DELETE ON ALL VIEWS IN SCHEMA {database}.PUBLIC TO ROLE {role};
+                GRANT SELECT, INSERT, UPDATE, DELETE ON FUTURE VIEWS IN SCHEMA {database}.PUBLIC TO ROLE {role};
             """
 
             # Grant privileges to task role

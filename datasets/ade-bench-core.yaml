@@ -20,11 +20,11 @@ task_ids:
   # - analytics_engineering006
   # - analytics_engineering007
   # - analytics_engineering008
-  # - asana001
-  # - asana002
-  # - asana003
-  # - asana004
-  # - asana005
+  - asana001
+  - asana002
+  - asana003
+  - asana004
+  - asana005
   # - f1001
   # - f1002
   # - f1003

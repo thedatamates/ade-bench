@@ -28,6 +28,11 @@ db_type: duckdb
 # Tables to compare for solution
 # solution_seeds:
 #   - template__model
+#   - table_name: another_model
+#     exclude_columns:
+#       - insertion_timestamp
+#     exclude_tests:
+#       - equality_test
 
 # Use shared database instead of local data files
 database:

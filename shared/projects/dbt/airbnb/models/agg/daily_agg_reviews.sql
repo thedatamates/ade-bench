@@ -16,7 +16,7 @@ SELECT
 	COUNT(*) AS REVIEW_TOTALS ,
 	REVIEW_SENTIMENT ,
 	REVIEW_DATE::DATE AS REVIEW_DATE ,
-	{{dbt_utils.generate_surrogate_key(['REVIEW_SENTIMENT','REVIEW_DATE'])}} AS DATE_SENTIMENT_ID
+	{{dbt_utils.generate_surrogate_key(['REVIEW_SENTIMENT','REVIEW_DATE::DATE'])}} AS DATE_SENTIMENT_ID
 FROM review_cte
 
 {% if is_incremental() %}

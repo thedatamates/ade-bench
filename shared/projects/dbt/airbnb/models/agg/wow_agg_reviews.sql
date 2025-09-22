@@ -48,5 +48,5 @@ SELECT
 	/*using LAG with 6 days as offset to calculate month over month metrics */
 	ROUND(((REVIEW_TOTALS * 100) / LAG(REVIEW_TOTALS,6) OVER (PARTITION BY REVIEW_SENTIMENT
 																ORDER BY AGGREGATION_DATE ASC) - 100),2) AS WOW,
-	{{dbt_utils.generate_surrogate_key(['AGGREGATION_DATE','REVIEW_SENTIMENT'])}} AS DATE_SENTIMENT_ID
+	{{dbt_utils.generate_surrogate_key(['AGGREGATION_DATE::DATE','REVIEW_SENTIMENT'])}} AS DATE_SENTIMENT_ID
 FROM final_cte

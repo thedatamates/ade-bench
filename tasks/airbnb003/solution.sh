@@ -1,11 +1,20 @@
 #!/bin/bash
-# Create the product_performance model
+# Set schema based on database type
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema="main"
+else
+    schema="public"
+fi
+
+########################################################
+# Update source models to be be views
+
 cat <<EOF | cat - models/source/src_hosts.sql > tmp && mv tmp models/source/src_hosts.sql
 {{
 	config(
 		materialized="view" ,
 		alias="src_hosts" ,
-		schema="main" ,
+		schema="$schema" ,
 		unique_key="HOST_ID"
 	)
 }}
@@ -17,7 +26,7 @@ cat <<EOF | cat - models/source/src_listings.sql > tmp && mv tmp models/source/s
 	config(
 		materialized="view" ,
 		alias="src_listings" ,
-		schema="main" ,
+		schema="$schema" ,
 		unique_key="LISTING_ID"
 	)
 }}
@@ -29,7 +38,7 @@ cat <<EOF | cat - models/source/src_reviews.sql > tmp && mv tmp models/source/sr
 	config(
 		materialized="view" ,
 		alias="src_reviews" ,
-		schema="main" ,
+		schema="$schema" ,
 		unique_key="LISTING_ID"
 	)
 }}

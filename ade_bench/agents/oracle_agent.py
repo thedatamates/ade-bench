@@ -41,6 +41,7 @@ class OracleAgent(BaseAgent):
 
         self._logger = logger.getChild(__name__)
         self._init_solution_dict()
+        self._variant_config = None
 
     def _init_solution_dict(self) -> None:
         solution_dict: SolutionDict = {}
@@ -66,6 +67,10 @@ class OracleAgent(BaseAgent):
 
         self._solution_dict = solution_dict
 
+    def set_variant_config(self, variant_config: dict) -> None:
+        """Set the variant configuration for the current task."""
+        self._variant_config = variant_config
+
     def perform_task(
         self,
         task_description: str,
@@ -89,8 +94,18 @@ class OracleAgent(BaseAgent):
                 container_dir="/oracle",
                 container_filename="solution.sh",
             )
+            # Build command with optional parameters
+            command = "bash /oracle/solution.sh"
+            if self._variant_config:
+                db_type = self._variant_config.get("db_type")
+                project_type = self._variant_config.get("project_type")
+                if db_type:
+                    command += f" --db-type={db_type}"
+                if project_type:
+                    command += f" --project-type={project_type}"
+
             session.send_keys(
-                ["bash /oracle/solution.sh", "Enter"],
+                [command, "Enter"],
                 max_timeout_sec=float("inf"),
                 block=True,
             )

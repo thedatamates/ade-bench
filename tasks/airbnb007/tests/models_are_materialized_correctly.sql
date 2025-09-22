@@ -19,10 +19,9 @@
 
 {% if fct_reviews_mat != 'incremental' %}
     select 'fct_views is not incremental' as error_message
-{% elif daily_agg_nps_reviews_mat != 'incremental' %}
+
+{% elif daily_agg_nps_reviews_mat != 'table' %}
     select 'daily_agg_nps_reviews is not a table' as error_message
-
-
 {% elif dim_hosts_mat != 'table' %}
     select 'dim_hosts is not a table' as error_message
 {% elif dim_listings_mat != 'table' %}

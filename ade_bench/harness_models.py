@@ -165,6 +165,7 @@ class SolutionSeedConfig(BaseModel):
     table_name: str
     include_columns: Optional[List[str]] = None
     exclude_columns: Optional[List[str]] = None
+    exclude_tests: Optional[List[str]] = None
 
 
 class TaskMetadata(BaseModel):

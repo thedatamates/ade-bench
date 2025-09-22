@@ -1,11 +1,18 @@
 #!/bin/bash
-# Create the product_performance model
-cat > models/fact/fct_reviews.sql << 'EOF'
+# Set schema based on database type
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema="main"
+else
+    schema="public"
+fi
+
+## Add the primary key to the fct_reviews model
+cat > models/fact/fct_reviews.sql << EOF
 {{
 	config(
 		materialized="incremental" ,
 		alias="fct_reviews" ,
-		schema="main"
+		schema="$schema"
 	)
 }}
 
@@ -14,7 +21,7 @@ WITH src_reviews_cte AS (
 	FROM {{ref('src_reviews')}}
 )
 
-SELECT 
+SELECT
 	{{dbt_utils.generate_surrogate_key(['LISTING_ID','REVIEW_DATE','REVIEWER_NAME','REVIEW_TEXT'])}} AS REVIEW_ID,
 	*
 FROM src_reviews_cte

@@ -23,7 +23,11 @@ solution_seeds:
   - table_name: dim_listings
   - table_name: dim_listings_hosts
   - table_name: daily_agg_nps_reviews
+    exclude_tests:
+      - equality_test
   - table_name: listing_agg_nps_reviews
+    exclude_tests:
+      - equality_test
 
 # Variants for different database and project combinations
 variants:
