@@ -13,7 +13,6 @@ seeds:
         purchase_order_id: integer
         customer_order_id: integer
         comments: varchar
-        insertion_timestamp: timestamp with time zone
     solution__obt_product_inventory:
       +column_types:
         product_id: integer
@@ -38,7 +37,6 @@ seeds:
         purchase_order_id: integer
         customer_order_id: integer
         comments: varchar
-        insertion_timestamp: timestamp with time zone
     solution__dim_products:
       +column_types:
         product_id: integer
@@ -55,4 +53,3 @@ seeds:
         minimum_reorder_quantity: integer
         category: varchar
         attachments: integer
-        insertion_timestamp: timestamp with time zone

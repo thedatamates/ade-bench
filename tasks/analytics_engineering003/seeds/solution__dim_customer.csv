@@ -1,30 +1,30 @@
-customer_id,company,last_name,first_name,email_address,job_title,business_phone,home_phone,mobile_phone,fax_number,address,city,state_province,zip_postal_code,country_region,web_page,notes,attachments,insertion_timestamp
-12,Company L,Edwards,John,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 12th Street,Las Vegas,NV,99999,USA,,,,2025-08-12 10:42:39.384-04
-20,Company T,Li,George,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 20th Street,New York,NY,99999,USA,,,,2025-08-12 10:42:39.384-04
-21,Company U,Tham,Bernard,,Accounting Manager,(123)555-0100,,,(123)555-0101,789 21th Street,Minneapolis,MN,99999,USA,,,,2025-08-12 10:42:39.384-04
-25,Company Y,Rodman,John,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 25th Street,Chicago,IL,99999,USA,,,,2025-08-12 10:42:39.384-04
-1,Company A,Bedecs,Anna,,Owner,(123)555-0100,,,(123)555-0101,123 1st Street,Seattle,WA,99999,USA,,,,2025-08-12 10:42:39.384-04
-2,Company B,Gratacos Solsona,Antonio,,Owner,(123)555-0100,,,(123)555-0101,123 2nd Street,Boston,MA,99999,USA,,,,2025-08-12 10:42:39.384-04
-28,Company BB,Raghav,Amritansh,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 28th Street,Memphis,TN,99999,USA,,,,2025-08-12 10:42:39.384-04
-5,Company E,O’Donnell,Martin,,Owner,(123)555-0100,,,(123)555-0101,123 5th Street,Minneapolis,MN,99999,USA,,,,2025-08-12 10:42:39.384-04
-9,Company I,Mortensen,Sven,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 9th Street,Salt Lake City,UT,99999,USA,,,,2025-08-12 10:42:39.384-04
-14,Company N,Grilo,Carlos,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 14th Street,Denver,CO,99999,USA,,,,2025-08-12 10:42:39.384-04
-17,Company Q,Bagel,Jean Philippe,,Owner,(123)555-0100,,,(123)555-0101,456 17th Street,Seattle,WA,99999,USA,,,,2025-08-12 10:42:39.384-04
-15,Company O,Kupkova,Helena,,Purchasing Manager,(123)555-0100,,,(123)555-0101,456 15th Street,Honolulu,HI,99999,USA,,,,2025-08-12 10:42:39.384-04
-22,Company V,Ramos,Luciana,,Purchasing Assistant,(123)555-0100,,,(123)555-0101,789 22th Street,Milwaukee,WI,99999,USA,,,,2025-08-12 10:42:39.384-04
-11,Company K,Krschne,Peter,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 11th Street,Miami,FL,99999,USA,,,,2025-08-12 10:42:39.384-04
-16,Company P,Goldschmidt,Daniel,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 16th Street,San Francisco,CA,99999,USA,,,,2025-08-12 10:42:39.384-04
-26,Company Z,Liu,Run,,Accounting Assistant,(123)555-0100,,,(123)555-0101,789 26th Street,Miami,FL,99999,USA,,,,2025-08-12 10:42:39.384-04
-7,Company G,Xie,Ming-Yang,,Owner,(123)555-0100,,,(123)555-0101,123 7th Street,Boise,ID,99999,USA,,,,2025-08-12 10:42:39.384-04
-27,Company AA,Toh,Karen,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 27th Street,Las Vegas,NV,99999,USA,,,,2025-08-12 10:42:39.384-04
-8,Company H,Andersen,Elizabeth,,Purchasing Representative,(123)555-0100,,,(123)555-0101,123 8th Street,Portland,OR,99999,USA,,,,2025-08-12 10:42:39.384-04
-13,Company M,Ludick,Andre,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 13th Street,Memphis,TN,99999,USA,,,,2025-08-12 10:42:39.384-04
-19,Company S,Eggerer,Alexander,,Accounting Assistant,(123)555-0100,,,(123)555-0101,789 19th Street,Los Angelas,CA,99999,USA,,,,2025-08-12 10:42:39.384-04
-10,Company J,Wacker,Roland,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 10th Street,Chicago,IL,99999,USA,,,,2025-08-12 10:42:39.384-04
-18,Company R,Autier Miconi,Catherine,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 18th Street,Boston,MA,99999,USA,,,,2025-08-12 10:42:39.384-04
-29,Company CC,Lee,Soo Jung,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 29th Street,Denver,CO,99999,USA,,,,2025-08-12 10:42:39.384-04
-4,Company D,Lee,Christina,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 4th Street,New York,NY,99999,USA,,,,2025-08-12 10:42:39.384-04
-23,Company W,Entin,Michael,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 23th Street,Portland,OR,99999,USA,,,,2025-08-12 10:42:39.384-04
-24,Company X,Hasselberg,Jonas,,Owner,(123)555-0100,,,(123)555-0101,789 24th Street,Salt Lake City,UT,99999,USA,,,,2025-08-12 10:42:39.384-04
-3,Company C,Axen,Thomas,,Purchasing Representative,(123)555-0100,,,(123)555-0101,123 3rd Street,Los Angelas,CA,99999,USA,,,,2025-08-12 10:42:39.384-04
-6,Company F,Pérez-Olaeta,Francisco,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 6th Street,Milwaukee,WI,99999,USA,,,,2025-08-12 10:42:39.384-04
+customer_id,company,last_name,first_name,email_address,job_title,business_phone,home_phone,mobile_phone,fax_number,address,city,state_province,zip_postal_code,country_region,web_page,notes,attachments
+4,Company D,Lee,Christina,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 4th Street,New York,NY,99999,USA,,,
+23,Company W,Entin,Michael,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 23th Street,Portland,OR,99999,USA,,,
+24,Company X,Hasselberg,Jonas,,Owner,(123)555-0100,,,(123)555-0101,789 24th Street,Salt Lake City,UT,99999,USA,,,
+7,Company G,Xie,Ming-Yang,,Owner,(123)555-0100,,,(123)555-0101,123 7th Street,Boise,ID,99999,USA,,,
+27,Company AA,Toh,Karen,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 27th Street,Las Vegas,NV,99999,USA,,,
+21,Company U,Tham,Bernard,,Accounting Manager,(123)555-0100,,,(123)555-0101,789 21th Street,Minneapolis,MN,99999,USA,,,
+25,Company Y,Rodman,John,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 25th Street,Chicago,IL,99999,USA,,,
+8,Company H,Andersen,Elizabeth,,Purchasing Representative,(123)555-0100,,,(123)555-0101,123 8th Street,Portland,OR,99999,USA,,,
+13,Company M,Ludick,Andre,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 13th Street,Memphis,TN,99999,USA,,,
+19,Company S,Eggerer,Alexander,,Accounting Assistant,(123)555-0100,,,(123)555-0101,789 19th Street,Los Angelas,CA,99999,USA,,,
+3,Company C,Axen,Thomas,,Purchasing Representative,(123)555-0100,,,(123)555-0101,123 3rd Street,Los Angelas,CA,99999,USA,,,
+6,Company F,Pérez-Olaeta,Francisco,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 6th Street,Milwaukee,WI,99999,USA,,,
+5,Company E,O’Donnell,Martin,,Owner,(123)555-0100,,,(123)555-0101,123 5th Street,Minneapolis,MN,99999,USA,,,
+9,Company I,Mortensen,Sven,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 9th Street,Salt Lake City,UT,99999,USA,,,
+14,Company N,Grilo,Carlos,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 14th Street,Denver,CO,99999,USA,,,
+17,Company Q,Bagel,Jean Philippe,,Owner,(123)555-0100,,,(123)555-0101,456 17th Street,Seattle,WA,99999,USA,,,
+1,Company A,Bedecs,Anna,,Owner,(123)555-0100,,,(123)555-0101,123 1st Street,Seattle,WA,99999,USA,,,
+12,Company L,Edwards,John,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 12th Street,Las Vegas,NV,99999,USA,,,
+20,Company T,Li,George,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 20th Street,New York,NY,99999,USA,,,
+15,Company O,Kupkova,Helena,,Purchasing Manager,(123)555-0100,,,(123)555-0101,456 15th Street,Honolulu,HI,99999,USA,,,
+22,Company V,Ramos,Luciana,,Purchasing Assistant,(123)555-0100,,,(123)555-0101,789 22th Street,Milwaukee,WI,99999,USA,,,
+10,Company J,Wacker,Roland,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 10th Street,Chicago,IL,99999,USA,,,
+18,Company R,Autier Miconi,Catherine,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 18th Street,Boston,MA,99999,USA,,,
+29,Company CC,Lee,Soo Jung,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 29th Street,Denver,CO,99999,USA,,,
+2,Company B,Gratacos Solsona,Antonio,,Owner,(123)555-0100,,,(123)555-0101,123 2nd Street,Boston,MA,99999,USA,,,
+28,Company BB,Raghav,Amritansh,,Purchasing Manager,(123)555-0100,,,(123)555-0101,789 28th Street,Memphis,TN,99999,USA,,,
+11,Company K,Krschne,Peter,,Purchasing Manager,(123)555-0100,,,(123)555-0101,123 11th Street,Miami,FL,99999,USA,,,
+16,Company P,Goldschmidt,Daniel,,Purchasing Representative,(123)555-0100,,,(123)555-0101,456 16th Street,San Francisco,CA,99999,USA,,,
+26,Company Z,Liu,Run,,Accounting Assistant,(123)555-0100,,,(123)555-0101,789 26th Street,Miami,FL,99999,USA,,,

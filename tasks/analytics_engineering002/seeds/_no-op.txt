@@ -26,4 +26,3 @@ seeds:
         purchase_order_id: integer
         customer_order_id: integer
         comments: varchar
-        insertion_timestamp: timestamp with time zone
