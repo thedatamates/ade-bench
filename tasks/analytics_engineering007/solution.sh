@@ -1,103 +1,20 @@
 #!/bin/bash
 
-# Update the fact_inventory model to cast the product_id to a string.
-cat > models/warehouse/fact_inventory.sql << 'EOF'
-{{ config(
-    partition_by={
-        "field": "transaction_created_date",
-        "data_type": "date"
-    }
-) }}
+SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
 
-WITH source AS (
-    SELECT
-        id AS inventory_id,
-        transaction_type,
-        CAST(STRPTIME(transaction_created_date, '%m/%d/%Y %H:%M:%S') AS DATE) AS transaction_created_date,
-        transaction_modified_date,
-        product_id::varchar AS product_id,
-        quantity,
-        purchase_order_id,
-        customer_order_id,
-        comments
-    FROM {{ ref('stg_inventory_transactions') }}
-),
+## Update timestamp function config in solution files by db type
+s1="fact_inventory.sql"
+s2="fact_sales.sql"
 
-unique_source AS (
-    SELECT
-        *,
-        ROW_NUMBER() OVER(PARTITION BY inventory_id ORDER BY inventory_id) AS row_number
-    FROM source
-)
+if [[ "$*" != *"--db-type=duckdb"* ]]; then
+    f1="CAST(STRPTIME(transaction_created_date, '%m/%d/%Y %H:%M:%S') AS DATE)"
+    r1="TO_DATE(TO_TIMESTAMP(transaction_created_date, 'MM/DD/YYYY HH24:MI:SS'))"
+    sed -i "s|${f1}|${r1}|g" $SOLUTIONS_DIR/$s1
 
-SELECT
-    inventory_id,
-    transaction_type,
-    transaction_created_date,
-    transaction_modified_date,
-    product_id,
-    quantity,
-    purchase_order_id,
-    customer_order_id,
-    comments
-FROM unique_source
-WHERE row_number = 1
-EOF
+    f2="CAST(STRPTIME(o.order_date, '%m/%d/%Y %H:%M:%S') AS DATE)"
+    r2="TO_DATE(TO_TIMESTAMP(transaction_created_date, 'MM/DD/YYYY HH24:MI:SS'))"
+    sed -i "s|${f2}|${r2}|g" $SOLUTIONS_DIR/$s2
+fi
 
-# Update the fact_sales model to cast the product_id to a string.
-cat > models/warehouse/fact_sales.sql << 'EOF'
-{{ config(
-    partition_by={
-        "field": "order_date",
-        "data_type": "date"
-    }
-) }}
-
-WITH source AS (
-    SELECT
-        od.order_id,
-        od.product_id::varchar AS product_id,
-        o.customer_id,
-        o.employee_id,
-        o.shipper_id,
-        od.quantity,
-        od.unit_price,
-        od.discount,
-        od.status_id,
-        od.date_allocated,
-        od.purchase_order_id,
-        od.inventory_id,
-        CAST(STRPTIME(o.order_date, '%m/%d/%Y %H:%M:%S') AS DATE) AS order_date,
-        o.shipped_date,
-        o.paid_date
-    FROM {{ ref('stg_orders') }} o
-    LEFT JOIN {{ ref('stg_order_details') }} od
-    ON od.order_id = o.id
-    WHERE od.order_id IS NOT NULL
-),
-
-unique_source AS (
-    SELECT *,
-           ROW_NUMBER() OVER(PARTITION BY customer_id, employee_id, order_id, product_id, shipper_id, purchase_order_id, order_date ORDER BY order_id) AS row_number
-    FROM source
-)
-
-SELECT
-    order_id,
-    product_id,
-    customer_id,
-    employee_id,
-    shipper_id,
-    quantity,
-    unit_price,
-    discount,
-    status_id,
-    date_allocated,
-    purchase_order_id,
-    inventory_id,
-    order_date,
-    shipped_date,
-    paid_date
-FROM unique_source
-WHERE row_number = 1
-EOF
+cp $SOLUTIONS_DIR/$s1 models/warehouse/$s1
+cp $SOLUTIONS_DIR/$s2 models/warehouse/$s2

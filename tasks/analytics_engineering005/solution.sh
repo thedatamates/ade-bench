@@ -1,45 +1,14 @@
 #!/bin/bash
 
-# Add a dedupe function to the fact_inventory model
-cat > models/warehouse/fact_inventory.sql << 'EOF'
-{{ config(
-    partition_by={
-        "field": "transaction_created_date",
-        "data_type": "date"
-    }
-) }}
+SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
 
-WITH source AS (
-    SELECT
-        id AS inventory_id,
-        transaction_type,
-        CAST(STRPTIME(transaction_created_date, '%m/%d/%Y %H:%M:%S') AS DATE) AS transaction_created_date,
-        transaction_modified_date,
-        product_id,
-        quantity,
-        purchase_order_id,
-        customer_order_id,
-        comments
-    FROM {{ ref('stg_inventory_transactions') }}
-),
+## Update timestamp function config in solution files by db type
+file="fact_inventory.sql"
 
-unique_source AS (
-    SELECT
-        *,
-        ROW_NUMBER() OVER(PARTITION BY inventory_id ORDER BY inventory_id) AS row_number
-    FROM source
-)
+if [[ "$*" != *"--db-type=duckdb"* ]]; then
+    find="CAST(STRPTIME(transaction_created_date, '%m/%d/%Y %H:%M:%S') AS DATE)"
+    replace="TO_DATE(TO_TIMESTAMP(transaction_created_date, 'MM/DD/YYYY HH24:MI:SS'))"
+    sed -i "s/${find}/${replace}/g" $SOLUTIONS_DIR/$file
+fi
 
-SELECT
-    inventory_id,
-    transaction_type,
-    transaction_created_date,
-    transaction_modified_date,
-    product_id,
-    quantity,
-    purchase_order_id,
-    customer_order_id,
-    comments
-FROM unique_source
-WHERE row_number = 1
-EOF
+cp $SOLUTIONS_DIR/$file models/warehouse/$file
