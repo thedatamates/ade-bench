@@ -370,7 +370,10 @@ This is probably the easiest way to do that:
 
 1. Clone the repo.
 2. Download the DuckDB databases, and put them in the `/shared/databases/duckdb` directory. You can download those here: https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE
-3. Run a basic execution: `uv run scripts_python/run_harness.py --tasks analytics_engineering001 --db duckdb --project-type dbt --agent oracle`
+3. Run a basic execution:
+```
+uv run scripts_python/run_harness.py --tasks analytics_engineering001 --db duckdb --project-type dbt --agent oracle
+```
 4. See what it tells you to do? I think it'll ask if you have Docker and uv, and maybe some stuff like dbt, Snowflake CLIs, DuckDB, and Claude Code, for the agents. But that might all be handled by Dockerfile. Though, it is useful to have that stuff for dev. This section is still under development, ok?
 
 ### Snowflake setup
@@ -497,7 +500,7 @@ $ ade-log
 # For creating a sandbox environment for testing, navigating into it, and running
 # various setup scripts, including opening it up in the DuckDB UI
 alias ade-dev='uv run scripts_python/create_sandbox.py'
-alias sand='cd ~/local/code/ade-bench/dev/sandbox'
+alias sand='cd ~/ade-bench/dev/sandbox'
 alias st='bash setup.sh'
 alias sl='bash solution.sh'
 alias ts='dbt test --select "test_type:singular"'
