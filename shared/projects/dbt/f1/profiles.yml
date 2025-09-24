@@ -1,7 +1,21 @@
-f1:
+f1-duckdb:
   target: dev
   outputs:
     dev:
       type: duckdb
       path: "./f1.duckdb"
       schema: main
+
+f1-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>

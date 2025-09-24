@@ -1,18 +1,20 @@
 constructor_name,season,total_points
-Connaught,1958,0.0
-Cooper,1958,31.0
 Maserati,1958,6.0
-OSCA,1958,0.0
 Porsche,1958,0.0
 Ferrari,1958,40.0
+OSCA,1958,0.0
+Team Lotus,1958,3.0
+Connaught,1958,0.0
+Cooper,1958,31.0
 Vanwall,1958,48.0
 BRM,1958,18.0
-Team Lotus,1958,3.0
-Cooper-Borgward,1959,0.0
 BRM,1959,18.0
 Porsche,1959,0.0
 Ferrari,1959,32.0
 Cooper-Climax,1959,40.0
+Vanwall,1959,0.0
+Tec-Mec,1959,0.0
+Cooper-Borgward,1959,0.0
 Fry,1959,0.0
 JBW,1959,0.0
 Team Lotus,1959,5.0
@@ -22,43 +24,44 @@ Connaught,1959,0.0
 Maserati,1959,0.0
 Cooper-Maserati,1959,0.0
 Cooper-OSCA,1959,0.0
-Vanwall,1959,0.0
-Tec-Mec,1959,0.0
-Behra-Porsche,1960,0.0
-JBW,1960,0.0
-Team Lotus,1960,34.0
+BRM,1960,8.0
 Scarab,1960,0.0
 Maserati,1960,0.0
 Cooper-Maserati,1960,3.0
-BRM,1960,8.0
+Cooper-Castellotti,1960,3.0
+Aston Martin,1960,0.0
+Behra-Porsche,1960,0.0
+JBW,1960,0.0
+Team Lotus,1960,34.0
 Vanwall,1960,0.0
 Porsche,1960,1.0
 Ferrari,1960,26.0
 Cooper-Climax,1960,48.0
-Cooper-Castellotti,1960,3.0
-Aston Martin,1960,0.0
+Lotus-Climax,1961,35.0
+De Tomaso-Osca,1961,0.0
+BRM,1961,7.0
+MBM,1961,0.0
 Cooper-Climax,1961,14.0
 Porsche,1961,22.0
 Ferrari,1961,45.0
-Lotus-Climax,1961,35.0
-De Tomaso-Osca,1961,0.0
 Gilby,1961,0.0
 De Tomaso-Alfa Romeo,1961,0.0
 Lotus-Maserati,1961,0.0
 Cooper-Maserati,1961,0.0
 Emeryson,1961,0.0
 JBW,1961,0.0
-BRM,1961,7.0
-MBM,1961,0.0
-BRM,1962,42.0
 De Tomaso-Osca,1962,0.0
-Lotus-Climax,1962,36.0
-Lotus-Borgward,1962,0.0
 Emeryson,1962,0.0
 Lotus-BRM,1962,1.0
 Team Lotus,1962,0.0
 ENB,1962,0.0
 De Tomaso,1962,0.0
+Lotus-Climax,1962,36.0
+Lotus-Borgward,1962,0.0
+Porsche,1962,18.0
+Cooper-Climax,1962,29.0
+Ferrari,1962,18.0
+BRM,1962,42.0
 Lola,1962,19.0
 Cooper-Alfa Romeo,1962,0.0
 De Tomaso-Alfa Romeo,1962,0.0
@@ -66,33 +69,30 @@ Gilby,1962,0.0
 Brabham,1962,6.0
 LDS,1962,0.0
 Cooper,1962,0.0
-Porsche,1962,18.0
-Cooper-Climax,1962,29.0
-Ferrari,1962,18.0
 ATS,1963,0.0
 Gilby,1963,0.0
 Lotus-Maserati,1963,0.0
 Cooper-Maserati,1963,0.0
 Brabham,1963,28.0
 LDS,1963,0.0
-Lola,1963,0.0
-Stebro,1963,0.0
-Alfa Romeo,1963,0.0
 Porsche,1963,5.0
 Ferrari,1963,26.0
 Cooper-Climax,1963,25.0
-Lotus-Climax,1963,54.0
-Lotus-Borgward,1963,0.0
-De Tomaso-Ferrari,1963,0.0
-BRP,1963,6.0
-BRM,1963,36.0
+Lola,1963,0.0
+Stebro,1963,0.0
+Alfa Romeo,1963,0.0
 Scirocco,1963,0.0
 Lotus-BRM,1963,4.0
 De Tomaso,1963,0.0
 Lotus-Ford,1963,0.0
 Team Lotus,1963,0.0
-BRP,1964,5.0
+Lotus-Climax,1963,54.0
+Lotus-Borgward,1963,0.0
+De Tomaso-Ferrari,1963,0.0
+BRP,1963,6.0
+BRM,1963,36.0
 BRM,1964,42.0
+Honda,1964,0.0
 Cooper-Climax,1964,16.0
 Brabham-Climax,1964,30.0
 Porsche,1964,0.0
@@ -100,16 +100,18 @@ Brabham-BRM,1964,7.0
 Brabham-Ford,1964,0.0
 Derrington,1964,0.0
 Ferrari,1964,45.0
-Honda,1964,0.0
+Lotus-Climax,1964,37.0
+BRP,1964,5.0
 Scirocco,1964,0.0
 Lotus-BRM,1964,3.0
-Lotus-Climax,1964,37.0
+Lotus-Climax,1965,54.0
+BRM,1965,45.0
+LDS-Alfa Romeo,1965,0.0
 Ferrari,1965,26.0
 Cooper-Climax,1965,14.0
 Brabham-BRM,1965,5.0
 Brabham-Climax,1965,27.0
 Brabham-Ford,1965,0.0
-Lotus-Climax,1965,54.0
 Cooper-Ford,1965,0.0
 LDS-Climax,1965,0.0
 Cooper-Maserati,1965,0.0
@@ -118,30 +120,29 @@ Honda,1965,11.0
 Lotus-BRM,1965,2.0
 Lotus-Ford,1965,0.0
 RE,1965,0.0
-BRM,1965,45.0
-LDS-Alfa Romeo,1965,0.0
+Lotus-Climax,1966,8.0
 Ferrari,1966,31.0
 Brabham-Climax,1966,1.0
+McLaren-Serenissima,1966,1.0
+Brabham-BRM,1966,1.0
 Cooper-Maserati,1966,30.0
 McLaren-Ford,1966,2.0
 Shannon,1966,0.0
 Cooper-Ferrari,1966,0.0
-Honda,1966,3.0
-Eagle-Climax,1966,4.0
-Lotus-BRM,1966,13.0
-McLaren-Serenissima,1966,1.0
-Brabham-BRM,1966,1.0
-Lotus-Climax,1966,8.0
 Eagle-Weslake,1966,0.0
 Brabham-Repco,1966,42.0
 BRM,1966,22.0
+Honda,1966,3.0
+Eagle-Climax,1966,4.0
+Lotus-BRM,1966,13.0
 BRM,1967,17.0
+Honda,1967,20.0
+Lola,1967,0.0
 Brabham-Climax,1967,2.0
 Cooper-Climax,1967,6.0
 Ferrari,1967,20.0
 Brabham-Ford,1967,0.0
-Honda,1967,20.0
-Lola,1967,0.0
+Lotus-Climax,1967,0.0
 Lotus-BRM,1967,6.0
 McLaren-BRM,1967,3.0
 Eagle-Climax,1967,0.0
@@ -154,60 +155,61 @@ Cooper-Maserati,1967,28.0
 Matra,1967,0.0
 Protos,1967,0.0
 McLaren-Ford,1967,0.0
-Lotus-Climax,1967,0.0
-Lotus-Ford,1968,62.0
-McLaren-BRM,1968,3.0
 Honda,1968,14.0
 Lola,1968,0.0
+BRM,1968,28.0
+McLaren,1968,0.0
 LDS,1968,0.0
 Cooper-Maserati,1968,0.0
 McLaren-Ford,1968,49.0
 Cooper-BRM,1968,14.0
 Matra,1968,8.0
-BRM,1968,28.0
-McLaren,1968,0.0
-Brabham-Climax,1968,0.0
-Ferrari,1968,32.0
-Cooper-Climax,1968,0.0
 Eagle-Weslake,1968,0.0
 Brabham-Repco,1968,10.0
 Matra-Ford,1968,45.0
-Brabham-Repco,1969,0.0
-Matra-Ford,1969,66.0
+Lotus-Ford,1968,62.0
+McLaren-BRM,1968,3.0
+Brabham-Climax,1968,0.0
+Ferrari,1968,32.0
+Cooper-Climax,1968,0.0
 McLaren-Ford,1969,38.0
 Cooper-Maserati,1969,0.0
 Brabham-Climax,1969,0.0
 Brabham-Ford,1969,49.0
 Ferrari,1969,7.0
+Lotus-Ford,1969,47.0
+Brabham-Repco,1969,0.0
+Matra-Ford,1969,66.0
 BRM,1969,7.0
 BRM-Ford,1969,0.0
-Lotus-Ford,1969,47.0
-BRM,1970,23.0
 De Tomaso,1970,0.0
 McLaren-Alfa Romeo,1970,0.0
 Team Lotus,1970,59.0
+Bellasi,1970,0.0
+Ferrari,1970,52.0
+BRM,1970,23.0
 Surtees,1970,3.0
 Brabham,1970,35.0
 McLaren-Ford,1970,35.0
 March,1970,48.0
 Matra,1970,23.0
 Tyrrell,1970,0.0
-Bellasi,1970,0.0
-Ferrari,1970,52.0
-Surtees,1971,8.0
 Lotus-Ford,1971,21.0
-March-Alfa Romeo,1971,0.0
 Lotus-Pratt &amp; Whitney,1971,0.0
+March-Alfa Romeo,1971,0.0
+Tyrrell,1971,73.0
+Matra,1971,9.0
+Brabham,1971,5.0
+Surtees,1971,8.0
 March-Ford,1971,33.0
 McLaren,1971,10.0
 BRM,1971,36.0
 Ferrari,1971,33.0
 Bellasi,1971,0.0
-Tyrrell,1971,73.0
-Matra,1971,9.0
-Brabham,1971,5.0
-Ferrari,1972,33.0
 Connew,1972,0.0
+McLaren,1972,47.0
+BRM,1972,14.0
+Ferrari,1972,33.0
 Tyrrell,1972,51.0
 Matra,1972,12.0
 March,1972,15.0
@@ -216,31 +218,31 @@ Tecno,1972,0.0
 Politoys,1972,0.0
 Surtees,1972,18.0
 Team Lotus,1972,61.0
-McLaren,1972,47.0
-BRM,1972,14.0
 Ferrari,1973,12.0
-McLaren,1973,58.0
-BRM,1973,12.0
 Tyrrell,1973,82.0
 March,1973,14.0
 Brabham,1973,22.0
 Tecno,1973,1.0
 Ensign,1973,0.0
+McLaren,1973,58.0
+BRM,1973,12.0
 Iso Marlboro,1973,2.0
 Team Lotus,1973,92.0
 Surtees,1973,7.0
 Shadow,1973,9.0
-Amon,1974,0.0
-Lyncar,1974,0.0
 Ferrari,1974,65.0
-McLaren,1974,73.0
-BRM,1974,10.0
-Penske,1974,0.0
 Tyrrell,1974,52.0
 Brabham,1974,35.0
 March,1974,6.0
 Hesketh,1974,15.0
 Ensign,1974,0.0
+McLaren,1974,73.0
+BRM,1974,10.0
+Penske,1974,0.0
+Trojan,1974,0.0
+Token,1974,0.0
+Amon,1974,0.0
+Lyncar,1974,0.0
 Iso Marlboro,1974,4.0
 Maki,1974,0.0
 Parnelli,1974,0.0
@@ -248,37 +250,38 @@ Team Lotus,1974,42.0
 Shadow,1974,7.0
 Surtees,1974,3.0
 Lola,1974,1.0
-Trojan,1974,0.0
-Token,1974,0.0
+Team Lotus,1975,9.0
 Lola,1975,0.0
+Shadow-Ford,1975,9.5
+Williams,1975,6.0
+Ferrari,1975,72.5
+Surtees,1975,0.0
 BRM,1975,0.0
 McLaren,1975,53.0
 Penske,1975,2.0
-Williams,1975,6.0
-Ferrari,1975,72.5
-Lyncar,1975,0.0
-Hesketh,1975,33.0
-Brabham,1975,54.0
-Shadow-Ford,1975,9.5
-Surtees,1975,0.0
-Team Lotus,1975,9.0
-Shadow-Matra,1975,0.0
 Parnelli,1975,5.0
 Maki,1975,0.0
+Hesketh,1975,33.0
+Brabham,1975,54.0
+Shadow-Matra,1975,0.0
 Fittipaldi,1975,0.0
 Tyrrell,1975,25.0
 March,1975,7.5
 Embassy Hill,1975,3.0
 Ensign,1975,1.0
-Fittipaldi,1976,3.0
-Brabham-Alfa Romeo,1976,9.0
-Williams,1976,0.0
-Ferrari,1976,83.0
-Brabham-Ford,1976,0.0
+Lyncar,1975,0.0
 Wolf,1976,0.0
 Boro,1976,0.0
 Parnelli,1976,1.0
 Maki,1976,0.0
+Fittipaldi,1976,3.0
+Penske,1976,20.0
+McLaren,1976,74.0
+BRM,1976,0.0
+Brabham-Alfa Romeo,1976,9.0
+Williams,1976,0.0
+Ferrari,1976,83.0
+Brabham-Ford,1976,0.0
 Ligier,1976,20.0
 March,1976,19.0
 Tyrrell,1976,71.0
@@ -288,9 +291,6 @@ Shadow,1976,10.0
 Surtees,1976,7.0
 Team Lotus,1976,29.0
 Kojima,1976,0.0
-Penske,1976,20.0
-McLaren,1976,74.0
-BRM,1976,0.0
 Tyrrell,1977,27.0
 Ligier,1977,18.0
 Brabham,1977,27.0
@@ -298,10 +298,13 @@ Ensign,1977,10.0
 March,1977,0.0
 Hesketh,1977,0.0
 McGuire,1977,0.0
+Ferrari,1977,95.0
 Surtees,1977,6.0
 Shadow,1977,23.0
 LEC,1977,0.0
-Ferrari,1977,95.0
+Team Lotus,1977,62.0
+Renault,1977,0.0
+Kojima,1977,0.0
 Wolf,1977,55.0
 Boro,1977,0.0
 Fittipaldi,1977,11.0
@@ -309,21 +312,18 @@ Apollon,1977,0.0
 McLaren,1977,60.0
 BRM,1977,0.0
 Penske,1977,1.0
-Team Lotus,1977,62.0
-Renault,1977,0.0
-Kojima,1977,0.0
-Team Lotus,1978,86.0
-Renault,1978,3.0
 Theodore,1978,0.0
 Shadow,1978,6.0
 Surtees,1978,1.0
+McLaren,1978,15.0
 Hesketh,1978,0.0
 Ensign,1978,1.0
 Brabham,1978,53.0
 Tyrrell,1978,38.0
 ATS,1978,0.0
 Ligier,1978,19.0
-McLaren,1978,15.0
+Team Lotus,1978,86.0
+Renault,1978,3.0
 Merzario,1978,0.0
 Fittipaldi,1978,17.0
 Arrows,1978,11.0
@@ -331,16 +331,16 @@ Martini,1978,0.0
 Wolf,1978,24.0
 Ferrari,1978,58.0
 Williams,1978,11.0
-Team Lotus,1979,39.0
-Renault,1979,26.0
 Shadow,1979,3.0
 Alfa Romeo,1979,0.0
+McLaren,1979,15.0
+Rebaque,1979,0.0
 Tyrrell,1979,28.0
 ATS,1979,2.0
 Ligier,1979,61.0
 Ensign,1979,0.0
-McLaren,1979,15.0
-Rebaque,1979,0.0
+Team Lotus,1979,39.0
+Renault,1979,26.0
 Merzario,1979,0.0
 Fittipaldi,1979,1.0
 Arrows,1979,5.0
@@ -350,14 +350,14 @@ Ferrari,1979,113.0
 Brabham-Alfa Romeo,1979,7.0
 Kauhsen,1979,0.0
 Brabham-Ford,1979,0.0
-Fittipaldi,1980,11.0
-Arrows,1980,11.0
 McLaren,1980,11.0
+Alfa Romeo,1980,4.0
+Shadow,1980,0.0
 Williams,1980,120.0
 Ferrari,1980,8.0
 Osella,1980,0.0
-Alfa Romeo,1980,4.0
-Shadow,1980,0.0
+Fittipaldi,1980,11.0
+Arrows,1980,11.0
 Team Lotus,1980,14.0
 Renault,1980,38.0
 Brabham,1980,55.0
@@ -365,12 +365,13 @@ Tyrrell,1980,12.0
 Ensign,1980,0.0
 Ligier,1980,66.0
 ATS,1980,0.0
+Fittipaldi,1981,0.0
+Arrows,1981,10.0
+McLaren,1981,28.0
 Williams,1981,95.0
 Ferrari,1981,34.0
 Osella,1981,0.0
 Toleman,1981,0.0
-Fittipaldi,1981,0.0
-Arrows,1981,10.0
 Brabham,1981,61.0
 Tyrrell,1981,10.0
 Ensign,1981,5.0
@@ -381,48 +382,47 @@ Alfa Romeo,1981,10.0
 Theodore,1981,1.0
 Renault,1981,54.0
 Team Lotus,1981,22.0
-McLaren,1981,28.0
+Fittipaldi,1982,1.0
 Williams,1982,58.0
+Ferrari,1982,74.0
+Toleman,1982,0.0
+Osella,1982,3.0
 Tyrrell,1982,25.0
 ATS,1982,4.0
+Arrows,1982,5.0
+McLaren,1982,69.0
 March,1982,0.0
 Ligier,1982,20.0
 Brabham,1982,41.0
 Ensign,1982,0.0
-Ferrari,1982,74.0
-Toleman,1982,0.0
-Osella,1982,3.0
-Fittipaldi,1982,1.0
-Arrows,1982,5.0
 Alfa Romeo,1982,7.0
 Theodore,1982,0.0
 Renault,1982,62.0
 Team Lotus,1982,30.0
-McLaren,1982,69.0
-RAM,1983,0.0
-Spirit,1983,0.0
 Williams,1983,38.0
 Ferrari,1983,89.0
 Toleman,1983,10.0
 Osella,1983,0.0
-McLaren,1983,34.0
 Brabham,1983,72.0
 Tyrrell,1983,12.0
 ATS,1983,0.0
 Ligier,1983,0.0
+McLaren,1983,34.0
+Arrows,1983,4.0
+RAM,1983,0.0
+Spirit,1983,0.0
 Renault,1983,79.0
 Team Lotus,1983,12.0
 Theodore,1983,1.0
 Alfa Romeo,1983,18.0
-Arrows,1983,4.0
-Team Lotus,1984,47.0
-Renault,1984,34.0
 Alfa Romeo,1984,11.0
+McLaren,1984,143.5
 Ligier,1984,3.0
 Brabham,1984,38.0
 Tyrrell,1984,0.0
 ATS,1984,0.0
-McLaren,1984,143.5
+Team Lotus,1984,47.0
+Renault,1984,34.0
 Arrows,1984,6.0
 RAM,1984,0.0
 Spirit,1984,0.0
@@ -430,39 +430,37 @@ Williams,1984,25.5
 Ferrari,1984,57.5
 Osella,1984,2.0
 Toleman,1984,16.0
-Arrows,1985,14.0
 McLaren,1985,90.0
 Minardi,1985,0.0
 Zakspeed,1985,0.0
+Alfa Romeo,1985,0.0
+Lola,1985,0.0
 Ferrari,1985,82.0
 Osella,1985,0.0
 Williams,1985,71.0
 Toleman,1985,0.0
-Alfa Romeo,1985,0.0
-Lola,1985,0.0
+RAM,1985,0.0
+Spirit,1985,0.0
+Arrows,1985,14.0
 Team Lotus,1985,71.0
 Renault,1985,16.0
 Ligier,1985,23.0
 Tyrrell,1985,7.0
 Brabham,1985,26.0
-RAM,1985,0.0
-Spirit,1985,0.0
-McLaren,1986,96.0
-Zakspeed,1986,0.0
-Minardi,1986,0.0
 Benetton,1986,19.0
 Arrows,1986,1.0
 Team Lotus,1986,58.0
+Williams,1986,141.0
+Ferrari,1986,37.0
+Osella,1986,0.0
+McLaren,1986,96.0
+Zakspeed,1986,0.0
+Minardi,1986,0.0
 Lola,1986,6.0
 Ligier,1986,29.0
 Tyrrell,1986,11.0
 Brabham,1986,2.0
 AGS,1986,0.0
-Williams,1986,141.0
-Ferrari,1986,37.0
-Osella,1986,0.0
-Benetton,1987,28.0
-Arrows,1987,11.0
 McLaren,1987,76.0
 Zakspeed,1987,2.0
 Minardi,1987,0.0
@@ -470,6 +468,8 @@ Coloni,1987,0.0
 Williams,1987,137.0
 Ferrari,1987,53.0
 Osella,1987,0.0
+Benetton,1987,28.0
+Arrows,1987,11.0
 Team Lotus,1987,64.0
 Tyrrell,1987,11.0
 AGS,1987,1.0
@@ -477,14 +477,17 @@ Brabham,1987,10.0
 March,1987,1.0
 Larrousse,1987,3.0
 Ligier,1987,1.0
-McLaren,1988,199.0
-Minardi,1988,1.0
-Coloni,1988,0.0
-Zakspeed,1988,0.0
 Arrows,1988,23.0
 Benetton,1988,39.0
 Team Lotus,1988,23.0
 Euro Brun,1988,0.0
+Ferrari,1988,65.0
+Williams,1988,20.0
+Osella,1988,0.0
+McLaren,1988,199.0
+Minardi,1988,1.0
+Coloni,1988,0.0
+Zakspeed,1988,0.0
 Dallara,1988,0.0
 Ligier,1988,0.0
 Tyrrell,1988,5.0
@@ -492,103 +495,100 @@ Larrousse,1988,0.0
 AGS,1988,0.0
 March,1988,22.0
 Rial,1988,3.0
-Ferrari,1988,65.0
-Williams,1988,20.0
-Osella,1988,0.0
-Team Lotus,1989,15.0
-Euro Brun,1989,0.0
 Dallara,1989,8.0
-March,1989,4.0
-Tyrrell,1989,16.0
 McLaren,1989,141.0
 Zakspeed,1989,0.0
 Minardi,1989,6.0
+Coloni,1989,0.0
+March,1989,4.0
+Tyrrell,1989,16.0
+Rial,1989,3.0
 Ligier,1989,3.0
 Larrousse,1989,1.0
 Brabham,1989,8.0
 AGS,1989,1.0
-Coloni,1989,0.0
+Onyx,1989,6.0
+Team Lotus,1989,15.0
+Euro Brun,1989,0.0
 Benetton,1989,39.0
 Arrows,1989,13.0
 Ferrari,1989,59.0
 Williams,1989,77.0
 Osella,1989,0.0
-Rial,1989,3.0
-Onyx,1989,6.0
-Minardi,1990,0.0
-Euro Brun,1990,0.0
+Life,1990,0.0
 Leyton House,1990,7.0
 Onyx,1990,0.0
-McLaren,1990,121.0
-Coloni,1990,0.0
-Larrousse,1990,11.0
-Life,1990,0.0
+Euro Brun,1990,0.0
 Williams,1990,57.0
 Osella,1990,0.0
 Ferrari,1990,110.0
+Larrousse,1990,11.0
 Brabham,1990,2.0
 Tyrrell,1990,16.0
 Ligier,1990,0.0
+Minardi,1990,0.0
+McLaren,1990,121.0
+Coloni,1990,0.0
+Arrows,1990,2.0
+Benetton,1990,71.0
 AGS,1990,0.0
 Team Lotus,1990,3.0
 Dallara,1990,0.0
-Arrows,1990,2.0
-Benetton,1990,71.0
+Benetton,1991,38.5
+Team Lotus,1991,3.0
+Williams,1991,125.0
+Lambo,1991,0.0
+Ferrari,1991,55.5
 Coloni,1991,0.0
 Minardi,1991,6.0
 McLaren,1991,139.0
-Benetton,1991,38.5
-Team Lotus,1991,3.0
 Fondmetal,1991,0.0
 Dallara,1991,5.0
 Jordan,1991,13.0
 Lola,1991,1.0
 Ligier,1991,0.0
 Brabham,1991,3.0
+Leyton House,1991,1.0
 AGS,1991,0.0
 Larrousse,1991,1.0
 Tyrrell,1991,12.0
-Leyton House,1991,1.0
 Footwork,1991,0.0
-Williams,1991,125.0
-Lambo,1991,0.0
-Ferrari,1991,55.5
 Footwork,1992,6.0
+Team Lotus,1992,13.0
+Jordan,1992,1.0
+Dallara,1992,2.0
+Fondmetal,1992,0.0
 Larrousse,1992,1.0
 Brabham,1992,0.0
 Ligier,1992,6.0
 Tyrrell,1992,8.0
 March,1992,3.0
-Team Lotus,1992,13.0
 Williams,1992,164.0
 Ferrari,1992,21.0
 McLaren,1992,99.0
 Minardi,1992,1.0
 Benetton,1992,91.0
-Jordan,1992,1.0
-Dallara,1992,2.0
-Fondmetal,1992,0.0
 Ferrari,1993,28.0
 Sauber,1993,12.0
 Williams,1993,168.0
-Minardi,1993,7.0
-McLaren,1993,84.0
 Ligier,1993,23.0
 Larrousse,1993,3.0
 Tyrrell,1993,0.0
+Minardi,1993,7.0
+McLaren,1993,84.0
+Benetton,1993,72.0
 Footwork,1993,4.0
 Team Lotus,1993,12.0
 Lola,1993,0.0
 Jordan,1993,3.0
-Benetton,1993,72.0
-Benetton,1994,103.0
-Pacific,1994,0.0
 Minardi,1994,5.0
 McLaren,1994,42.0
+Jordan,1994,28.0
 Sauber,1994,12.0
 Ferrari,1994,71.0
 Williams,1994,118.0
-Jordan,1994,28.0
+Benetton,1994,103.0
+Pacific,1994,0.0
 Team Lotus,1994,0.0
 Simtek,1994,0.0
 Footwork,1994,9.0
@@ -598,33 +598,33 @@ Tyrrell,1994,13.0
 Ferrari,1995,73.0
 Williams,1995,118.0
 Sauber,1995,18.0
+Ligier,1995,24.0
+Tyrrell,1995,5.0
 Forti,1995,0.0
 McLaren,1995,30.0
 Minardi,1995,1.0
-Ligier,1995,24.0
-Tyrrell,1995,5.0
+Pacific,1995,0.0
+Benetton,1995,147.0
 Simtek,1995,0.0
 Footwork,1995,5.0
 Jordan,1995,21.0
-Pacific,1995,0.0
-Benetton,1995,147.0
-Footwork,1996,1.0
 Tyrrell,1996,5.0
 Ligier,1996,15.0
-Jordan,1996,22.0
 Williams,1996,175.0
 Ferrari,1996,70.0
 Sauber,1996,11.0
+Jordan,1996,22.0
+Footwork,1996,1.0
 Benetton,1996,68.0
 McLaren,1996,49.0
 Minardi,1996,0.0
 Forti,1996,0.0
-Prost,1997,21.0
 Jordan,1997,33.0
 Lola,1997,0.0
-Tyrrell,1997,2.0
 Minardi,1997,0.0
 McLaren,1997,63.0
+Tyrrell,1997,2.0
+Prost,1997,21.0
 Arrows,1997,9.0
 Benetton,1997,67.0
 Stewart,1997,6.0
@@ -632,29 +632,30 @@ Williams,1997,123.0
 Sauber,1997,16.0
 Ferrari,1997,102.0
 Tyrrell,1998,0.0
-Jordan,1998,34.0
 Williams,1998,38.0
 Ferrari,1998,133.0
 Sauber,1998,10.0
+Jordan,1998,34.0
+Prost,1998,1.0
 Benetton,1998,33.0
 Stewart,1998,5.0
 Arrows,1998,6.0
 McLaren,1998,156.0
 Minardi,1998,0.0
-Prost,1998,1.0
+Jordan,1999,61.0
 Prost,1999,9.0
 Arrows,1999,1.0
 Stewart,1999,36.0
 Benetton,1999,16.0
 BAR,1999,0.0
 Williams,1999,35.0
-Ferrari,1999,128.0
-Jordan,1999,61.0
 Minardi,1999,1.0
 McLaren,1999,124.0
+Ferrari,1999,128.0
 Sauber,1999,5.0
-Prost,2000,0.0
 BAR,2000,20.0
+Prost,2000,0.0
+Jordan,2000,17.0
 Ferrari,2000,170.0
 Williams,2000,36.0
 Sauber,2000,6.0
@@ -663,252 +664,251 @@ Minardi,2000,0.0
 McLaren,2000,162.0
 Benetton,2000,20.0
 Arrows,2000,7.0
-Jordan,2000,17.0
-BAR,2001,17.0
 Jaguar,2001,9.0
 Sauber,2001,21.0
 Ferrari,2001,179.0
 Williams,2001,80.0
 Minardi,2001,0.0
 McLaren,2001,102.0
-Prost,2001,4.0
-Jordan,2001,19.0
 Benetton,2001,10.0
 Arrows,2001,1.0
+BAR,2001,17.0
+Prost,2001,4.0
+Jordan,2001,19.0
+BAR,2002,7.0
+Arrows,2002,2.0
+Minardi,2002,2.0
+McLaren,2002,65.0
 Jaguar,2002,8.0
 Williams,2002,92.0
 Ferrari,2002,221.0
 Sauber,2002,11.0
-BAR,2002,7.0
-Arrows,2002,2.0
 Toyota,2002,2.0
 Jordan,2002,9.0
 Renault,2002,23.0
-Minardi,2002,2.0
-McLaren,2002,65.0
-BAR,2003,26.0
 Sauber,2003,19.0
 Ferrari,2003,158.0
 Williams,2003,144.0
 Jaguar,2003,18.0
 Minardi,2003,0.0
 McLaren,2003,142.0
+BAR,2003,26.0
 Renault,2003,88.0
 Toyota,2003,16.0
 Jordan,2003,13.0
 McLaren,2004,69.0
 Minardi,2004,1.0
+Jordan,2004,5.0
+Toyota,2004,9.0
 Jaguar,2004,10.0
 Sauber,2004,34.0
 Williams,2004,88.0
 Ferrari,2004,262.0
-Jordan,2004,5.0
-Toyota,2004,9.0
-Renault,2004,105.0
 BAR,2004,119.0
+Renault,2004,105.0
+BAR,2005,38.0
+Red Bull,2005,34.0
+McLaren,2005,182.0
+Minardi,2005,7.0
 Sauber,2005,20.0
 Williams,2005,66.0
 Ferrari,2005,100.0
-BAR,2005,38.0
-Red Bull,2005,34.0
 Jordan,2005,12.0
 Toyota,2005,88.0
 Renault,2005,191.0
-McLaren,2005,182.0
-Minardi,2005,7.0
-MF1,2006,0.0
 Williams,2006,11.0
 Ferrari,2006,201.0
 Spyker MF1,2006,0.0
-McLaren,2006,110.0
 Super Aguri,2006,0.0
 BMW Sauber,2006,36.0
 Toro Rosso,2006,1.0
+McLaren,2006,110.0
+Red Bull,2006,16.0
+MF1,2006,0.0
 Renault,2006,206.0
 Toyota,2006,35.0
 Honda,2006,86.0
-Red Bull,2006,16.0
-Spyker,2007,1.0
 Toro Rosso,2007,8.0
 Super Aguri,2007,4.0
 BMW Sauber,2007,101.0
-Honda,2007,6.0
-Toyota,2007,13.0
 Williams,2007,33.0
 Ferrari,2007,204.0
+Honda,2007,6.0
+Toyota,2007,13.0
+Renault,2007,51.0
+Spyker,2007,1.0
 Red Bull,2007,24.0
 McLaren,2007,218.0
-Renault,2007,51.0
-McLaren,2008,151.0
 Red Bull,2008,29.0
 Renault,2008,80.0
+Williams,2008,26.0
+Ferrari,2008,172.0
+McLaren,2008,151.0
 Toyota,2008,56.0
 Honda,2008,14.0
 Force India,2008,0.0
 BMW Sauber,2008,135.0
 Toro Rosso,2008,39.0
 Super Aguri,2008,0.0
-Williams,2008,26.0
-Ferrari,2008,172.0
 BMW Sauber,2009,36.0
 Toro Rosso,2009,8.0
-Force India,2009,13.0
-Toyota,2009,59.5
 Ferrari,2009,70.0
 Williams,2009,34.5
+Force India,2009,13.0
+Toyota,2009,59.5
+Renault,2009,26.0
 Brawn,2009,172.0
 Red Bull,2009,153.5
 McLaren,2009,71.0
-Renault,2009,26.0
-Renault,2010,163.0
+Force India,2010,68.0
+McLaren,2010,454.0
 Toro Rosso,2010,13.0
 Lotus,2010,0.0
 HRT,2010,0.0
-Force India,2010,68.0
-McLaren,2010,454.0
+Virgin,2010,0.0
+Renault,2010,163.0
 Red Bull,2010,498.0
 Mercedes,2010,214.0
 Ferrari,2010,396.0
 Williams,2010,69.0
 Sauber,2010,44.0
-Virgin,2010,0.0
-Virgin,2011,0.0
 Lotus,2011,0.0
 Toro Rosso,2011,41.0
 HRT,2011,0.0
+Williams,2011,5.0
+Virgin,2011,0.0
 Mercedes,2011,165.0
 Red Bull,2011,650.0
-McLaren,2011,497.0
-Force India,2011,69.0
-Williams,2011,5.0
 Ferrari,2011,375.0
-Sauber,2011,44.0
+Force India,2011,69.0
 Renault,2011,73.0
-Caterham,2012,0.0
-Red Bull,2012,460.0
+Sauber,2011,44.0
+McLaren,2011,497.0
 McLaren,2012,378.0
+Force India,2012,109.0
 Williams,2012,76.0
 Sauber,2012,126.0
 Ferrari,2012,400.0
-Force India,2012,109.0
+Mercedes,2012,142.0
+Caterham,2012,0.0
+Red Bull,2012,460.0
 Marussia,2012,0.0
 Lotus F1,2012,303.0
 Toro Rosso,2012,26.0
 HRT,2012,0.0
-Mercedes,2012,142.0
-Marussia,2013,0.0
 Force India,2013,77.0
-Toro Rosso,2013,33.0
 McLaren,2013,122.0
+Toro Rosso,2013,33.0
+Lotus F1,2013,315.0
+Marussia,2013,0.0
 Red Bull,2013,596.0
 Caterham,2013,0.0
 Mercedes,2013,360.0
 Ferrari,2013,354.0
 Sauber,2013,57.0
 Williams,2013,5.0
-Lotus F1,2013,315.0
-Red Bull,2014,405.0
-Caterham,2014,0.0
 McLaren,2014,181.0
+Force India,2014,155.0
 Sauber,2014,0.0
 Williams,2014,320.0
 Ferrari,2014,216.0
-Force India,2014,155.0
+Mercedes,2014,701.0
+Red Bull,2014,405.0
+Caterham,2014,0.0
 Marussia,2014,2.0
 Lotus F1,2014,10.0
 Toro Rosso,2014,30.0
-Mercedes,2014,701.0
-Red Bull,2015,187.0
 McLaren,2015,27.0
 Manor Marussia,2015,0.0
+Force India,2015,136.0
 Ferrari,2015,428.0
 Williams,2015,257.0
 Sauber,2015,36.0
-Force India,2015,136.0
+Mercedes,2015,703.0
+Red Bull,2015,187.0
 Lotus F1,2015,78.0
 Toro Rosso,2015,67.0
-Mercedes,2015,703.0
-Haas F1 Team,2016,29.0
 Toro Rosso,2016,63.0
-Force India,2016,173.0
 Sauber,2016,2.0
 Williams,2016,138.0
 Ferrari,2016,398.0
+Force India,2016,173.0
+Renault,2016,8.0
+Haas F1 Team,2016,29.0
 Mercedes,2016,765.0
 Red Bull,2016,468.0
 Manor Marussia,2016,1.0
 McLaren,2016,76.0
-Renault,2016,8.0
+Mercedes,2017,668.0
+Haas F1 Team,2017,47.0
+Red Bull,2017,368.0
+McLaren,2017,30.0
 Ferrari,2017,522.0
 Williams,2017,83.0
 Sauber,2017,5.0
-Mercedes,2017,668.0
-Red Bull,2017,368.0
-Haas F1 Team,2017,47.0
 Toro Rosso,2017,53.0
 Force India,2017,187.0
 Renault,2017,57.0
-McLaren,2017,30.0
-McLaren,2018,62.0
 Red Bull,2018,419.0
-Mercedes,2018,655.0
 Renault,2018,122.0
-Force India,2018,59.0
-Toro Rosso,2018,33.0
-Haas F1 Team,2018,93.0
+Mercedes,2018,655.0
 Ferrari,2018,571.0
 Sauber,2018,48.0
 Williams,2018,7.0
+McLaren,2018,62.0
+Force India,2018,59.0
+Toro Rosso,2018,33.0
+Haas F1 Team,2018,93.0
+Red Bull,2019,417.0
+Renault,2019,91.0
+Mercedes,2019,739.0
+Ferrari,2019,504.0
+Williams,2019,1.0
 Racing Point,2019,73.0
 McLaren,2019,145.0
-Red Bull,2019,417.0
-Mercedes,2019,739.0
-Renault,2019,91.0
 Alfa Romeo,2019,57.0
 Toro Rosso,2019,85.0
 Haas F1 Team,2019,28.0
-Ferrari,2019,504.0
-Williams,2019,1.0
-AlphaTauri,2020,107.0
 Haas F1 Team,2020,3.0
-Renault,2020,181.0
 Mercedes,2020,573.0
+Renault,2020,181.0
+Alfa Romeo,2020,8.0
+AlphaTauri,2020,107.0
 Williams,2020,0.0
 Ferrari,2020,131.0
 Racing Point,2020,195.0
 McLaren,2020,202.0
 Red Bull,2020,319.0
-Alfa Romeo,2020,8.0
 Alfa Romeo,2021,13.0
-AlphaTauri,2021,142.0
 McLaren,2021,275.0
+AlphaTauri,2021,142.0
+Haas F1 Team,2021,0.0
+Alpine F1 Team,2021,155.0
+Aston Martin,2021,77.0
 Red Bull,2021,585.5
 Mercedes,2021,613.5
 Williams,2021,23.0
 Ferrari,2021,323.5
-Haas F1 Team,2021,0.0
-Alpine F1 Team,2021,155.0
-Aston Martin,2021,77.0
-Mercedes,2022,515.0
 Williams,2022,8.0
 Ferrari,2022,554.0
-McLaren,2022,159.0
 AlphaTauri,2022,35.0
+McLaren,2022,159.0
+Red Bull,2022,759.0
+Mercedes,2022,515.0
 Aston Martin,2022,55.0
 Alpine F1 Team,2022,173.0
 Haas F1 Team,2022,37.0
 Alfa Romeo,2022,55.0
-Red Bull,2022,759.0
-McLaren,2023,302.0
 Red Bull,2023,860.0
 Mercedes,2023,409.0
+Williams,2023,28.0
+Ferrari,2023,406.0
+McLaren,2023,302.0
 Alfa Romeo,2023,16.0
 AlphaTauri,2023,25.0
 Haas F1 Team,2023,12.0
 Alpine F1 Team,2023,120.0
 Aston Martin,2023,280.0
-Williams,2023,28.0
-Ferrari,2023,406.0
 Aston Martin,2024,74.0
 Haas F1 Team,2024,28.0
 RB F1 Team,2024,34.0

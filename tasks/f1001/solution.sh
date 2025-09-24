@@ -50,7 +50,7 @@ fi
 for model in "${models[@]}"; do
   replace="ref('${model}')/ref('src_${model}')"
   path="models/staging/f1_dataset/stg_f1_dataset__${model}.sql"
-  
+
   "${SED_CMD[@]}" "s/${replace}/g" "${path}"
 done
 
@@ -59,13 +59,19 @@ done
 "${SED_CMD[@]}" "s/ref('position_descriptions')/ref('src_position_descriptions')/g" "models/staging/f1_dataset/stg_f1_dataset__results.sql"
 "${SED_CMD[@]}" "s/ref('position_descriptions')/ref('src_position_descriptions')/g" "models/stats/most_races.sql"
 
+## Create new yaml file with correct schema
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema="main"
+else
+    schema="public"
+fi
 
-cat > models/core/f1_dataset.yml << 'EOF'
+cat > models/core/f1_dataset.yml << EOF
 version: 2
 
 sources:
   - name: f1_dataset
-    schema: main
+    schema: $schema
     tables:
       - name: circuits
       - name: constructors

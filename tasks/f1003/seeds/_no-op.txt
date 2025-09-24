@@ -6,7 +6,7 @@ seeds:
       +column_types:
         rank: bigint
         driver_full_name: varchar
-        fastest_laps: hugeint
+        fastest_laps: bigint
     solution__most_laps:
       +column_types:
         rank: bigint
@@ -16,33 +16,33 @@ seeds:
       +column_types:
         rank: bigint
         driver_full_name: varchar
-        podiums: hugeint
+        podiums: bigint
     solution__most_pole_positions:
       +column_types:
         rank: bigint
         driver_full_name: varchar
-        pole_positions: hugeint
+        pole_positions: bigint
     solution__most_races:
       +column_types:
         rank: bigint
         driver_full_name: varchar
-        finishes: hugeint
-        excluded: hugeint
-        withdrew: hugeint
-        failed_to_qualify: hugeint
-        disqualified: hugeint
-        not_classified: hugeint
-        retired: hugeint
+        finishes: bigint
+        excluded: bigint
+        withdrew: bigint
+        failed_to_qualify: bigint
+        disqualified: bigint
+        not_classified: bigint
+        retired: bigint
     solution__most_retirements:
       +column_types:
         rank: bigint
         driver_full_name: varchar
-        retirements: hugeint
+        retirements: bigint
     solution__most_wins:
       +column_types:
         rank: bigint
         driver_full_name: varchar
-        wins: hugeint
+        wins: bigint
     solution__oldest_race_winners_in_modern_era:
       +column_types:
         driver_full_name: varchar

@@ -17,20 +17,13 @@ joined as (
 grouped as (
   select driver_id,
          driver_full_name,
-         sum(case
-               when position_desc is null
-               then 1
-               else 0
-             end) as finishes,
-         {{
-           dbt_utils.pivot(
-             'position_desc',
-             dbt_utils.get_column_values(
-               ref('src_position_descriptions'),
-               'position_desc'
-             )
-           )
-         }}
+         sum(case when position_desc is null then 1 else 0 end) as finishes,
+         sum(case when position_desc = 'disqualified' then 1 else 0 end) as disqualified,
+         sum(case when position_desc = 'retired' then 1 else 0 end) as retired,
+         sum(case when position_desc = 'excluded' then 1 else 0 end) as excluded,
+         sum(case when position_desc = 'withdrew' then 1 else 0 end) as withdrew,
+         sum(case when position_desc = 'failed to qualify' then 1 else 0 end) as failed_to_qualify,
+         sum(case when position_desc = 'not classified' then 1 else 0 end) as not_classified,
     from joined
    group by 1, 2
 ),
@@ -40,9 +33,9 @@ final as (
          finishes,
          excluded,
          withdrew,
-         "failed to qualify" as failed_to_qualify,
+         failed_to_qualify,
          disqualified,
-         "not classified" as not_classified,
+         not_classified,
          retired
     from grouped
    order by finishes desc

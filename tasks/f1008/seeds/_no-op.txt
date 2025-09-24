@@ -32,7 +32,7 @@ seeds:
       +column_types:
         rank: bigint
         driver_full_name: varchar
-        wins: hugeint
+        wins: bigint
     solution__most_laps:
       +column_types:
         rank: bigint

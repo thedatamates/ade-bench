@@ -153,6 +153,34 @@ uv run scripts_python/run_harness.py \
 
 We skimmed over lots of details in the section above. This next section explains the painful tedium of those details.
 
+### How dbt projects work
+
+When creating a dbt project, include the `profile.yml` and `dbt_project.yml` file in the root directory of the project. In `profile.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
+
+```yaml
+foo-duckdb:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "./foo.duckdb"
+      schema: main
+
+foo-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>
+```
+
 ### How databases work
 
 ADE-bench currently supports these database types:

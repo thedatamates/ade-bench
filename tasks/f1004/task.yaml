@@ -15,7 +15,6 @@ tags:
   - data-quality
 timeout_seconds: 500
 parser_name: dbt
-db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:
@@ -27,3 +26,9 @@ variants:
   db_name: f1
   project_type: dbt
   project_name: f1
+
+- db_type: snowflake
+  db_name: f1
+  project_type: dbt
+  project_name: f1
+  migration_directory: f1__duckdb_to_snowflake
