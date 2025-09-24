@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import LiteralScalarString
 
-from ade_bench.parsers.parser_factory import ParserFactory, ParserName
+from ade_bench.parsers.parser_factory import ParserFactory
 from ade_bench.utils.logger import logger
 from ade_bench.harness_models import SolutionSeedConfig, VariantConfig
 from ade_bench.config import config
@@ -59,10 +59,6 @@ class Task(BaseModel):
     )
 
     # Configuration
-    parser_name: ParserName = Field(
-        default=ParserName.PYTEST,
-        description="Name of the parser to use for test results",
-    )
     max_agent_timeout_sec: float = Field(
         default_factory=lambda: config.default_agent_timeout_sec,
         description="Maximum timeout in seconds for the agent to run."
@@ -173,7 +169,10 @@ class TrialHandler:
 
         self._logger = logger.getChild(__name__)
         self.task = Task.from_yaml(self._task_config_path)
-        self.parser = ParserFactory.get_parser(self.task.parser_name, task_name=self.task_id)
+
+        # Determine parser from variant_config project_type instead of task.parser_name
+        project_type = self.variant_config.get("project_type", "dbt")  # Default to dbt
+        self.parser = ParserFactory.get_parser(project_type, task_name=self.task_id)
 
         if self.output_path is not None:
             self._task_output_path.mkdir(parents=True, exist_ok=True)

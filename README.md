@@ -78,8 +78,6 @@ tags:
   - dbt
   - jinja
 timeout_seconds: 500 # An optional task timeout that overrides the timeouts in .env.
-parser_name: dbt # TODO - REMOVE
-db_type: duckdb # TODO - REMOVE
 
 # An optional script to run after the agent runs, and before the tests are evaluated.
 # This should be used if

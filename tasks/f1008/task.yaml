@@ -14,7 +14,6 @@ tags:
   - dbt
   - data-quality
 timeout_seconds: 500
-parser_name: dbt
 
 # Tables to compare for solution
 solution_seeds:

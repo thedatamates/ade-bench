@@ -12,8 +12,6 @@ category: model_creation
 tags:
   - dbt
 timeout_seconds: 500
-parser_name: dbt
-db_type: duckdb
 
 # Optional test setup script to run before dbt tests
 test_setup: |-

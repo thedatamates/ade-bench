@@ -20,8 +20,6 @@ tags:
   - dbt
   - data
 timeout_seconds: 500
-parser_name: dbt
-db_type: duckdb
 
 # Test setup script to run before dbt tests
 test_setup: |-

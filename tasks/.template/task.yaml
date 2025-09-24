@@ -1,47 +1,72 @@
-task_id: template
-status: dev
-description: Template
+task_id: The name of the task, which should match the name of the task directory.
+status: An indicator of the task's development status.
+description: A description of what the task does
 notes: |-
-  [dev notes]
-prompts:
+  Optional notes about the task, things to add to it, issues with it, etc.
+prompts: #
+  # Tasks can have multiple prompt variants to see how well agents resolve issues
+  # with different levels of detail. The base prompt is required; additional prompt
+  # variants are optional. Each prompt will run as its own trial in its own sandbox.
   - key: base
     prompt: |-
-      Do some stuff.
-author_name: test
-author_email: test
-difficulty: easy
-category: data-transformation
+      The prompt to give to the agent.
+  - key: hard
+    prompt: |-
+      Optional prompt variants.
+author_name: The name of the task author.
+author_email: The author's email.
+difficulty: How hard the task is.
+category: The category of problem the task is testing.
 tags:
+  # Additional tags to help with organization
   - dbt
-  - aggregation
-  - joins
-  - e-commerce
-  - analytics
-timeout_seconds: 500
-parser_name: dbt
-db_type: duckdb
+  - jinja
+timeout_seconds: 500 # An optional task timeout that overrides the timeouts in .env.
 
-# Optional test setup script to run before dbt tests
-# test_setup: |-
-#   dbt run
+# An optional script to run after the agent runs, and before the tests are evaluated.
+# This should be used if
+#  1. the agent might update a file as part of the task
+#  2. and might not run dbt,
+#  3. which should be considered a success,
+#  4. but dbt needs to run to evaluate the tests.
+test_setup: |-
+  dbt run --select obt_product_inventory
 
-# Tables to compare for solution
-# solution_seeds:
-#   - template__model
-#   - table_name: another_model
-#     exclude_columns:
-#       - insertion_timestamp
-#     exclude_tests:
-#       - equality_test
+# ADE-bench will automatically do several things with the tables listed here:
+#  1. Create solution seeds (called `solution__[table_name]`) after the agent runs.
+#  2. Create a dbt test that checks for the existence of this table
+#  3. Create a test to compare the table to corresponding solution seed.
+#
+# As is shown for with the second through fourth tables, you can:
+#  1. Exclude some columns from the equality test
+#  2. Only include certain columns in the equality test
+#  3. Disable the creation of both the existence and equality tests.
+solution_seeds:
+  - table_name: dim_products
+  - table_name: fct_sales
+    inclulde_columns:
+    - id
+    - item_name_displayed
+    - item_name_actual
+  - table_name: fct_transactions
+    exclude_columns:
+    - bribe_amount_usd
+  - table_name: generated_income_statement
+    exclude_tests:
+    - equality_test # Can also be `existence_test`
 
-# Use shared database instead of local data files
-database:
-  source: shared
-  name: template
-  type: duckdb
+# These are the different database and project variants that the task supports
+# If no migration directory is provided, then no migration script will run.
+# If one is provided, it will be run against the project prior to the the task's
+# setup.sh script.
+variants:
+- db_type: duckdb
+  db_name: enron
+  project_type: dbt
+  project_name: enron
 
-# Use shared project instead of local project
-project:
-  source: shared
-  name: template
-  type: dbt
+- db_type: snowflake
+  db_name: enron
+  project_type: dbt
+  project_name: enron
+  migration_directory: enron__duckdb_to_snowflake

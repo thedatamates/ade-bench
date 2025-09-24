@@ -13,8 +13,6 @@ category: logic
 tags:
   - dbt
 timeout_seconds: 500
-parser_name: dbt
-db_type: duckdb
 
 # Variants for different database and project combinations
 variants:

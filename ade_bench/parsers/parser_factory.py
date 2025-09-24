@@ -10,6 +10,7 @@ from ade_bench.parsers.macro_parser import MacroParser
 class ParserName(Enum):
     PYTEST = "pytest"
     DBT = "dbt"
+    DBT_FUSION = "dbt-fusion"
     CLAUDE = "claude"
     MACRO = "macro"
 
@@ -18,12 +19,20 @@ class ParserFactory:
     PARSER_NAME_TO_CLASS = {
         ParserName.PYTEST: PytestParser,
         ParserName.DBT: DbtParser,
+        ParserName.DBT_FUSION: DbtParser,  # dbt-fusion uses the same parser as dbt
         ParserName.CLAUDE: ClaudeParser,
         ParserName.MACRO: MacroParser,
     }
 
     @staticmethod
-    def get_parser(parser_name: ParserName, **kwargs) -> BaseParser:
+    def get_parser(parser_name: ParserName | str, **kwargs) -> BaseParser:
+        # Convert string to ParserName if needed
+        if isinstance(parser_name, str):
+            try:
+                parser_name = ParserName(parser_name)
+            except ValueError:
+                raise ValueError(f"Unknown parser: {parser_name}. Available parsers: {[p.value for p in ParserName]}")
+
         parser_class = ParserFactory.PARSER_NAME_TO_CLASS.get(parser_name)
         if not parser_class:
             raise ValueError(

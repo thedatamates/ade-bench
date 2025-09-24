@@ -15,7 +15,6 @@ category: model-creation
 tags:
   - dbt
 timeout_seconds: 500
-parser_name: dbt
 
 # Test setup script to run before dbt tests
 test_setup: |-

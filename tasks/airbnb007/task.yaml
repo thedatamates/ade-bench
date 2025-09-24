@@ -14,8 +14,6 @@ tags:
   - dbt
   - naming
 timeout_seconds: 500
-parser_name: dbt
-db_type: duckdb
 
 # Tables to compare for solution
 solution_seeds:

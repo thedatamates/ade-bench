@@ -1,6 +1,6 @@
 #!/bin/bash
 # Create the product_performance model
-cat > models/foo.sql << 'EOF'
+cat > models/foo.sql << EOF
 select 1;
 EOF
 
