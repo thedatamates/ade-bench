@@ -470,7 +470,7 @@ LOG_LEVEL=INFO
 
 To develop a new task, there are a few things that can be useful:
 
-#### Creating a local sanbox
+### Creating a local sanbox
 You can create a local sandbox in a `/dev/sandbox` directory, which you can `cd` into and play around directly. This is especially helpful if you're developing on a DuckDB trial. To create that sandbox, run:
 ```
 uv run scripts_python/create_sandbox.py --task [task_to_copy] --db [duckdb] --project-type [dbt]
@@ -478,14 +478,15 @@ uv run scripts_python/create_sandbox.py --task [task_to_copy] --db [duckdb] --pr
 This will move all of the relevant files into the directory above. Then, if you `cd` into that directory, you can manually execute the various steps of the task:
 
 ```bash
-$ setup.sh # Run the setup script
-$ solution.sh # Run the solution script
+$ bash setup.sh # Run the setup script
+$ bash migration.sh # Run the migration scripts, if needed
+$ bash solution.sh # Run the solution script
 $ dbt seed # Create the seed file
 $ dbt test --select "test_type:singular" # Run the task tests
 ```
-**Note:** This is a little flimsy, and has errors. The migration script might not work. A TODO, for later.
+**Note:** This does **NOT** create a user or database in Snowflake like the task setup does. If you want to use this sandbox on Snowflake, you'll need to run the task first, which will create those resources in Snowflake.
 
-#### Creating seeds
+### Creating seeds
 
 When you're developing a task and ready to create CSVs for the solution seeds, run the following command:
 ```
@@ -526,20 +527,25 @@ $ ade-log
 
 
 # For creating a sandbox environment for testing, navigating into it, and running
-# various setup scripts, including opening it up in the DuckDB UI
+# various setup scripts, including opening it up in the DuckDB UI. You can obviously
+# run whichever scripts here you want, to get the sandbox in whatever state you want
+# to do development work in.
 alias ade-dev='uv run scripts_python/create_sandbox.py'
 alias sand='cd ~/ade-bench/dev/sandbox'
+alias mg='bash migration.sh'
 alias st='bash setup.sh'
 alias sl='bash solution.sh'
 alias ts='dbt test --select "test_type:singular"'
 alias ddb='duckdb -ui'
 # Usage:
-$ ade-dev --task foo001 --db duckdb --project-type dbt
-$ sand
-$ st
-$ sl
-$ ts
-$ ddb
+$ ade-dev --task foo001 --db snowflake --project-type dbt # Create sandbox
+$ sand # Navigate into sandbox
+$ mg # If Snowflake, run the migration scripts
+$ st # Run the setup scripts
+$ sl # Run the solution scripts
+$ dbt seed # Add the soltuion seeds
+$ ts # Run the tests
+$ ddb # If DuckDB, open the DuckDB UI
 
 
 # For viewing all the tasks

@@ -14,9 +14,6 @@ from pathlib import Path
 # Add the project root to the Python path so we can import ade_bench modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from ade_bench.setup.setup_orchestrator import SetupOrchestrator
-
-
 def check_task_exists(task_name):
     """Check if task exists in tasks directory."""
     tasks_dir = Path("tasks")
@@ -219,6 +216,84 @@ def copy_shared_scripts():
     return copy_item(script_path, sandbox_dir, "seed-schema.sh script")
 
 
+def update_dbt_config(variant, task_name):
+    """Update dbt_project.yml and profiles.yml files based on variant configuration."""
+    sandbox_dir = Path("dev/sandbox")
+    project_name = variant['project_name']
+    db_type = variant['db_type']
+
+    # Update dbt_project.yml to use the right profile
+    dbt_project_path = sandbox_dir / "dbt_project.yml"
+    if not dbt_project_path.exists():
+        print(f"❌ dbt_project.yml not found in {sandbox_dir}")
+        return False
+
+    try:
+        # Use the existing _update_project_profile function logic
+        profile_name = f"{project_name}-{db_type}"
+
+        with open(dbt_project_path, 'r') as f:
+            dbt_project = yaml.safe_load(f)
+
+        dbt_project['profile'] = profile_name
+
+        with open(dbt_project_path, 'w') as f:
+            yaml.safe_dump(dbt_project, f)
+
+        print(f"✓ Updated dbt_project.yml to use profile: {profile_name}")
+
+    except Exception as e:
+        print(f"❌ Failed to update dbt_project.yml: {e}")
+        return False
+
+    # Update profiles.yml
+    profiles_path = sandbox_dir / "profiles.yml"
+    if not profiles_path.exists():
+        print(f"❌ profiles.yml not found in {sandbox_dir}")
+        return False
+
+    try:
+        if db_type == "snowflake":
+            # Use the existing _update_snowflake_creds function logic
+            from ade_bench.setup.setup_utils import generate_task_snowflake_credentials
+
+            creds = generate_task_snowflake_credentials(task_name)
+
+            with open(profiles_path, 'r') as f:
+                profiles = yaml.safe_load(f)
+
+            profiles[profile_name]['outputs']['dev']['account'] = creds['account'].replace('.snowflakecomputing.com', '')
+            profiles[profile_name]['outputs']['dev']['user'] = creds['user']
+            profiles[profile_name]['outputs']['dev']['password'] = creds['password']
+            profiles[profile_name]['outputs']['dev']['role'] = creds['role']
+            profiles[profile_name]['outputs']['dev']['database'] = creds['database']
+            profiles[profile_name]['outputs']['dev']['schema'] = creds['schema']
+            profiles[profile_name]['outputs']['dev']['warehouse'] = creds['warehouse']
+
+            with open(profiles_path, 'w') as f:
+                yaml.safe_dump(profiles, f)
+
+            print(f"✓ Updated profiles.yml with generated Snowflake credentials for {profile_name}")
+
+        elif db_type == "duckdb":
+            # For DuckDB, just ensure the path is correct
+            with open(profiles_path, 'r') as f:
+                profiles = yaml.safe_load(f)
+
+            profiles[profile_name]['outputs']['dev']['path'] = f"./{variant['db_name']}.duckdb"
+
+            with open(profiles_path, 'w') as f:
+                yaml.safe_dump(profiles, f)
+
+            print(f"✓ Updated profiles.yml for DuckDB path: {profile_name}")
+
+    except Exception as e:
+        print(f"❌ Failed to update profiles.yml: {e}")
+        return False
+
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(description="Create a sandbox environment from a task")
     parser.add_argument("--task", help="Name of the task to create sandbox for")
@@ -275,11 +350,10 @@ def main():
     if not copy_shared_scripts():
         sys.exit(1)
 
-    # Step 9: Run variant-specific setup
-    print(f"✓ Running variant-specific setup...")
-    setup_orchestrator = SetupOrchestrator()
-    if not setup_orchestrator.setup_task(task_name, variant):
-        print(f"❌ Variant-specific setup failed for task '{task_name}'")
+    # Step 9: Update dbt configuration files
+    print(f"✓ Updating dbt configuration files...")
+    if not update_dbt_config(variant, task_name):
+        print(f"❌ Failed to update dbt configuration files")
         sys.exit(1)
 
     print("-" * 50)
