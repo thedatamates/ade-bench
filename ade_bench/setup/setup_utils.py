@@ -10,7 +10,8 @@ from typing import Dict, Any
 
 def generate_task_snowflake_credentials(task_id: str) -> Dict[str, str]:
     """Generate Snowflake credentials for a specific task (the user created during setup)."""
-    temp_slug = f"temp_ade_{task_id}".upper()
+    modified_task_id = task_id.replace(".", "_")
+    temp_slug = f"temp_ade_{modified_task_id}".upper()
     username = f"{temp_slug}_USER"
     password = f"{temp_slug}_password_123"
     role_name = f"{temp_slug}_ROLE"
