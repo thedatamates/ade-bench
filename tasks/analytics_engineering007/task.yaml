@@ -15,7 +15,6 @@ category: schema_change
 tags:
   - dbt
   - data_issue
-timeout_seconds: 500
 
 # Test setup script to run before dbt tests
 test_setup: |-

@@ -58,7 +58,6 @@ def main():
         "difficulty": difficulty,
         "category": category,
         "tags": [],
-        "timeout_seconds": 300,
         "test_type": "sql",
         "db_type": db_type,
     }

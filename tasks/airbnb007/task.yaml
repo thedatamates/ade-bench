@@ -13,7 +13,6 @@ category: model-creation
 tags:
   - dbt
   - naming
-timeout_seconds: 500
 
 # Tables to compare for solution
 solution_seeds:

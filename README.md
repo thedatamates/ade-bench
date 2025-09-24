@@ -77,7 +77,6 @@ tags:
   # Additional tags to help with organization
   - dbt
   - jinja
-timeout_seconds: 500 # An optional task timeout that overrides the timeouts in .env.
 
 # An optional script to run after the agent runs, and before the tests are evaluated.
 # This should be used if

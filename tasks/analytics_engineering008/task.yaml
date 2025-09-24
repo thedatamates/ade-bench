@@ -14,7 +14,6 @@ difficulty: easy
 category: project_creation
 tags:
   - dbt
-timeout_seconds: 500
 
 # Test setup script to run before dbt tests
 test_setup: |-

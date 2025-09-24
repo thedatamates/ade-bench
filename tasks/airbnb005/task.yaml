@@ -27,7 +27,6 @@ category: data-transformation
 tags:
   - dbt
   - macros
-timeout_seconds: 500
 
 # Tables to compare for solution
 solution_seeds:

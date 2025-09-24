@@ -11,7 +11,6 @@ difficulty: easy
 category: diagnostic
 tags:
   - dbt
-timeout_seconds: 500
 
 # Variants for different database and project combinations
 variants:

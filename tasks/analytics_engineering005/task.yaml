@@ -12,7 +12,6 @@ category: model_refactor
 tags:
   - dbt
   - join
-timeout_seconds: 500
 
 # Test setup script to run before dbt tests
 test_setup: |-

@@ -20,7 +20,6 @@ category: debugging
 tags:
   - dbt
   - data-quality
-timeout_seconds: 500
 
 # Tables to compare for solution
 solution_seeds:

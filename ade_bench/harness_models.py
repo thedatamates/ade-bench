@@ -177,7 +177,6 @@ class TaskMetadata(BaseModel):
     difficulty: str = Field(pattern="^(easy|medium|hard)$")
     category: str
     tags: List[str] = Field(default_factory=list)
-    timeout_seconds: int = 300
     test_type: str = "sql"
     db_type: str = "duckdb"
     variants: List[VariantConfig] = Field(default_factory=list)
