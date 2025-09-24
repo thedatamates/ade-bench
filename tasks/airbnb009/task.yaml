@@ -1,10 +1,10 @@
 task_id: airbnb009
 status: ready
-title: Fix missing days in rollup table
+description: Fix missing days in rollup table
 notes: |-
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       In mom_agg_reviews, there should be a row for every day. Right now, some days are missing. Can you identify why these days are missing, and fix that model?
 author_name: test
 author_email: test

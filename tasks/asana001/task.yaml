@@ -1,11 +1,11 @@
 task_id: asana001
 status: ready
-title: Fix an error from an update to the Fivetran asana package.
+description: Fix an error from an update to the Fivetran asana package.
 notes: |-
   This is from a mismatch in the Fivetran Asana package, where the underlying data no longer matches the current package.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       This project is erroring. Please fix it without modifying the underlying data.
 author_name: test
 author_email: test

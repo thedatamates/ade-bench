@@ -1,10 +1,10 @@
 task_id: airbnb005
 status: ready
-title: Create an NPS model.
+description: Create an NPS model.
 notes: |-
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Create two NPS score tables for reviews using sentiment to determine promoters or detractors. Create these tables and columns:
 
       daily_agg_nps_reviews

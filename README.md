@@ -1,6 +1,8 @@
 # ADE-bench
 
-_Quote something_
+_"Lord, forgive me, I've been running, running blind in truth."_
+
+— [Beyonce  /  "Freedom"  /  Lemonade](https://www.youtube.com/watch?v=7FWF9375hUA&t=39s)
 
 ## Overview
 
@@ -54,18 +56,18 @@ The task is defined in the `task.yaml` file:
 # task.yaml
 task_id: The name of the task, which should match the name of the task directory.
 status: An indicator of the task's development status.
-title: A description of what the task does
+description: A description of what the task does
 notes: |-
   Optional notes about the task, things to add to it, issues with it, etc.
-descriptions: #
+prompts: #
   # Tasks can have multiple prompt variants to see how well agents resolve issues
   # with different levels of detail. The base prompt is required; additional prompt
   # variants are optional. Each prompt will run as its own trial in its own sandbox.
   - key: base
-    description: |-
+    prompt: |-
       The prompt to give to the agent.
   - key: hard
-    description: |-
+    prompt: |-
       Optional prompt variants.
 author_name: The name of the task author.
 author_email: The author's email.

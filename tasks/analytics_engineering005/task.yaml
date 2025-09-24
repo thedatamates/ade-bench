@@ -1,9 +1,9 @@
 task_id: analytics_engineering005
 status: ready
-title: Create a model that dedupes inventory records.
-descriptions:
+description: Create a model that dedupes inventory records.
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       The fact_inventory model should be unique on inventory_id and it's not. Update the model so that it has only one row per inventory_id.
 author_name: test
 author_email: test

@@ -54,7 +54,7 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
 
         # Extract basic task info
         task_id = clean_text_for_spreadsheet(task_config.get('task_id', ''))
-        title = clean_text_for_spreadsheet(task_config.get('title', ''))
+        description = clean_text_for_spreadsheet(task_config.get('description', ''))
         status = clean_text_for_spreadsheet(task_config.get('status', ''))
         difficulty = clean_text_for_spreadsheet(task_config.get('difficulty', ''))
         category = clean_text_for_spreadsheet(task_config.get('category', ''))
@@ -77,45 +77,45 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
 
 
 
-        # Extract descriptions
-        descriptions = task_config.get('descriptions', [])
+        # Extract prompts
+        prompts = task_config.get('prompts', [])
 
         # Extract notes
         notes = clean_text_for_spreadsheet(task_config.get('notes', ''))
 
-        if not descriptions:
-            # If no descriptions, create one row with empty key and description
+        if not prompts:
+            # If no prompts, create one row with empty key and prompt
             task_details.append({
                 'task_id': task_id,
-                'title': title,
+                'description': description,
                 'status': status,
                 'database_types': db_types,
                 'project_types': project_types,
                 'project_name': project_name,
                 'database_name': database_name,
                 'key': '',
-                'description': '',
+                'prompt': '',
                 'notes': notes,
                 'difficulty': difficulty,
                 'category': category,
                 'tags': clean_text_for_spreadsheet(', '.join(tags) if tags else '')
             })
         else:
-            # Create one row per description key
-            for desc in descriptions:
-                key = clean_text_for_spreadsheet(desc.get('key', ''))
-                description = clean_text_for_spreadsheet(desc.get('description', ''))
+            # Create one row per prompt key
+            for prompt in prompts:
+                key = clean_text_for_spreadsheet(prompt.get('key', ''))
+                prompt_text = clean_text_for_spreadsheet(prompt.get('prompt', ''))
 
                 task_details.append({
                     'task_id': task_id,
-                    'title': title,
+                    'description': description,
                     'status': status,
                     'database_types': db_types,
                     'project_types': project_types,
                     'project_name': project_name,
                     'database_name': database_name,
                     'key': key,
-                    'description': description,
+                    'prompt': prompt_text,
                     'notes': notes,
                     'difficulty': difficulty,
                     'category': category,
@@ -177,8 +177,8 @@ def main():
         'database_name',
         'category',
         'key',
-        'title',
         'description',
+        'prompt',
         'notes',
         'difficulty',
         'tags'
@@ -198,15 +198,15 @@ def main():
     print("="*80)
 
     # Print header
-    print(f"{'status':<8} | {'task_id':<25} | {'description':<60}")
+    print(f"{'status':<8} | {'task_id':<25} | {'prompt':<60}")
     print("-" * 100)
 
     # Print data rows
     for _, row in df.iterrows():
         status = str(row['status'])[:7]
         task_id = str(row['task_id'])[:24]
-        description = str(row['description'])[:59]
-        print(f"{status:<8} | {task_id:<25} | {description:<60}")
+        prompt = str(row['prompt'])[:59]
+        print(f"{status:<8} | {task_id:<25} | {prompt:<60}")
 
     print("="*80)
 

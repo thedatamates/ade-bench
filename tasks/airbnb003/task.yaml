@@ -1,11 +1,11 @@
 task_id: airbnb003
 status: ready
-title: Update dbt models to be views
+description: Update dbt models to be views
 notes: |-
   I want to include a test to check for src_reviews but need to figure out how limit the table size.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Update the all the source models to be views.
 author_name: test
 author_email: test

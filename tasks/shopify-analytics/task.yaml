@@ -1,9 +1,9 @@
 task_id: shopify-analytics
 status: open
-title: Shopify Product and Shop Performance Analytics
-descriptions:
+description: Shopify Product and Shop Performance Analytics
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Create two tables: one that pulls together product data like total sales, refunds, discounts, and taxes, and another that tracks daily shop performance, including orders, abandoned checkouts, and fulfillment statuses.
 author_name: test
 author_email: test

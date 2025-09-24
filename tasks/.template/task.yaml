@@ -1,11 +1,11 @@
 task_id: template
 status: dev
-title: Template
+description: Template
 notes: |-
   [dev notes]
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Do some stuff.
 author_name: test
 author_email: test

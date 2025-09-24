@@ -82,9 +82,9 @@ class MacroAgent(BaseAgent):
             # Log the error but don't fail the entire task
             logger.warning(f"Failed to copy log file from container: {e}")
 
-    def _run_agent_commands(self, task_description: str) -> list[TerminalCommand]:
-        escaped_description = shlex.quote(task_description)
-        base_command = f"macro -p {escaped_description} -e {self.LOG_DIR}/{self.LOG_FILENAME} --output-format=json"
+    def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
+        escaped_prompt = shlex.quote(task_prompt)
+        base_command = f"macro -p {escaped_prompt} -e {self.LOG_DIR}/{self.LOG_FILENAME} --output-format=json"
 
         if self.additional_args:
             logger.info(f"Running macro with additional args: {self.additional_args}")
@@ -104,7 +104,7 @@ class MacroAgent(BaseAgent):
 
     def perform_task(
         self,
-        task_description: str,
+        task_prompt: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
         task_name: str | None = None,
@@ -165,7 +165,7 @@ class MacroAgent(BaseAgent):
             max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
         )
 
-        run_agent_commands = self._run_agent_commands(task_description)
+        run_agent_commands = self._run_agent_commands(task_prompt)
         for command in run_agent_commands:
             session.send_command(command)
 

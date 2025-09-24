@@ -1,11 +1,11 @@
 task_id: airbnb004
 status: ready
-title: Add a primary key to a dbt model.
+description: Add a primary key to a dbt model.
 notes: |-
   - This needs to figure out a way to check if the primary key is derived and not just a row_count or something.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Add a primary key to the fct_reviews table and update the model.
 author_name: test
 author_email: test

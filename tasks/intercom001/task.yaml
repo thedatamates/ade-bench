@@ -1,9 +1,9 @@
 task_id: intercom001
 status: ready
-title: Create a model for intercom converastion threads.
-descriptions:
+description: Create a model for intercom converastion threads.
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Create a model called intercom__threads that aggregates the conversation_parts by conversation_id. Include the following columns:
         - conversation_id
         - conversation_created_at

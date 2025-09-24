@@ -1,9 +1,9 @@
 task_id: intercom002
 status: ready
-title: Create two models for intercom threads and conversation metrics.
-descriptions:
+description: Create two models for intercom threads and conversation metrics.
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Create two models - one called intercom__threads and one called intercom__conversation_metrics. The threads model should aggregate the conversation_parts by conversation_id, and the metrics model should add additional metrics.
 
       intercom__threads should include the following columns:

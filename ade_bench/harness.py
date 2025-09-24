@@ -357,7 +357,7 @@ class Harness:
             None,
             partial(
                 agent.perform_task,
-                task_description=trial_handler.task_description,
+                task_prompt=trial_handler.task_prompt,
                 session=session,
                 logging_dir=logging_dir,
                 task_name=task_name,
@@ -502,7 +502,7 @@ class Harness:
         results = TrialResults(
             trial_name=trial_handler.trial_name,
             task_id=trial_handler.task_id,
-            task_description=trial_handler.task_description,
+            task_prompt=trial_handler.task_prompt,
         )
 
         with spin_up_terminal(
@@ -1042,7 +1042,7 @@ class Harness:
             trial_results = TrialResults(
                 trial_name=trial_name,
                 task_id=trial_handler.task_id,
-                task_description=trial_handler.task_description,
+                task_prompt=trial_handler.task_prompt,
                 failure_mode=FailureMode.UNKNOWN_AGENT_ERROR,
             )
             return trial_results

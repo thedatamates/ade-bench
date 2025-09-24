@@ -1,17 +1,17 @@
 task_id: f1007
 status: ready
-title: Fix a join issue
+description: Fix a join issue
 notes: |-
   Check to make sure this works when you fix the bug that breaks multi-version tasks. A join that should be a left join is an inner join.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Something is wrong with the staging results table, where it's missing a lot of rows. Can you figure out why, fix it, and update the table?
   - key: medium
-    description: |-
+    prompt: |-
       The driver_wins_by_season table is suddenly empty. Can you figure out why, fix it, and update the table?
   - key: hard
-    description: |-
+    prompt: |-
       A lot of stats models are showing very different values and everything things broken. Can you figure out why, fix it, and update the tables?
 author_name: test
 author_email: test

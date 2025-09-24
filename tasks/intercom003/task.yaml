@@ -1,9 +1,9 @@
 task_id: intercom003
 status: ready
-title: Create a model for intercom conversation metrics, with no instruction for intermedidate models.
-descriptions:
+description: Create a model for intercom conversation metrics, with no instruction for intermedidate models.
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Create a model called intercom__conversation_metrics that aggregates the conversation_parts by conversation_id. Include the following columns and metrics:
 
       - conversation_id

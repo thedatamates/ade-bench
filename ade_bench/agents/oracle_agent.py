@@ -53,12 +53,12 @@ class OracleAgent(BaseAgent):
             )
 
             if trial_handler.solution_path.suffix == ".sh":
-                solution_dict[trial_handler.task_description] = {
+                solution_dict[trial_handler.task_prompt] = {
                     "type": "sh",
                     "path": trial_handler.solution_path,
                 }
             else:
-                solution_dict[trial_handler.task_description] = {
+                solution_dict[trial_handler.task_prompt] = {
                     "type": "yaml",
                     "commands": TerminalCommand.from_yaml_list(
                         trial_handler.solution_path
@@ -73,12 +73,12 @@ class OracleAgent(BaseAgent):
 
     def perform_task(
         self,
-        task_description: str,
+        task_prompt: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
         task_name: str | None = None,
     ) -> AgentResult:
-        solution = self._solution_dict[task_description]
+        solution = self._solution_dict[task_prompt]
 
         if solution["type"] == "sh":
             # Copy solutions directory if it exists

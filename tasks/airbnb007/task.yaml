@@ -1,10 +1,10 @@
 task_id: airbnb007
 status: ready
-title: Create several models based on a schema.yml file.
+description: Create several models based on a schema.yml file.
 notes: |-
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Create the models described in the schema.yml file.
 author_name: test
 author_email: test

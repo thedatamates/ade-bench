@@ -1,10 +1,10 @@
 task_id: quickbooks002
 status: ready
-title: Remove dbt variable
+description: Remove dbt variable
 notes: |-
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       We are no longer using departments in our billing, so we should remove the using_department variable and all references to it. Do not remove it in the Fivetran source package.
 author_name: test
 author_email: test

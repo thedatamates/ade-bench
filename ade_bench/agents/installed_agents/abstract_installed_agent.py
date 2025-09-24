@@ -46,9 +46,9 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         ...
 
     @abstractmethod
-    def _run_agent_commands(self, task_description: str) -> list[TerminalCommand]:
+    def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
         """
-        Commands to run the agent with the given task description.
+        Commands to run the agent with the given task prompt.
         """
         pass
 
@@ -59,7 +59,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
 
     def perform_task(
         self,
-        task_description: str,
+        task_prompt: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
         task_name: str | None = None,
@@ -101,9 +101,9 @@ class AbstractInstalledAgent(BaseAgent, ABC):
             max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
         )
 
-        run_agent_commands = self._run_agent_commands(task_description)
+        run_agent_commands = self._run_agent_commands(task_prompt)
         for command in run_agent_commands:
-            log_harness_info(logger, task_name, "agent", f"Calling agent:|||{task_description.replace(chr(10), ' ').replace(chr(13), '')[:100]}")
+            log_harness_info(logger, task_name, "agent", f"Calling agent:|||{task_prompt.replace(chr(10), ' ').replace(chr(13), '')[:100]}")
             session.send_command(command)
 
         log_harness_info(logger, task_name, "agent", "Agent returned response")

@@ -71,7 +71,7 @@ class BaseAgent(ABC, metaclass=RequireNameMeta):
     @abstractmethod
     def perform_task(
         self,
-        task_description: str,
+        task_prompt: str,
         session: TmuxSession,
         logging_dir: Path | None = None,
         task_name: str | None = None,

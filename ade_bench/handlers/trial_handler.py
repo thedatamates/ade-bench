@@ -14,16 +14,16 @@ from ade_bench.harness_models import SolutionSeedConfig, VariantConfig
 from ade_bench.config import config
 
 
-class TaskDescription(BaseModel):
+class TaskPrompt(BaseModel):
     key: str = Field(
         default="base",
         description=(
             "Use this key to provide various task difficulties based on the task "
-            "description. Every task must have at least one description with the key "
+            "prompt. Every task must have at least one prompt with the key "
             "'base'."
         ),
     )
-    description: str
+    prompt: str
 
 
 class TaskDifficulty(str, Enum):
@@ -42,7 +42,7 @@ class TaskDifficulty(str, Enum):
 
 
 class Task(BaseModel):
-    descriptions: list[TaskDescription]
+    prompts: list[TaskPrompt]
 
     # Metadata
     author_name: str
@@ -104,8 +104,8 @@ class Task(BaseModel):
     )
 
     @property
-    def task_description_dict(self) -> dict[str, str]:
-        return {task.key: task.description for task in self.descriptions}
+    def task_prompt_dict(self) -> dict[str, str]:
+        return {task.key: task.prompt for task in self.prompts}
 
     def get_solution_seed_configs(self) -> list[SolutionSeedConfig]:
         """Parse solution_seeds into SolutionSeedConfig objects."""
@@ -140,8 +140,8 @@ class Task(BaseModel):
         # Convert to JSON and back to dict to ensure all values are serializable
         task_dict = json.loads(self.model_dump_json())
 
-        for desc in task_dict["descriptions"]:
-            desc["description"] = LiteralScalarString(desc["description"])
+        for prompt in task_dict["prompts"]:
+            prompt["prompt"] = LiteralScalarString(prompt["prompt"])
 
         with open(path, "w") as f:
             if canary_string is not None:
@@ -192,9 +192,9 @@ class TrialHandler:
         return self.input_path / "task.yaml"
 
     @property
-    def task_description(self) -> str:
-        if self.task_key not in self.task.task_description_dict:
-            available_keys = ", ".join(self.task.task_description_dict.keys())
+    def task_prompt(self) -> str:
+        if self.task_key not in self.task.task_prompt_dict:
+            available_keys = ", ".join(self.task.task_prompt_dict.keys())
             raise ValueError(
                 f"Task key '{self.task_key}' not found in {self._task_config_path}. "
                 f"Available keys are: {available_keys}. "
@@ -202,7 +202,7 @@ class TrialHandler:
                 "YAML file."
             )
 
-        return self.task.task_description_dict[self.task_key]
+        return self.task.task_prompt_dict[self.task_key]
 
     @property
     def docker_image_prefix(self) -> str:

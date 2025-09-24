@@ -1,9 +1,9 @@
 task_id: analytics_engineering003
 status: ready
-title: Creates a new model that modifies a staging model.
-descriptions:
+description: Creates a new model that modifies a staging model.
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Create a model called "dim_customer" that renames id to customer_id, and makes that row a unique primary key.
 author_name: test
 author_email: test

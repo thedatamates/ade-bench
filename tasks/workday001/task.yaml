@@ -1,9 +1,9 @@
 task_id: workday001
 status: open
-title: Template
-descriptions:
+description: Template
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Do some stuff.
 author_name: test
 author_email: test

@@ -1,12 +1,12 @@
 task_id: f1002
 status: ready
-title: Add new stats models based on yml config
+description: Add new stats models based on yml config
 notes: |-
   Driver names are excluded from comparisons because the results are limited to top 20, there are ties in the 20th position, and different drivers sometimes are chosen in the top 20.
   Solving this issue is in f1003
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       There are four models defined in the __stats.yml config. Create new models for each of these so that they fit the yml config.
 author_name: test
 author_email: test

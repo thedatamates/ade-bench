@@ -1,9 +1,9 @@
 task_id: airbnb001
 status: ready
-title: Fix an outdated dbt util
-descriptions:
+description: Fix an outdated dbt util
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       I got this error, please fix it, and fix it anywhere else it needs to be fixed.
 
       Compilation Error in model monthly_agg_reviews (models/agg/monthly_agg_reviews.sql)

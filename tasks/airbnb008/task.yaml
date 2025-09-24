@@ -1,10 +1,10 @@
 task_id: airbnb008
 status: ready
-title: Fix a syntax error in the schema.yml file.
+description: Fix a syntax error in the schema.yml file.
 notes: |-
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       The project is broken.
 author_name: test
 author_email: test

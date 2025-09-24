@@ -1,11 +1,11 @@
 task_id: f1003
 status: ready
-title: Add new stats models based on yml config
+description: Add new stats models based on yml config
 notes: |-
   Fixing the issue noted in f1002.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Someone noticed that the results in the "most_fastest_laps" model are inconsistent, and that model doesn't always return the same top 20 drivers. Can you figure out why this is?
 
       When you find the issue, fix it so that:

@@ -107,10 +107,10 @@ class Dataset:
         with open(yaml_path) as f:
             task_data = yaml.safe_load(f)
 
-        for description in task_data["descriptions"]:
-            task_id = self._create_task_id(task_path.name, description["key"])
+        for prompt in task_data["prompts"]:
+            task_id = self._create_task_id(task_path.name, prompt["key"])
             if task_id not in self._exclude_task_ids:
-                tasks[task_id] = (task_path, description["key"])
+                tasks[task_id] = (task_path, prompt["key"])
 
         return tasks
 

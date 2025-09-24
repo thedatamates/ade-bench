@@ -1,11 +1,11 @@
 task_id: airbnb006
 status: ready
-title: Update misnamed CTEs.
+description: Update misnamed CTEs.
 notes: |-
   Need to include fct_reviews in the solution seeds, but it's too big.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Update the CTEs in the models to be named correctly.
 author_name: test
 author_email: test

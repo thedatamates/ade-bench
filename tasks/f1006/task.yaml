@@ -1,14 +1,14 @@
 task_id: f1006
 status: ready
-title: Fix a calculation error that requires a semantic understanding of data, with no example of correction.
+description: Fix a calculation error that requires a semantic understanding of data, with no example of correction.
 notes: |-
   This task changes both driver_points andconstructor_points.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Someone noticed that the "points" columns in constructor_points.sql and driver_points.sql look way too high. Can you figure out what's wrong, fix it, and update the table?
   - key: hard
-    description: |-
+    prompt: |-
       Someone noticed that the results in constructor_points.sql and driver_points.sql look wrong. Can you figure out what's wrong, fix it, and update the table?
 author_name: test
 author_email: test

@@ -1,10 +1,10 @@
 task_id: f1008
 status: dev
-title: Create new stats models
+description: Create new stats models
 notes: |-
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       Add the constructor models
 author_name: test
 author_email: test

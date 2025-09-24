@@ -1,11 +1,11 @@
 task_id: asana003
 status: ready
-title: Fix our data to match new Fivetran package.
+description: Fix our data to match new Fivetran package.
 notes: |-
   This is from a mismatch in the Fivetran Asana package, where the underlying data no longer matches the current package.
-descriptions:
+prompts:
   - key: base
-    description: |-
+    prompt: |-
       This project is erroring because Fivetran updated their Asana package. Please modify our data to match this new package.
 author_name: test
 author_email: test
