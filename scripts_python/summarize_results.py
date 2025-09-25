@@ -207,6 +207,6 @@ def display_detailed_results(results: BenchmarkResults) -> None:
     """Display a detailed summary table of benchmark results."""
     summary = summarize_results(results)
     table_data = format_summary_table(summary)
-    print(f"\n{'==' * 40} RESULTS SUMMARY {'==' * 40}\n")
+    print(f"\n{'=' * 40} RESULTS SUMMARY {'=' * 40}\n")
     print(tabulate(table_data, headers=summary['headers'], tablefmt="psql"))
     print(f"\nFor more details, run the command below:\nuv run scripts_python/view_results.py")
