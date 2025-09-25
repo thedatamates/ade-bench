@@ -244,6 +244,22 @@ where deleted is null
 
 order by object_type, drop_statement;
 ```
+### Agents
+
+ADE-bench currently supports the following agents:
+
+- Claude Code
+
+#### Claude code
+
+When a task is run with Claude Code, the following command runs in the repo:
+
+```
+claude --output-format json -p [ task prompt ] \
+  --allowedTools Bash Edit Write NotebookEdit WebFetch
+```
+
+Additionally, a `CLAUDE.md` file is provided to Claude Code. That file can be found in the `/shared/config` directory.
 
 ### How trials are evaluated
 

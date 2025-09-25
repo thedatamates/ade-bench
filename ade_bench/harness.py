@@ -1024,6 +1024,7 @@ class Harness:
             output_path=self._run_path,
             task_key=task_key,
             variant_config=config,
+            agent_name=self._agent_name,
         )
 
         try:

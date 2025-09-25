@@ -44,8 +44,9 @@ def log_harness_info(
         "Setting up dbt project...": "* · ·  ",
         "Running migrations...": "* · ·  ",
         "Migration script complete": "* · ·  ",
-        "Running setup script": "* · ·  ",
-        "Setup script complete": "* · ·  ",
+        "Running setup script...": "* · ·  ",
+        "Setup script complete.": "* · ·  ",
+        "Migrating agent config files...": "* · ·  ",
         "Diffing the setup changes...": "* · ·  ",
         "Captured setup diffs:": "✓ · ·  ",
 

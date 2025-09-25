@@ -8,6 +8,7 @@ from .duckdb_setup import setup_duckdb
 from .snowflake_setup import setup_snowflake
 from .dbt_setup import setup_dbt_project
 from .migration_setup import setup_migration
+from .agent_setup import setup_agent_config
 from ..utils.logger import log_harness_info
 
 
@@ -33,6 +34,11 @@ class SetupOrchestrator:
             setup_dbt_project(self.terminal, self.session, task_id, variant, self.trial_handler)
 
 
+        # Setup agent-specific configuration files
+        # Logging is in the setup_agent_config function
+        setup_agent_config(self.terminal, task_id, self.trial_handler, self.logger)
+
+
         # Set up the database
         db_type = variant.get('db_type')
         if db_type == 'duckdb':
@@ -56,15 +62,16 @@ class SetupOrchestrator:
         log_harness_info(self.logger, task_id, "setup", "Migration script complete")
 
 
-        # 4. Run main setup script.
-        log_harness_info(self.logger, task_id, "setup", "Running setup script")
+        # Run main setup script.
+        log_harness_info(self.logger, task_id, "setup", "Running setup script...")
         setup_base_files(self.terminal, self.session, task_id, variant, self.trial_handler)
-        log_harness_info(self.logger, task_id, "setup", "Setup script complete")
+        log_harness_info(self.logger, task_id, "setup", "Setup script complete.")
 
 
         # Take final snapshot after setup script
         if self.file_diff_handler:
             # Logging is contained in snapshot
             self.file_diff_handler.handle_phase_diffing(self.terminal.container, "setup", task_id, self.logger)
+
 
         return True

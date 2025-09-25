@@ -160,12 +160,14 @@ class TrialHandler:
         output_path: Path | None = None,
         task_key: str = "base",
         variant_config: dict | None = None,
+        agent_name = None,
     ):
         self.trial_name = trial_name
         self.input_path = input_path
         self.output_path = output_path
         self.task_key = task_key
         self.variant_config = variant_config or {}
+        self.agent_name = agent_name
 
         self._logger = logger.getChild(__name__)
         self.task = Task.from_yaml(self._task_config_path)
@@ -385,6 +387,11 @@ class TrialHandler:
     def shared_migrations_path(self) -> Path:
         """Path to the shared migrations directory."""
         return self._shared_path / "migrations"
+
+    @property
+    def shared_config_path(self) -> Path:
+        """Path to the shared config directory."""
+        return self._shared_path / "config"
 
     def get_duckdb_file_path(self, db_name: str) -> Path:
         """Get the path to a specific DuckDB database file."""
