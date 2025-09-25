@@ -15,5 +15,5 @@ seeds:
         last_contact_reply_at: timestamp
         last_admin_response_at: timestamp
         last_reopen_at: timestamp
-        total_assignments: hugeint
-        total_reopens: hugeint
+        total_assignments: bigint
+        total_reopens: bigint

@@ -15,15 +15,15 @@ seeds:
         last_contact_reply_at: timestamp
         last_admin_response_at: timestamp
         last_reopen_at: timestamp
-        total_assignments: hugeint
-        total_reopens: hugeint
+        total_assignments: bigint
+        total_reopens: bigint
     solution__intercom__conversation_metrics:
       +column_types:
         conversation_id: integer
         conversation_created_at: timestamp
-        total_reopens: hugeint
+        total_reopens: bigint
         total_conversation_parts: bigint
-        total_assignments: hugeint
+        total_assignments: bigint
         first_contact_reply_at: timestamp
         first_assignment_at: timestamp
         first_admin_response_at: timestamp

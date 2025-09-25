@@ -364,7 +364,7 @@ seeds:
         due_date: date
         initial_payment_date: date
         recent_payment_date: date
-        total_current_payment: hugeint
+        total_current_payment: bigint
     solution__int_quickbooks__bill_double_entry:
       +column_types:
         transaction_id: varchar
