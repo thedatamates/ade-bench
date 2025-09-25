@@ -7,7 +7,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     """Generate a JSON summary of benchmark results."""
     table_data = []
     headers = ["Task", "Result", "Tests", "Passed", "Passed %", "Time (s)", "Cost", "Input Tokens", "Output Tokens", "Cache Tokens", "Turns"]
-    
+
     total_tests = 0
     total_tests_passed = 0
     total_runtime = 0
@@ -17,7 +17,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     total_cache_tokens = 0
     total_turns = 0
     resolved_count = 0
-    
+
     for result in sorted(results.results, key=lambda x: x.task_id):
         # Calculate test statistics
         if result.parser_results:
@@ -28,7 +28,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
             tests = 0
             tests_passed = 0
             passed_percentage = 0
-        
+
         # Accumulate totals
         total_tests += tests
         total_tests_passed += tests_passed
@@ -40,7 +40,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
         total_turns += result.num_turns or 0
         if result.is_resolved:
             resolved_count += 1
-        
+
         # Format values
         result_status = "p" if result.is_resolved else "FAIL"
         runtime_seconds = (result.runtime_ms / 1000) if result.runtime_ms else 0
@@ -50,10 +50,10 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
         output_tokens_str = f"{result.output_tokens:,}" if result.output_tokens else "0"
         cache_tokens_str = f"{result.cache_tokens:,}" if result.cache_tokens else "0"
         turns_str = f"{result.num_turns:,}" if result.num_turns else "0"
-        
+
         # Format percentage - show nothing if 100%
         percentage_str = "" if passed_percentage == 100.0 else f"{passed_percentage:.0f}%"
-        
+
         table_data.append({
             'task_id': result.task_id,
             'result': result_status,
@@ -78,12 +78,12 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
             '_turns': result.num_turns or 0,
             '_is_resolved': result.is_resolved
         })
-    
+
     # Calculate totals
     total_passed_percentage = (total_tests_passed / total_tests * 100) if total_tests > 0 else 0
     overall_accuracy = (resolved_count / len(results.results) * 100) if results.results else 0
     total_runtime_seconds = total_runtime / 1000
-    
+
     total_row = {
         'task_id': f"TOTAL (n={len(results.results)})",
         'result': f"{overall_accuracy:.0f}%",
@@ -98,7 +98,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
         'cache_tokens': f"{total_cache_tokens:,}",
         'turns': f"{total_turns:,}"
     }
-    
+
     return {
         'headers': headers,
         'tasks': table_data,
@@ -109,7 +109,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
 def format_summary_table(summary: Dict[str, Any]) -> List[List[str]]:
     """Format the summary data into a table format for display."""
     table_data = []
-    
+
     # Add task rows
     for task in summary['tasks']:
         table_data.append([
@@ -125,10 +125,10 @@ def format_summary_table(summary: Dict[str, Any]) -> List[List[str]]:
             task['cache_tokens'],
             task['turns']
         ])
-    
+
     # Add blank row as divider
     table_data.append([""] * len(summary['headers']))
-    
+
     # Add total row
     total_row = summary['total_row']
     table_data.append([
@@ -144,18 +144,18 @@ def format_summary_table(summary: Dict[str, Any]) -> List[List[str]]:
         total_row['cache_tokens'],
         total_row['turns']
     ])
-    
+
     return table_data
 
 
 def generate_html_table(results: BenchmarkResults) -> str:
     """Generate an HTML table of benchmark results with action links."""
     summary = summarize_results(results)
-    
+
     # Generate table with unique placeholders for action links
     headers = summary['headers'] + ['Actions']
     table_data = []
-    
+
     # Add task rows with unique placeholders
     for i, task in enumerate(summary['tasks']):
         row = [
@@ -173,7 +173,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
             f"__ACTION_LINKS_{i}__"  # Unique placeholder
         ]
         table_data.append(row)
-    
+
     # Add total row
     total_row = summary['total_row']
     total_row_data = [
@@ -191,15 +191,15 @@ def generate_html_table(results: BenchmarkResults) -> str:
         ""  # No action links for total row
     ]
     table_data.append(total_row_data)
-    
+
     # Generate the base table
     html_table = tabulate(table_data, headers=headers, tablefmt="html")
-    
+
     # Now replace the placeholders with actual action links
     for i, task in enumerate(summary['tasks']):
         action_links = f'<div class="links"><a href="{task["task_id"]}/results.html" class="link results">Results</a> <a href="{task["task_id"]}/panes.html" class="link panes">Panes</a> <a href="{task["task_id"]}/diffs.html" class="link diffs">Diffs</a></div>'
         html_table = html_table.replace(f"__ACTION_LINKS_{i}__", action_links)
-    
+
     return html_table
 
 
@@ -207,7 +207,6 @@ def display_detailed_results(results: BenchmarkResults) -> None:
     """Display a detailed summary table of benchmark results."""
     summary = summarize_results(results)
     table_data = format_summary_table(summary)
-    print("\n" + tabulate(table_data, headers=summary['headers'], tablefmt="psql"))
-
-def display_all_results(results: BenchmarkResults) -> None:
-    display_detailed_results(results)
+    print(f"\n{'==' * 40} RESULTS SUMMARY {'==' * 40}\n")
+    print(tabulate(table_data, headers=summary['headers'], tablefmt="psql"))
+    print(f"\nFor more details, run the command below:\nuv run scripts_python/view_results.py")

@@ -15,7 +15,7 @@ from tenacity import RetryError
 from ade_bench.agents.agent_factory import AgentFactory
 from ade_bench.agents.agent_name import AgentName
 from ade_bench.agents.base_agent import AgentResult, BaseAgent
-from ade_bench.config import config as terminal_bench_config
+from ade_bench.config import config as ade_bench_config
 from ade_bench.handlers.asciinema_handler import AsciinemaHandler
 from ade_bench.handlers.file_diff_handler import FileDiffHandler, FileSnapshot
 from ade_bench.handlers.trial_handler import TrialHandler
@@ -32,7 +32,7 @@ from ade_bench.terminal.docker_compose_manager import DockerComposeManager
 from ade_bench.terminal.terminal import Terminal, spin_up_terminal
 from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.dataset import Dataset
-from ade_bench.utils.logger import logger, log_harness_info
+from ade_bench.utils.logger import logger, log_harness_info, rich_logger, initialize_dynamic_logging
 from ade_bench.utils.test_generator import generate_solution_tests
 from ade_bench.utils.timeout_manager import TimeoutManager
 from ade_bench.utils.debug_breakpoint import breakpoint, DebugBreakpointException
@@ -116,7 +116,7 @@ class Harness:
         self._log_level = log_level
         self._max_episodes = max_episodes
         self._upload_results = upload_results
-        self._s3_bucket = terminal_bench_config.s3_bucket_name
+        self._s3_bucket = ade_bench_config.s3_bucket_name
         self._n_concurrent_trials = n_concurrent_trials
         self._n_attempts = n_attempts
 
@@ -537,7 +537,7 @@ class Harness:
                 exclude_paths = (
                     trial_handler.task.file_diff_exclude_paths
                     if trial_handler.task.file_diff_exclude_paths is not None
-                    else terminal_bench_config.file_diff_exclude_paths
+                    else ade_bench_config.file_diff_exclude_paths
                 )
 
                 file_diff_handler = FileDiffHandler(
@@ -926,7 +926,7 @@ class Harness:
 
         try:
             s3_client = boto3.client("s3")
-            log_harness_info(self._logger, "harness", "upload", f"Uploading run results to S3 bucket: {self._s3_bucket}")
+            log_harness_info(self._logger, "system", "upload", f"Uploading run results to S3 bucket: {self._s3_bucket}")
 
             failed_uploads = []
 
@@ -948,7 +948,7 @@ class Harness:
             if not failed_uploads:
                 log_harness_info(
                     self._logger,
-                    "HARNESS",
+                    "system",
                     "upload",
                     f"Successfully uploaded all {len(files_to_upload)} files to "
                     f"s3://{self._s3_bucket}/{self._run_id}/"
@@ -1065,6 +1065,7 @@ class Harness:
         # Get tasks that have matching database and project type
         all_tasks = self._dataset
         matching_tasks = []
+        task_ids = []
 
         for task_path, task_key in all_tasks:
             trial_handler = TrialHandler(
@@ -1083,15 +1084,20 @@ class Harness:
 
             if matching_config:
                 matching_tasks.append((task_path, task_key, matching_config))
+                task_ids.append(trial_handler.task_id)
 
         # Log filtering summary
         total_tasks = len(self._dataset)
         matching_count = len(matching_tasks)
-        log_harness_info(self._logger, "HARNESS", "start", f"Running with {self._db_filter} + {self._project_type_filter}. Found {matching_count} tasks of {total_tasks} requested tasks.")
+        log_harness_info(self._logger, "system", "start", f"Running with {self._db_filter} + {self._project_type_filter}. Found {matching_count} tasks of {total_tasks} requested tasks.")
 
         if not matching_tasks:
             self._logger.warning("No tasks have matching database and project type configurations")
             return results
+
+        # Initialize dynamic logging with task IDs (only if dynamic logging is enabled)
+        if ade_bench_config.use_dynamic_logging:
+            initialize_dynamic_logging(task_ids)
 
         # Calculate total number of tasks (matching tasks * attempts)
         total_tasks = len(matching_tasks) * self._n_attempts
@@ -1127,8 +1133,8 @@ class Harness:
                 percentage = (successful_tasks / completed_tasks * 100) if completed_tasks > 0 else 0
                 log_harness_info(
                     self._logger,
-                    "HARNESS",
-                    "progress",
+                    "SUMMARY",
+                    "",
                     f"Run {completed_tasks} of {total_tasks} tasks, {successful_tasks} successful ({percentage:.1f}%)"
                 )
 
@@ -1140,8 +1146,8 @@ class Harness:
         Returns:
             BenchmarkResults: The results of the harness run.
         """
-        log_harness_info(logger, "HARNESS", "start", "STARTING HARNESS RUN")
-        log_harness_info(logger, "HARNESS", "start", f"Run ID: {self._run_id}")
+        log_harness_info(logger, "system", "start", "STARTING HARNESS RUN")
+        log_harness_info(logger, "system", "start", f"Run ID: {self._run_id}")
 
         self._write_run_metadata()
 
@@ -1149,22 +1155,26 @@ class Harness:
 
         self._update_metadata_on_end(results=results)
 
+        # Stop the Rich logger (only if dynamic logging is enabled)
+        if ade_bench_config.use_dynamic_logging:
+            rich_logger.stop()
+
         # Generate HTML results dashboard
         if not self._disable_diffs:
             try:
                 from scripts_python.generate_results_html import ResultsHTMLGenerator
                 generator = ResultsHTMLGenerator(self._run_path)
                 generator.generate_all()
-                log_harness_info(self._logger, "HARNESS", "finish", "Generated HTML dashboard.")
+                log_harness_info(self._logger, "system", "finish", "Generated HTML dashboard.")
             except Exception as e:
-                log_harness_info(self._logger, "HARNESS", "finish", "Failed to generate HTML dashboard.")
+                log_harness_info(self._logger, "system", "finish", "Failed to generate HTML dashboard.")
 
         # Log harness completion
         successful_tasks = sum(1 for result in results.results if result.is_resolved)
         total_tasks = len(results.results)
         log_harness_info(
             self._logger,
-            "HARNESS",
+            "system",
             "finish",
             f"Harness run completed: {successful_tasks} of {total_tasks} tasks successful"
         )

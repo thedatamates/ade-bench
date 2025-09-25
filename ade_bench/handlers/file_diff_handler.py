@@ -403,7 +403,7 @@ class FileDiffHandler:
                 self.snapshots[-1]
             )
             if diff:
-                diff_summary = f"Captured {phase} diffs:|||{len(diff.added_files)} added, {len(diff.removed_files)} removed, {len(diff.modified_files)} modified files"
+                diff_summary = f"Captured {phase} diffs: {len(diff.added_files)} added, {len(diff.removed_files)} removed, {len(diff.modified_files)} modified files"
                 log_harness_info(self._logger, self.task_name, phase, diff_summary)
 
                 # Save detailed diff info to trial log

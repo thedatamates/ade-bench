@@ -43,11 +43,16 @@ class DbtParser(BaseParser):
             # TOTAL is now group 6 (was group 5) due to optional NO-OP field
             total_count = int(summary_match.group(6))
 
-            log_harness_info(self._logger, self._task_name, "eval", f"dbt test summary:|||PASS: {pass_count}, ERROR: {error_count}, TOTAL: {total_count}")
+            if error_count > 0:
+                status = "FAILED"
+            else:
+                status = "PASSED"
+
+            log_harness_info(self._logger, self._task_name, "done", f"{status} — dbt tests: Pass-{pass_count}, Error-{error_count}, Total-{total_count}")
 
             # Verify we parsed the correct number of tests
             if len(results) - 1 != total_count:  # -1 for compile test
-                log_harness_info(self._logger, self._task_name, "eval", f"Mismatch: parsed {len(results) - 1} tests but summary shows {total_count} total")
+                log_harness_info(self._logger, self._task_name, "done", f"Mismatch: parsed {len(results) - 1} tests but summary shows {total_count} total")
 
         if not results:
             raise ValueError("No test results found in the provided content.")

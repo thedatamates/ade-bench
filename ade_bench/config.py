@@ -80,5 +80,11 @@ class Config:
             return [path.strip() for path in exclude_paths_str.split(",") if path.strip()]
         return []
 
+    # Logging Settings
+    @property
+    def use_dynamic_logging(self):
+        """Whether to use dynamic Rich table logging instead of traditional print statements."""
+        return self.get_setting("use_dynamic_logging", "true").lower() in ("true", "1", "yes", "on")
+
 
 config = Config()

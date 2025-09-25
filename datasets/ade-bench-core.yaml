@@ -25,16 +25,16 @@ task_ids:
   # - asana003
   # - asana004
   # - asana005
-  # - f1001
-  # - f1002
-  # - f1003
-  # - f1004
-  # - f1005
-  # - f1006
-  # - f1007
-  - intercom001
-  - intercom002
-  - intercom003
+  - f1001
+  - f1002
+  - f1003
+  - f1004
+  - f1005
+  - f1006
+  - f1007
+  # - intercom001
+  # - intercom002
+  # - intercom003
   # - quickbooks001
   # - quickbooks002
   # - quickbooks003

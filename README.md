@@ -476,6 +476,7 @@ DOCKER_DEFAULT_PLATFORM=linux/amd64
 
 # Logging
 # This stuff is for nerds.
+USE_DYNAMIC_LOGGING=TRUE # Set to FALSE if you want normal logs and not a fancy table.
 FILE_DIFF_EXCLUDE_PATHS=/tmp,/logs,/var,/target,/build,/node_modules
 LOG_LEVEL=INFO
 ```
