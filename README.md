@@ -154,7 +154,7 @@ We skimmed over lots of details in the section above. This next section explains
 
 ### How dbt projects work
 
-When creating a dbt project, include the `profile.yml` and `dbt_project.yml` file in the root directory of the project. In `profile.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
+**ADE-bench currently supports `dbt` and `dbt-fusion`[^2] projects.** When creating a dbt project, include the `profile.yml` and `dbt_project.yml` file in the root directory of the project. In `profile.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
 
 ```yaml
 foo-duckdb:
@@ -319,7 +319,7 @@ In other words, the oracle agent is the answer key to the task. When ADE-bench i
 
 Many tasks have `solution_seeds` defined in their `task.yaml` file. These are tables that are used to evaluate the agent's work.
 
-**You can generate these seeds by running ADE-bench with the `--seed flag`.** When you do this, the harness runs as it normally would,[^2] except, once trial is over, it exports two things into the task directory:
+**You can generate these seeds by running ADE-bench with the `--seed flag`.** When you do this, the harness runs as it normally would,[^3] except, once trial is over, it exports two things into the task directory:
 
 - **CSVs:** Each table defined in as solution seed will get exported into the task's `\seeds` directory as `solution__[table_name].csv`.
 - **A seed config:** To ensure that the `dbt seed` command runs during the evaluation, ADE-bench will also create a schema file called `_no-op.txt`. This is utility file that is used when tables are uploaded. (Note that some shenanigans are necessary here to support cross-database compatibility. For example, DuckDB has a `hugeint` data type, whereas Snowflake does not. Why does the small database need huge integers?)
@@ -574,4 +574,10 @@ $ ade-config
 
 [^1] ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.
 
-[^2] A somewhat annoying thing about this: When you run ADE-bench with the `--seed` flag, it will evaluate each trial with whatever CSVs exist in the `/seeds` directory _before_ the new ones are created, and then, _after the tests have run_, it will export the results into the directory. This means that you may need to run it twice to check that task works: Once to create the seeds, and another time (without the `--seed` flag) to see if it passes.
+[^2] Well, sort of. There is a Dockerfile that supports running dbt Fusion, and you can set a task's project type to `dbt-fusion`. The task will run, but it won't work, because dbt Fusion is very particular about things, in a way that causes problems for how the harness is set up. There are three primary issues:
+
+1. It will not run if there are references to models that don't exist. Since the point of ADE-bench is to see if an agent can create these models—and in come cases they won't, and they won't be there—that's an issue.
+2. It finds type matching errors prior to running, even if those errors don't cause problems when you run the queries. So, there's some stuff to iron over there.
+3. To run `dbt seed`, ADE-bench appends the `_no-op.txt` file to the end of the dbt project file. This sometimes creates a duplicate `seed` key in the yaml file. dbt Core is cool with this; dbt Fusion, not so much.
+
+[^3] A somewhat annoying thing about this: When you run ADE-bench with the `--seed` flag, it will evaluate each trial with whatever CSVs exist in the `/seeds` directory _before_ the new ones are created, and then, _after the tests have run_, it will export the results into the directory. This means that you may need to run it twice to check that task works: Once to create the seeds, and another time (without the `--seed` flag) to see if it passes.

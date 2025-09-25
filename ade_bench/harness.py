@@ -771,7 +771,7 @@ class Harness:
             log_harness_info(self._logger, trial_handler.task_id, "seed", f"No valid tables to extract")
             return
 
-        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables:|||{tables_to_extract}")
+        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Extracting tables: {tables_to_extract}")
 
         # Get the current running variant information directly from the trial handler
         variant_db_type = trial_handler.variant_config.get('db_type', '')
@@ -780,7 +780,7 @@ class Harness:
         if variant_db_type == 'duckdb':
             self._extract_duckdb_csv(terminal, trial_handler, variant_db_name, tables_to_extract, task_config)
         else:
-            log_harness_info(self._logger, trial_handler.task_id, "seed", f"CSV extraction not supported for db_type:|||{variant_db_type}")
+            log_harness_info(self._logger, trial_handler.task_id, "seed", f"CSV extraction not supported for db_type: {variant_db_type}")
 
     def _extract_duckdb_csv(self, terminal: Terminal, trial_handler: TrialHandler, db_name: str, tables_to_extract: list, task_config: dict) -> None:
         """Extract CSV files from DuckDB database."""
@@ -827,7 +827,7 @@ class Harness:
                         csv_path = task_seeds_dir / f"solution__{table_name}.csv"
                         copy_query = f"COPY {table_name} TO '{csv_path}' (HEADER, DELIMITER ',');"
                         con.execute(copy_query)
-                        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Exported|||{table_name} to {csv_path}")
+                        log_harness_info(self._logger, trial_handler.task_id, "seed", f"Exported {table_name} to {csv_path}")
                     except Exception as e:
                         self._logger.error(f"Failed to export table {table_name}: {e}")
 
@@ -866,7 +866,7 @@ class Harness:
                         f.write('\n\n')  # Add two blank lines at the start
                         yaml.dump(seeds_content, f, default_flow_style=False, sort_keys=False)
 
-                    log_harness_info(self._logger, trial_handler.task_id, "seed", f"Generated _no-op.txt file:|||{no_op_path}")
+                    log_harness_info(self._logger, trial_handler.task_id, "seed", f"Generated _no-op.txt file: {no_op_path}")
 
                 con.close()
 

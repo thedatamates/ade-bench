@@ -391,9 +391,19 @@ class FileDiffHandler:
             return
 
         # Capture snapshot
-        log_harness_info(self._logger, self.task_name, phase, f"Capturing snapshot...")
+        snapshot_count = self.get_snapshot_count()
+        if snapshot_count == 0:
+            snapshot_type = "initial snapshot"
+        elif snapshot_count == 1:
+            snapshot_type = "snapshot after migration and setup scripts"
+        elif snapshot_count == 2:
+            snapshot_type = "snapshot of agent output"
+        else:
+            snapshot_type = "snapshot"
+
+        log_harness_info(self._logger, self.task_name, phase, f"Capturing {snapshot_type}...")
         snapshot = self.capture_snapshot(container)
-        log_harness_info(self._logger, self.task_name, phase, f"Captured snapshot.")
+        log_harness_info(self._logger, self.task_name, phase, f"Captured {snapshot_type}.")
 
         if snapshot and self.get_snapshot_count() >= 2:
             # Create diff with previous snapshot
