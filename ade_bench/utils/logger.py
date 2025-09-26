@@ -189,7 +189,7 @@ def format_log_line(log_data: dict) -> str:
     return f"{log_data['formatted_timestamp']:<8} | {log_data['task']:<32} | {log_data['formatted_stage']:<12} | {log_data['formatted_message']}"
 
 
-def log_harness_info(
+def log(
     logger: logging.Logger,
     task: str,
     stage: str,
@@ -251,6 +251,22 @@ def log_harness_info(
     else:
         # Rich logs off - print log line to console
         print(log_line, flush=True)
+
+
+def log_harness_info(
+    logger: logging.Logger,
+    task: str,
+    stage: str,
+    message: str,
+    timestamp: Optional[datetime] = None
+) -> None:
+
+    try:
+        log(logger, task, stage, message, timestamp)
+    except Exception as e:
+        # Fallback to simple print if logging fails
+        print(f"Logging error: {e}", flush=True)
+        print(f"Original message: {task} | {stage} | {message}", flush=True)
 
 
 def initialize_dynamic_logging(task_ids: list[str]) -> None:
