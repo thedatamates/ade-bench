@@ -48,7 +48,10 @@ class DbtParser(BaseParser):
             else:
                 status = "PASSED"
 
-            log_harness_info(self._logger, self._task_name, "done", f"{status} — dbt tests: Pass-{pass_count}, Error-{error_count}, Total-{total_count}")
+            def _z(int) -> str:
+                return f"{int:2d}"
+
+            log_harness_info(self._logger, self._task_name, "done", f"{status} — dbt test results — Pass: {_z(pass_count)}, Error: {_z(error_count)}, Total: {_z(total_count)}")
 
             # Verify we parsed the correct number of tests
             if len(results) - 1 != total_count:  # -1 for compile test
