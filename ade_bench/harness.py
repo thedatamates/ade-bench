@@ -27,7 +27,7 @@ from ade_bench.harness_models import (
 )
 from ade_bench.setup.setup_orchestrator import SetupOrchestrator
 from ade_bench.llms.base_llm import ContextLengthExceededError, ParseError
-from ade_bench.parsers.base_parser import UnitTestStatus
+from ade_bench.parsers.base_parser import UnitTestStatus, ParserResult
 from ade_bench.terminal.docker_compose_manager import DockerComposeManager
 from ade_bench.terminal.terminal import Terminal, spin_up_terminal
 from ade_bench.terminal.tmux_session import TmuxSession
@@ -332,9 +332,17 @@ class Harness:
         self,
         trial_handler: TrialHandler,
         post_agent_pane: str,
-    ) -> tuple[dict[str, UnitTestStatus] | None, FailureMode]:
+    ) -> tuple[ParserResult | None, FailureMode]:
         try:
-            return trial_handler.parser.parse(post_agent_pane), FailureMode.NONE
+            parser_result = trial_handler.parser.parse(post_agent_pane)
+
+            # Log the status message if it exists
+            if parser_result.status_message:
+                log_harness_info(self._logger, trial_handler.task_id, "done", parser_result.status_message)
+            else:
+                log_harness_info(self._logger, trial_handler.task_id, "done", "No status message found.")
+
+            return parser_result, FailureMode.NONE
         except Exception as e:
             self._logger.error(
                 f"Error parsing results for task {trial_handler.task_id}: {e}. It's "
@@ -694,7 +702,7 @@ class Harness:
                 results.failure_mode = test_failure_mode
                 return results
 
-        parser_results, parse_failure_mode = self._parse_results(
+        parser_result, parse_failure_mode = self._parse_results(
             trial_handler=trial_handler,
             post_agent_pane=post_agent_pane,
         )
@@ -703,8 +711,8 @@ class Harness:
             results.failure_mode = parse_failure_mode
             return results
 
-        results.parser_results = parser_results
-        results.is_resolved = self._is_resolved(parser_results)
+        results.parser_results = parser_result.test_results
+        results.is_resolved = self._is_resolved(parser_result.test_results)
 
         if results.is_resolved:
             self._logger.debug(f"Resolved task {trial_handler.task_id}")
