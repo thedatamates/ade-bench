@@ -37,4 +37,9 @@ class ParserFactory:
                 f"Available parsers: {ParserFactory.PARSER_NAME_TO_CLASS.keys()}"
             )
 
+        # For DbtParser, pass the parser type based on the parser name
+        if parser_class == DbtParser:
+            parser_type = parser_name.value  # "dbt" or "dbt-fusion"
+            return parser_class(parser_type=parser_type, **kwargs)
+
         return parser_class(**kwargs)
