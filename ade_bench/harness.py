@@ -272,18 +272,18 @@ class Harness:
             # Log that test script is starting to run
             log_harness_info(self._logger, trial_handler.task_id, "eval", "Executing test script")
 
-            session.send_keys(
-                [
-                    "bash ",
-                    str(
-                        DockerComposeManager.CONTAINER_TEST_DIR
-                        / trial_handler.run_tests_path.name
-                    ),
-                    "Enter",
-                ],
-                block=True,
-                max_timeout_sec=timeouts.test_execution,
-            )
+            # Build command with optional parameters
+            command = f"bash {DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name}"
+
+            db_type = trial_handler.variant_config.get('db_type')
+            project_type = trial_handler.variant_config.get('project_type')
+
+            if db_type:
+                command += f" --db-type={db_type}"
+            if project_type:
+                command += f" --project-type={project_type}"
+
+            session.send_keys([command, "Enter"], block=True, max_timeout_sec=timeouts.test_execution)
 
         except TimeoutError:
             self._logger.warning(

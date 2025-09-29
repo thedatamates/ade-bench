@@ -29,6 +29,15 @@ def setup_base_files(terminal, session, task_id: str, variant: Dict[str, Any], t
 
     # Run setup script and remove it
     if setup_script_path.exists():
-        session.send_keys([f"bash {DockerComposeManager.CONTAINER_APP_DIR}/setup.sh", "Enter"], block=True)
+        # Build command with optional parameters
+        command = f"bash {DockerComposeManager.CONTAINER_APP_DIR}/setup.sh"
+        db_type = variant.get("db_type")
+        project_type = variant.get("project_type")
+        if db_type:
+            command += f" --db-type={db_type}"
+        if project_type:
+            command += f" --project-type={project_type}"
+
+        session.send_keys([command, "Enter"], block=True)
         session.container.exec_run(["rm", f"{DockerComposeManager.CONTAINER_APP_DIR}/setup.sh"])
         session.container.exec_run(["rm", "-rf", str(DockerComposeManager.CONTAINER_SETUP_DIR)])

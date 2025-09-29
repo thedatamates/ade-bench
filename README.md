@@ -271,6 +271,14 @@ More specifically, when the agent completes its work, several things happen:
 2. The existing test directory in the sandbox is replaced with the tests in the `\tests` directory of the task folder. If a task has no solution seeds, then it will only have manual tests; if a task has solution seeds, ADE-bench will automatically generate two tests (by default, `AUTO_{table_name}_equality.sql` and `AUTO_{table_name}_existence.sql`) and copy those. **Note:** ADE-bench automatically removes and regenerates all `AUTO_` tests prior to evaluating each trial, so if you update these files directly, your changes will probably get wiped away.
 3. The tests in that directory are run and the results are recorded. If all of them pass, the task passes. If any fail, the task fails.
 
+**Project and DB specific tests:** Tests can be designated for specific environments using comment headers:
+```sql
+-- db: duckdb          # Only runs for DuckDB
+-- db: snowflake duckdb # Runs for both Snowflake and DuckDB
+-- project-type: dbt   # Only runs for dbt projects
+```
+Tests without environment specification run on all environments.
+
 #### Approximate equality tests
 
 Here's a thing: Sometimes databases give slightly different results. (For reasons, `select round(23/40,2)` is 58 in Snowflake, and 57 in DuckDB. Computers, man.) Or, the agent could write a query that returns a number rounded to a different number of decimals, and you want to be tolerant to that. Though there currently isn't a way to automatically create a test like this, `airbnb007` includes examples of `_with_tolerance` tests. This test will:
