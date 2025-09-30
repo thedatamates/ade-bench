@@ -68,7 +68,7 @@ class Task(BaseModel):
         description="Maximum timeout in seconds for each individual test"
     )
     test_scripts: list[str] = Field(
-        default=["setup-dbt-test.sh", "run-dbt-test.sh", "seed-schema.sh"],
+        default=["setup-dbt-test.sh", "run-dbt-test.sh", "seed-schema.sh", "merge_yaml.py"],
         description="List of test scripts to use for the task",
     )
     run_tests_in_same_shell: bool = Field(

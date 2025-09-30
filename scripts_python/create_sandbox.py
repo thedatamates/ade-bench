@@ -210,10 +210,21 @@ def copy_migration_files(variant):
 
 def copy_shared_scripts():
     """Copy shared scripts to sandbox."""
-    script_path = Path("shared/scripts/seed-schema.sh")
     sandbox_dir = Path("dev/sandbox")
 
-    return copy_item(script_path, sandbox_dir, "seed-schema.sh script")
+    # Copy both seed-schema.sh and merge_yaml.py
+    seed_schema_success = copy_item(
+        Path("shared/scripts/seed-schema.sh"),
+        sandbox_dir,
+        "seed-schema.sh script"
+    )
+    merge_yaml_success = copy_item(
+        Path("shared/scripts/merge_yaml.py"),
+        sandbox_dir,
+        "merge_yaml.py script"
+    )
+
+    return seed_schema_success and merge_yaml_success
 
 
 def update_dbt_config(variant, task_name):

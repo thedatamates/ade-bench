@@ -3,7 +3,7 @@ version: 2
 models:
   - name: daily_agg_reviews
     description: |
-      This model aggregates the total number of reviews and their sentiment for each day. It is an incremental model that processes new data daily. 
+      This model aggregates the total number of reviews and their sentiment for each day. It is an incremental model that processes new data daily.
       A surrogate key is generated based on the review sentiment and review date to ensure uniqueness. The model only processes reviews from the current date when running incrementally.
 
     refs:
@@ -24,13 +24,9 @@ models:
 
   - name: mom_agg_reviews
     description: |
-      This model calculates the total number of reviews and their sentiment over a rolling 30-day window, providing month-over-month (MoM) comparison metrics. 
-      The model aggregates review data over the past 30 days and calculates the percentage change in review totals compared to the previous month. 
+      This model calculates the total number of reviews and their sentiment over a rolling 30-day window, providing month-over-month (MoM) comparison metrics.
+      The model aggregates review data over the past 30 days and calculates the percentage change in review totals compared to the previous month.
       It uses a surrogate key generated from the aggregation date and review sentiment to ensure uniqueness.
-
-    refs:
-      - name: fct_reviews
-      - name: dim_dates
 
     columns:
       - name: REVIEW_TOTALS
@@ -44,7 +40,7 @@ models:
 
       - name: MOM
         description: "The month-over-month (MoM) percentage change in review totals compared to the previous 30 days."
-      
+
       - name: DATE_SENTIMENT_ID
         description: "A surrogate key generated from the aggregation date and review sentiment, ensuring uniqueness for each date-sentiment combination."
 

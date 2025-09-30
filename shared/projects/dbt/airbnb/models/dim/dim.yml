@@ -24,17 +24,13 @@ models:
       It merges the data based on `HOST_ID`, ensuring the most recent `UPDATED_AT` timestamp between the two tables is captured.
       A surrogate key is generated for each unique combination of `LISTING_ID` and `HOST_ID`.
 
-    refs:
-      - name: dim_listings
-      - name: dim_hosts
-
     columns:
       - name: CREATED_AT
         description: "The date and time when the listing was created."
 
       - name: UPDATED_AT
         description: |
-          The most recent update time between the listing and the host. 
+          The most recent update time between the listing and the host.
           It takes the greater value of `listings_cte.UPDATED_AT` and `hosts_cte.UPDATED_AT`.
 
       - name: LISTING_ID
