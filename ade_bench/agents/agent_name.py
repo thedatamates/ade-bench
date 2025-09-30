@@ -9,6 +9,8 @@ class AgentName(Enum):
     NONE = "none"
     ORACLE = "oracle"
     CLAUDE_CODE = "claude-code"
+    OPENAI_CODEX = "openai-codex"
+    GEMINI_CLI = "gemini-cli"
     MACRO = "macro"
 
     def model_name_from_agent_name(model_name, agent_name):

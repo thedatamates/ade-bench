@@ -451,7 +451,7 @@ Configuration is all managed through the `.env` file. It's fairly self-explanato
 ANTHROPIC_API_KEY=[API key for Anthropic, if you want to run Claude Code agents]
 OPENAI_API_KEY=[API key for OpenAI, if you want to run Codex agents]
 MACRO_API_KEY=[API key for Macro, if you want to run Macro (Macro! https://getmacro.com/) agents]
-
+GEMINI_API_KEY=[API key for Gemini, if you want to run Gemini CLI]
 # S3 Configuration (optional)
 # This isn't used right now, so whatever, ignore it.
 S3_BUCKET_NAME=
