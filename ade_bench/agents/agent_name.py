@@ -8,4 +8,6 @@ class AgentName(Enum):
     # Non-abstract agents
     ORACLE = "oracle"
     CLAUDE_CODE = "claude-code"
+    OPENAI_CODEX = "openai-codex"
+    GEMINI_CLI = "gemini-cli"
     MACRO = "macro"
