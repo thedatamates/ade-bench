@@ -3,7 +3,6 @@ echo "Setup Macro"
 apt-get update
 apt-get install -y curl unixodbc unixodbc-dev
 
-#!/bin/bash
 set -e
 
 curl -LsSf https://getmacro.com/terminal/install.sh | bash
