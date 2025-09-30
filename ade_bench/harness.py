@@ -108,7 +108,7 @@ class Harness:
 
         self._output_path = output_path
         self._agent_name = agent_name
-        self._model_name = model_name if agent_name != AgentName.ORACLE else "Oracle"
+        self._model_name = AgentName.model_name_from_agent_name(model_name, agent_name)
         self._agent_kwargs = agent_kwargs or {}
         self._run_id = run_id
         self._no_rebuild = no_rebuild
