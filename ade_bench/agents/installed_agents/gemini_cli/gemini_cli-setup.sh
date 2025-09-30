@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Setup OpenAI Codex"
+echo "Setup Gemini CLI"
 apt-get update
 apt-get install -y curl
 
@@ -8,10 +8,10 @@ source "$HOME/.nvm/nvm.sh"
 nvm install 22
 npm -v
 
-echo "installing OpenAI Codex"
+echo "installing Gemini CLI"
 
-npm install -g @openai/codex
+npm install -g @google/gemini-cli
 
-codex --version
+gemini --version
 
-echo "Installed OpenAI Codex"
+echo "Installed Gemini CLI"
