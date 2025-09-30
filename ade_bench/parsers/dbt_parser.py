@@ -117,7 +117,7 @@ class DbtParser(BaseParser):
         else:
             message_lead = "FAIL"
 
-        return f"{message_lead} - dbt test results - Pass:{_z(pass_count)}, Fail:{_z(fail_count)}, Total: {_z(total_count)}{mismatch_warning}"
+        return f"{message_lead} - dbt test results - Pass:{_z(pass_count)}, Fail:{_z(fail_count)}, Total:{_z(total_count)}{mismatch_warning}"
 
     def _has_test_results(self, content: str) -> bool:
         """Check if the content contains actual test results (not just compilation errors)."""

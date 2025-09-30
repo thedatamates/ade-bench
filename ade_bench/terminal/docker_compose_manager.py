@@ -26,6 +26,7 @@ class DockerComposeEnvVars(EnvModel):
 class DockerComposeManager:
     CONTAINER_LOGS_PATH = Path("/logs")
     CONTAINER_TEST_DIR = Path("/tests")
+    CONTAINER_SCRIPTS_DIR = Path("/scripts")
     CONTAINER_SEEDS_DIR = Path("/seeds")
     CONTAINER_SOLUTIONS_DIR = Path("/solutions")
     CONTAINER_APP_DIR = Path("/app")

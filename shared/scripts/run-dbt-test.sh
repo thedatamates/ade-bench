@@ -1,9 +1,15 @@
 #! /bin/bash
-# remove any existing singular tests and add solution tests
+
+# STEP 1: Run the test setup script if it exists
+if [ -f "/scripts/test-setup.sh" ]; then
+    bash /scripts/test-setup.sh
+fi
+
+# STEP 2: Remove any existing singular tests and add solution test directory
 rm -rf tests
 mkdir tests
 
-# Parse arguments
+# STEP 3: Parse arguments to filter for tests
 for arg in "$@"; do
     case $arg in
         --db-type=*) db_type="${arg#*=}" ;;
@@ -13,7 +19,7 @@ done
 
 echo "Filtering for db_type='$db_type', project_type='$project_type'"
 
-# Copy files with filtering
+# STEP 4: Copy files with filtering
 for file in /tests/*; do
     [[ -f "$file" ]] || continue
 
@@ -48,17 +54,12 @@ for file in /tests/*; do
     fi
 done
 
-# Run test setup script if it exists
-if [ -f "tests/test-setup.sh" ]; then
-    bash tests/test-setup.sh
-fi
-
-# Setup seeds and convert schema if needed
+# STEP 5: Setup seed directlry and run dbt seed
 if [ -d "/seeds" ]; then
     mkdir -p seeds
     cp /seeds/* seeds/
 
-    bash tests/seed-schema.sh
+    bash /scripts/seed-schema.sh
 
     dbt seed
 fi

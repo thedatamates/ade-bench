@@ -213,10 +213,17 @@ class Harness:
                 trial_handler.agent_pane_path,
                 trial_handler.run_tests_path,
                 trial_handler.test_dir,
-                *trial_handler.task.test_script_paths,
             ],
             container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
         )
+
+        # Copy test scripts to the scripts directory
+        for script_path in trial_handler.task.test_script_paths:
+            terminal.copy_to_container(
+                paths=[script_path],
+                container_dir=str(DockerComposeManager.CONTAINER_SCRIPTS_DIR),
+                container_filename=script_path.name
+            )
 
         # Copy seeds directory if it exists
         if trial_handler.seeds_dir.exists():
@@ -243,14 +250,14 @@ class Harness:
                     f.write(trial_handler.task.test_setup)
                     f.write("\n")
 
-                # Copy the file to the container with the exact name we want
+                # Copy the test-setup script to the container
                 terminal.copy_to_container(
                     paths=[test_setup_path],
-                    container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
+                    container_dir=str(DockerComposeManager.CONTAINER_SCRIPTS_DIR),
                     container_filename="test-setup.sh"
                 )
                 # Make it executable using the container's exec_run method
-                terminal.container.exec_run(f"chmod +x {DockerComposeManager.CONTAINER_TEST_DIR}/test-setup.sh")
+                terminal.container.exec_run(f"chmod +x {DockerComposeManager.CONTAINER_SCRIPTS_DIR}/test-setup.sh")
 
     def _run_tests(
         self,

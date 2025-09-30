@@ -3,39 +3,39 @@ description: "Core benchmarking tasks for data analysts using dbt and SQL"
 dataset_path: "tasks"
 
 task_ids:
-  # - airbnb001
-  # - airbnb002
-  # - airbnb003
-  # - airbnb004
-  # - airbnb005
-  # - airbnb006
-  # - airbnb007
-  # - airbnb008
-  # - airbnb009
-  # - analytics_engineering001
-  # - analytics_engineering002
-  # - analytics_engineering003
-  # - analytics_engineering004
-  # - analytics_engineering005
-  # - analytics_engineering006
-  # - analytics_engineering007
-  # - analytics_engineering008
+  - airbnb001
+  - airbnb002
+  - airbnb003
+  - airbnb004
+  - airbnb005
+  - airbnb006
+  - airbnb007
+  - airbnb008
+  - airbnb009
+  - analytics_engineering001
+  - analytics_engineering002
+  - analytics_engineering003
+  - analytics_engineering004
+  - analytics_engineering005
+  - analytics_engineering006
+  - analytics_engineering007
+  - analytics_engineering008
   - asana001
   - asana002
   - asana003
   - asana004
   - asana005
-  # - f1001
-  # - f1002
-  # - f1003
-  # - f1004
-  # - f1005
-  # - f1006
-  # - f1007
-  # - intercom001
-  # - intercom002
-  # - intercom003
-  # - quickbooks001
-  # - quickbooks002
-  # - quickbooks003
-  # - quickbooks004
+  - f1001
+  - f1002
+  - f1003
+  - f1004
+  - f1005
+  - f1006
+  - f1007
+  - intercom001
+  - intercom002
+  - intercom003
+  - quickbooks001
+  - quickbooks002
+  - quickbooks003
+  - quickbooks004
