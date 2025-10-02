@@ -11,6 +11,7 @@ agent's inability to perform the task (e.g. volume constraints, broken networkin
 """
 
 import shlex
+import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
@@ -75,6 +76,26 @@ class AbstractInstalledAgent(BaseAgent, ABC):
             container_filename="install-agent.sh",
         )
 
+        # Copy custom macro binary if specified
+        macro_binary_path = os.environ.get("MACRO_BINARY_PATH")
+
+        if macro_binary_path:
+            binary_path = Path(macro_binary_path)
+            if not binary_path.exists():
+                error_msg = f"MACRO_BINARY_PATH is set but file does not exist: {macro_binary_path}"
+                logger.error(error_msg)
+                raise FileNotFoundError(error_msg)
+
+            logger.info(f"Using custom macro binary from {macro_binary_path}")
+            session.copy_to_container(
+                binary_path,
+                container_dir="/installed-agent",
+                container_filename="macro",
+            )
+
+        if hasattr(self, "LOG_DIR"):
+            session.container.exec_run(["mkdir", "-p", self.LOG_DIR])
+
         # Execute outside the session to avoid exposing the env variables.
         env_setup_content = self._create_env_setup_file()
         session.container.exec_run(
@@ -135,7 +156,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
             )
 
         if logging_dir is not None:
-            _copy_log_file_from_container(session, logging_dir)
+            self._copy_log_file_from_container(session, logging_dir)
 
         return AgentResult(
             input_tokens=parsed_metrics["input_tokens"],
