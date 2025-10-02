@@ -582,6 +582,6 @@ $ ade-config
 
 [^1] ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.
 
-[^2] For a full list of known issues with dbt Fusion support, see (#12)[https://github.com/thedatamates/ade-bench/issues/12].
+[^2] For a full list of known issues with dbt Fusion support, see https://github.com/thedatamates/ade-bench/issues/12.
 
 [^3] A somewhat annoying thing about this: When you run ADE-bench with the `--seed` flag, it will evaluate each trial with whatever CSVs exist in the `/seeds` directory _before_ the new ones are created, and then, _after the tests have run_, it will export the results into the directory. This means that you may need to run it twice to check that task works: Once to create the seeds, and another time (without the `--seed` flag) to see if it passes.
