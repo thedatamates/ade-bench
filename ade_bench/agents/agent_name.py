@@ -6,6 +6,15 @@ class AgentName(Enum):
     ABSTRACT_INSTALLED = "abstract-installed"
 
     # Non-abstract agents
+    NONE = "none"
     ORACLE = "oracle"
     CLAUDE_CODE = "claude-code"
     MACRO = "macro"
+
+    def model_name_from_agent_name(model_name, agent_name):
+        if agent_name == AgentName.ORACLE:
+            return "Oracle"
+        elif agent_name == AgentName.NONE:
+            return "None"
+        else:
+            return model_name
