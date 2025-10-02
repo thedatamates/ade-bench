@@ -39,11 +39,6 @@ class MacroAgent(AbstractInstalledAgent):
             return Path(__file__).parent / "macro-setup-local.sh"
         return Path(__file__).parent / "macro-setup.sh"
 
-    def _create_env_setup_file(self) -> str:
-        return "\n".join(
-            [f"export {key}='{value}'" for key, value in self._env.items()]
-        )
-
     def _copy_log_file_from_container(self, session: TmuxSession, logging_dir: Path) -> None:
         """Copy the log file from the container to the logging directory."""
         try:
@@ -110,95 +105,5 @@ class MacroAgent(AbstractInstalledAgent):
         """Parse Macro agent output to extract metrics."""
         # The output should now be cleaner since we're using capture_entire=False
         # But let's still try to extract just the JSON part if there's any extra content
-        parser = ParserFactory.get_parser(ParserName.MACRO, task_name=task_name or "macro")
-        return parser.parse(pane_output)
-
-#    def perform_task(
-#        self,
-#        task_prompt: str,
-#        session: TmuxSession,
-#        logging_dir: Path | None = None,
-#        task_name: str | None = None,
-#    ) -> AgentResult:
-#        session.copy_to_container(
-#            self._install_agent_script,
-#            container_dir="/installed-agent",
-#            container_filename="install-agent.sh",
-#        )
-#
-#        # Copy custom macro binary if specified
-#        macro_binary_path = os.environ.get("MACRO_BINARY_PATH")
-#
-#        if macro_binary_path:
-#            binary_path = Path(macro_binary_path)
-#            if not binary_path.exists():
-#                error_msg = f"MACRO_BINARY_PATH is set but file does not exist: {macro_binary_path}"
-#                logger.error(error_msg)
-#                raise FileNotFoundError(error_msg)
-#
-#            logger.info(f"Using custom macro binary from {macro_binary_path}")
-#            session.copy_to_container(
-#                binary_path,
-#                container_dir="/installed-agent",
-#                container_filename="macro",
-#            )
-#
-#        # Create logs directory
-#        session.container.exec_run(["mkdir", "-p", self.LOG_DIR])
-#
-#        # Execute outside the session to avoid exposing the env variables.
-#        env_setup_content = self._create_env_setup_file()
-#        session.container.exec_run(
-#            [
-#                "sh",
-#                "-c",
-#                (
-#                    f"echo {shlex.quote(env_setup_content)} > "
-#                    "/installed-agent/setup-env.sh"
-#                ),
-#            ]
-#        )
-#
-#        session.send_keys(
-#            [
-#                "source /installed-agent/setup-env.sh",
-#                "Enter",
-#            ],
-#            block=True,
-#            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
-#        )
-#
-#        session.send_keys(
-#            [
-#                "source /installed-agent/install-agent.sh",
-#                "Enter",
-#            ],
-#            block=True,
-#            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
-#        )
-#
-#        run_agent_commands = self._run_agent_commands(task_prompt)
-#        for command in run_agent_commands:
-#            session.send_command(command)
-#
-#        # Capture the output from the session to extract metrics
-#        pane_output = session.capture_pane(capture_entire=True)
-#
-#        # Parse the output to extract metrics using MacroParser
-#        parser = ParserFactory.get_parser(ParserName.MACRO, task_name=task_name or "macro")
-#        metrics = parser.parse(pane_output)
-#
-#        logger.info(f"Extracted metrics from Macro output: {metrics}")
-#
-#        if logging_dir is not None:
-#            self._copy_log_file_from_container(session, logging_dir)
-#
-#        return AgentResult(
-#            input_tokens=metrics["input_tokens"],
-#            output_tokens=metrics["output_tokens"],
-#            cache_tokens=metrics["cache_tokens"],
-#            num_turns=metrics["num_turns"],
-#            cost_usd=metrics["cost_usd"],
-#            runtime_ms=metrics["runtime_ms"],
-#        )
-#
+        parser = ParserFactory.get_parser(ParserName.MACRO, task_name="macro")
+        return parser.parse(output)
