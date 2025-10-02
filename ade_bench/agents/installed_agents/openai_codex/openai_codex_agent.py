@@ -34,11 +34,14 @@ class OpenAICodexAgent(AbstractInstalledAgent):
     def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
         escaped_prompt = shlex.quote(task_prompt)
 
+        key = self._env["OPENAI_API_KEY"]
+
         return [
             TerminalCommand(
                 command=
                 f"echo 'AGENT RESPONSE: ' && "
-                f"codex -a never --full-auto {escaped_prompt}",
+                f"codex login --api-key {key} && "
+                f"codex exec --skip-git-repo-check --full-auto {escaped_prompt} ",
                 min_timeout_sec=0.0,
                 max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,
