@@ -582,10 +582,9 @@ $ ade-config
 
 [^1] ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.
 
-[^2] Well, sort of. There is a Dockerfile that supports running dbt Fusion, and you can set a task's project type to `dbt-fusion`. The task will run, but it won't work, because dbt Fusion is very particular about things, in a way that causes problems for how the harness is set up. There are three primary issues:
+[^2] Well, almost. dbt Fusion is very particular about things, in a way that causes problems for how the harness is set up. There are three primary issues:
 
-1. It will not run if there are references to models that don't exist. Since the point of ADE-bench is to see if an agent can create these models—and in come cases they won't, and they won't be there—that's an issue.
-2. It finds type matching errors prior to running, even if those errors don't cause problems when you run the queries. So, there's some stuff to iron over there.
-3. To run `dbt seed`, ADE-bench appends the `_no-op.txt` file to the end of the dbt project file. This sometimes creates a duplicate `seed` key in the yaml file. dbt Core is cool with this; dbt Fusion, not so much.
+1. It will not run if there are references to models that don't exist. Since the point of ADE-bench is to see if an agent can create these models—and in come cases they won't, and they won't be there—that's an issue. This means that correct solutions pass, but incorrect solutions fail harder than they should (i.e., instead of dbt tests failing, the entire project will not parse.)
+3. For reasons I don't yet understand, running `dbt seed` against Snowflake with fusion removes `\` from text fields. Prior versions of dbt don't do this. So several tasks in the Airbnb tasks fail, all because of this issue.
 
 [^3] A somewhat annoying thing about this: When you run ADE-bench with the `--seed` flag, it will evaluate each trial with whatever CSVs exist in the `/seeds` directory _before_ the new ones are created, and then, _after the tests have run_, it will export the results into the directory. This means that you may need to run it twice to check that task works: Once to create the seeds, and another time (without the `--seed` flag) to see if it passes.

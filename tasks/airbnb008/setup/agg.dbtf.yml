@@ -17,7 +17,7 @@ models:
         description: "The date on which the review was submitted."
 
       - name: DATE_SENTIMENT_ID
-        description: "A surrogate key generated from the review sentiment and the review date, ensuring uniqueness for each date-sentiment combination."
+        description: "A surrogate key generated from the review sentiment and the review date, ensuring uniqueness for each date-sentiment combination.
 
   - name: mom_agg_reviews
     description: |
@@ -50,7 +50,8 @@ models:
       - name: REVIEW_SENTIMENT
         tests:
           - accepted_values:
-              values: ['positive','negative','neutral']
+              arguments:
+                values: ['positive', 'negative', 'neutral']
 
   - name: wow_agg_reviews
     columns:
@@ -61,4 +62,5 @@ models:
       - name: REVIEW_SENTIMENT
         tests:
           - accepted_values:
-              values: ['positive','negative','neutral']
+              arguments:
+                values: ['positive', 'negative', 'neutral']
