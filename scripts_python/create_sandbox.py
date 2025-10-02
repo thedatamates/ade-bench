@@ -204,7 +204,7 @@ def copy_migration_files(variant):
             return False
 
     # Copy migration directory contents to sandbox/migration
-    migration_dest = sandbox_dir / "migration"
+    migration_dest = sandbox_dir / "migrations"
     return copy_item(migration_dir_path, migration_dest, f"migration directory '{migration_dir_name}'", create_dest_dir=True)
 
 
