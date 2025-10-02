@@ -600,6 +600,7 @@ class Harness:
                 task_agent.set_variant_config(config)
 
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent...")
+            session.start()
             try:
                 agent_result, agent_failure_mode = self._run_agent(
                     session=session,
