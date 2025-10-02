@@ -1,18 +1,22 @@
-from pathlib import Path
-import shlex
 import os
-import tarfile
 import io
+import shlex
+import tarfile
+from pathlib import Path
+from typing import Any
 
 from ade_bench.agents.agent_name import AgentName
-from ade_bench.agents.base_agent import AgentResult, BaseAgent
-from ade_bench.terminal.tmux_session import TmuxSession
+from ade_bench.agents.installed_agents.abstract_installed_agent import (
+    AbstractInstalledAgent,
+)
+# from ade_bench.agents.base_agent import AgentResult, BaseAgent
 from ade_bench.utils.logger import logger
+from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.harness_models import TerminalCommand
 from ade_bench.parsers.parser_factory import ParserFactory, ParserName
 from ade_bench.config import config
 
-class MacroAgent(BaseAgent):
+class MacroAgent(AbstractInstalledAgent):
     NAME = AgentName.MACRO
     LOG_FILENAME = "logs.jsonl"
     LOG_DIR = "/var/log/macro-agent"
@@ -102,90 +106,99 @@ class MacroAgent(BaseAgent):
             )
         ]
 
-    def perform_task(
-        self,
-        task_prompt: str,
-        session: TmuxSession,
-        logging_dir: Path | None = None,
-        task_name: str | None = None,
-    ) -> AgentResult:
-        session.copy_to_container(
-            self._install_agent_script,
-            container_dir="/installed-agent",
-            container_filename="install-agent.sh",
-        )
-
-        # Copy custom macro binary if specified
-        macro_binary_path = os.environ.get("MACRO_BINARY_PATH")
-        if macro_binary_path:
-            binary_path = Path(macro_binary_path)
-            if not binary_path.exists():
-                error_msg = f"MACRO_BINARY_PATH is set but file does not exist: {macro_binary_path}"
-                logger.error(error_msg)
-                raise FileNotFoundError(error_msg)
-
-            logger.info(f"Using custom macro binary from {macro_binary_path}")
-            session.copy_to_container(
-                binary_path,
-                container_dir="/installed-agent",
-                container_filename="macro",
-            )
-
-        # Create logs directory
-        session.container.exec_run(["mkdir", "-p", self.LOG_DIR])
-
-        # Execute outside the session to avoid exposing the env variables.
-        env_setup_content = self._create_env_setup_file()
-        session.container.exec_run(
-            [
-                "sh",
-                "-c",
-                (
-                    f"echo {shlex.quote(env_setup_content)} > "
-                    "/installed-agent/setup-env.sh"
-                ),
-            ]
-        )
-
-        session.send_keys(
-            [
-                "source /installed-agent/setup-env.sh",
-                "Enter",
-            ],
-            block=True,
-            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
-        )
-
-        session.send_keys(
-            [
-                "source /installed-agent/install-agent.sh",
-                "Enter",
-            ],
-            block=True,
-            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
-        )
-
-        run_agent_commands = self._run_agent_commands(task_prompt)
-        for command in run_agent_commands:
-            session.send_command(command)
-
-        # Capture the output from the session to extract metrics
-        pane_output = session.capture_pane(capture_entire=True)
-
-        # Parse the output to extract metrics using MacroParser
+    def _parse_agent_output(self, output: str) -> dict[str, Any]:
+        """Parse Macro agent output to extract metrics."""
+        # The output should now be cleaner since we're using capture_entire=False
+        # But let's still try to extract just the JSON part if there's any extra content
         parser = ParserFactory.get_parser(ParserName.MACRO, task_name=task_name or "macro")
-        metrics = parser.parse(pane_output)
+        return parser.parse(pane_output)
 
-        logger.info(f"Extracted metrics from Macro output: {metrics}")
-
-        if logging_dir is not None:
-            self._copy_log_file_from_container(session, logging_dir)
-
-        return AgentResult(
-            input_tokens=metrics["input_tokens"],
-            output_tokens=metrics["output_tokens"],
-            cache_tokens=metrics["cache_tokens"],
-            num_turns=metrics["num_turns"],
-            cost_usd=metrics["cost_usd"],
-            runtime_ms=metrics["runtime_ms"],
-        )
+#    def perform_task(
+#        self,
+#        task_prompt: str,
+#        session: TmuxSession,
+#        logging_dir: Path | None = None,
+#        task_name: str | None = None,
+#    ) -> AgentResult:
+#        session.copy_to_container(
+#            self._install_agent_script,
+#            container_dir="/installed-agent",
+#            container_filename="install-agent.sh",
+#        )
+#
+#        # Copy custom macro binary if specified
+#        macro_binary_path = os.environ.get("MACRO_BINARY_PATH")
+#
+#        if macro_binary_path:
+#            binary_path = Path(macro_binary_path)
+#            if not binary_path.exists():
+#                error_msg = f"MACRO_BINARY_PATH is set but file does not exist: {macro_binary_path}"
+#                logger.error(error_msg)
+#                raise FileNotFoundError(error_msg)
+#
+#            logger.info(f"Using custom macro binary from {macro_binary_path}")
+#            session.copy_to_container(
+#                binary_path,
+#                container_dir="/installed-agent",
+#                container_filename="macro",
+#            )
+#
+#        # Create logs directory
+#        session.container.exec_run(["mkdir", "-p", self.LOG_DIR])
+#
+#        # Execute outside the session to avoid exposing the env variables.
+#        env_setup_content = self._create_env_setup_file()
+#        session.container.exec_run(
+#            [
+#                "sh",
+#                "-c",
+#                (
+#                    f"echo {shlex.quote(env_setup_content)} > "
+#                    "/installed-agent/setup-env.sh"
+#                ),
+#            ]
+#        )
+#
+#        session.send_keys(
+#            [
+#                "source /installed-agent/setup-env.sh",
+#                "Enter",
+#            ],
+#            block=True,
+#            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
+#        )
+#
+#        session.send_keys(
+#            [
+#                "source /installed-agent/install-agent.sh",
+#                "Enter",
+#            ],
+#            block=True,
+#            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
+#        )
+#
+#        run_agent_commands = self._run_agent_commands(task_prompt)
+#        for command in run_agent_commands:
+#            session.send_command(command)
+#
+#        # Capture the output from the session to extract metrics
+#        pane_output = session.capture_pane(capture_entire=True)
+#
+#        # Parse the output to extract metrics using MacroParser
+#        parser = ParserFactory.get_parser(ParserName.MACRO, task_name=task_name or "macro")
+#        metrics = parser.parse(pane_output)
+#
+#        logger.info(f"Extracted metrics from Macro output: {metrics}")
+#
+#        if logging_dir is not None:
+#            self._copy_log_file_from_container(session, logging_dir)
+#
+#        return AgentResult(
+#            input_tokens=metrics["input_tokens"],
+#            output_tokens=metrics["output_tokens"],
+#            cache_tokens=metrics["cache_tokens"],
+#            num_turns=metrics["num_turns"],
+#            cost_usd=metrics["cost_usd"],
+#            runtime_ms=metrics["runtime_ms"],
+#        )
+#

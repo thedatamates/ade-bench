@@ -52,6 +52,11 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         """
         pass
 
+    def _copy_log_file_from_container(self, session: TmuxSession, logging_dir: Path) -> None:
+        """Copy the log file from the container to the logging directory."""
+        pass
+
+
     def _create_env_setup_file(self) -> str:
         return "\n".join(
             [f"export {key}='{value}'" for key, value in self._env.items()]
@@ -128,6 +133,9 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 f"cache-{parsed_metrics.get('cache_tokens', 0)}, "
                 f"SUCCESS: {parsed_metrics.get('success', False)}"
             )
+
+        if logging_dir is not None:
+            _copy_log_file_from_container(session, logging_dir)
 
         return AgentResult(
             input_tokens=parsed_metrics["input_tokens"],
