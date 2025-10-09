@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Setup Claude Code"
+echo "Setup Gemini CLI"
 apt-get update
 apt-get install -y curl
 
@@ -8,10 +8,10 @@ source "$HOME/.nvm/nvm.sh"
 nvm install 22
 npm -v
 
-echo "installing Claude Code"
+echo "installing Gemini CLI"
 
-npm install -g @anthropic-ai/claude-code
+npm install -g @google/gemini-cli
 
-claude --version
+gemini --version
 
-echo "Installed Claude Code"
+echo "Installed Gemini CLI"
