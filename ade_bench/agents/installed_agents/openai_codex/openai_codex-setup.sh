@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Setup Claude Code"
+echo "Setup OpenAI Codex"
 apt-get update
 apt-get install -y curl
 
@@ -8,10 +8,10 @@ source "$HOME/.nvm/nvm.sh"
 nvm install 22
 npm -v
 
-echo "installing Claude Code"
+echo "installing OpenAI Codex"
 
-npm install -g @anthropic-ai/claude-code
+npm install -g @openai/codex
 
-claude --version
+codex --version
 
-echo "Installed Claude Code"
+echo "Installed OpenAI Codex"
