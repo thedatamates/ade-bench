@@ -136,7 +136,7 @@ uv run scripts_python/run_harness.py \
   --tasks foo001 foo002 \ # Say `all` to run all the tasks in datasets/ade-bench-core.yaml.
   --db snowflake \ # Which database variant to run
   --project-type dbt \ # Which project variant to run (currently dbt or dbt-fusion)
-  --agent oracle \ # Which agent to use (e.g., `oracle`, `claude-code`, `macro`)
+  --agent oracle \ # Which agent to use (e.g., `oracle`, `claude`, `macro`)
 
   --exclude_task_ids foo001 \ #Optional; if you run all tasks, you can exclude tasks with this flag
   --n-concurrent-trials 4 \ # Optional; sets trial concurrency limit; defaults to 4.
@@ -248,7 +248,39 @@ order by object_type, drop_statement;
 
 ADE-bench currently supports the following agents:
 
-- Claude Code
+- Claude Code - `--agent claude`
+- OpenAI Codex - `--agent codex`
+- Gemini CLI - `--agent gemini`
+- Macro - `--agent macro`
+
+The following commands are run to call each agent:
+
+```
+# CLAUDE
+claude --output-format json -p {task_prompt} \
+  --allowedTools Bash Edit Write NotebookEdit WebFetch
+
+# CODEX
+codex login --api-key {key} &&
+codex exec --skip-git-repo-check --full-auto {task_prompt}
+
+# GEMINI
+gemini --output-format json --yolo --prompt {task_prompt} \
+  --allowed-tools Bash Edit Write NotebookEdit WebFetch
+```
+
+Additionally, a `CLAUDE.md` file is provided to Claude Code. That file can be found in the `/shared/config` directory.
+
+#### Open AI  code
+
+When a task is run with Claude Code, the following command runs in the repo:
+
+```
+claude --output-format json -p [ task prompt ] \
+  --allowedTools Bash Edit Write NotebookEdit WebFetch
+```
+
+Additionally, a `CLAUDE.md` file is provided to Claude Code. That file can be found in the `/shared/config` directory.
 
 #### Claude code
 
