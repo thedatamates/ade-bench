@@ -1,5 +1,5 @@
 task_id: f1009
-status: dev
+status: ready
 description: Analysis using current dates.
 notes: |-
   This uses current dates, and also requires the agent to notice that the current_age in the model is incorrect.
