@@ -38,6 +38,16 @@ def setup_base_files(terminal, session, task_id: str, variant: Dict[str, Any], t
         if project_type:
             command += f" --project-type={project_type}"
 
-        session.send_keys([command, "Enter"], block=True)
-        session.container.exec_run(["rm", f"{DockerComposeManager.CONTAINER_APP_DIR}/setup.sh"])
-        session.container.exec_run(["rm", "-rf", str(DockerComposeManager.CONTAINER_SETUP_DIR)])
+        # Check if we have a session or just direct container access
+        if session is not None:
+            session.send_keys([command, "Enter"], block=True)
+            container = session.container
+        else:
+            # For interactive mode, execute the command directly on the container
+            logger.info(f"Running setup command: {command}")
+            terminal.container.exec_run(command)
+            container = terminal.container
+
+        # Clean up setup files
+        container.exec_run(["rm", f"{DockerComposeManager.CONTAINER_APP_DIR}/setup.sh"])
+        container.exec_run(["rm", "-rf", str(DockerComposeManager.CONTAINER_SETUP_DIR)])
