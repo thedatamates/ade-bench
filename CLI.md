@@ -68,8 +68,14 @@ ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt
 # Include solution and test files in the interactive environment
 ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --include-all
 
-# Set up a specific agent for testing
+# Set up a specific agent for testing (in a tmux session)
 ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code
+
+# Run the agent on a task and then drop into interactive mode
+ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code --step post-agent
+
+# Run the agent, evaluate the results, and then drop into interactive mode
+ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code --step post-eval
 
 # Specify a run ID for the output directory
 ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --run-id debug-session
