@@ -101,15 +101,27 @@ class AbstractInstalledAgent(BaseAgent, ABC):
             max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
         )
 
+        # Create a log file for agent output
+        agent_output_file = "/tmp/agent_output.log"
+
         run_agent_commands = self._run_agent_commands(task_prompt)
         for command in run_agent_commands:
             log_harness_info(logger, task_name, "agent", f"Calling agent: {task_prompt.replace(chr(10), ' ').replace(chr(13), '')[:100]}")
-            session.send_command(command)
+
+            # Redirect output to log file
+            modified_command = TerminalCommand(
+                command=f"{command.command} 2>&1 | tee {agent_output_file}",
+                min_timeout_sec=command.min_timeout_sec,
+                max_timeout_sec=command.max_timeout_sec,
+                block=command.block,
+                append_enter=command.append_enter,
+            )
+            session.send_command(modified_command)
 
         log_harness_info(logger, task_name, "agent", "Agent returned response")
 
-        # Try to capture just the recent output by looking at the last few lines
-        output = session.capture_pane(capture_entire=False)
+        # Read the output from the log file
+        output = session.container.exec_run(["cat", agent_output_file]).output.decode("utf-8")
 
         # Try to extract just the JSON part from the output
         parsed_metrics = self._parse_agent_output(output)

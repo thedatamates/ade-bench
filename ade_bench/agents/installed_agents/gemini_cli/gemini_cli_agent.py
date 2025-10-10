@@ -14,7 +14,8 @@ from ade_bench.config import config
 
 class GeminiCLIAgent(AbstractInstalledAgent):
     NAME = AgentName.GEMINI_CLI
-    ALLOWED_TOOLS = ["Bash", "Edit", "Write", "NotebookEdit", "WebFetch"]
+    # Yolo Mode (-y) lets Gemini do whatever it wants.
+    # ALLOWED_TOOLS = ["Bash", "Edit", "Write", "NotebookEdit", "WebFetch"]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -37,8 +38,7 @@ class GeminiCLIAgent(AbstractInstalledAgent):
             TerminalCommand(
                 command=
                 f"echo 'AGENT RESPONSE: ' && "
-                f"gemini --output-format json -y -p {escaped_prompt} --allowedTools"
-                f"{' '.join(self.ALLOWED_TOOLS)}",
+                f"gemini --output-format json -y -p {escaped_prompt}",
                 min_timeout_sec=0.0,
                 max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,
@@ -48,6 +48,4 @@ class GeminiCLIAgent(AbstractInstalledAgent):
 
     def _parse_agent_output(self, output: str) -> dict[str, Any]:
         """Parse Gemini agent output to extract metrics."""
-        # The output should now be cleaner since we're using capture_entire=False
-        # But let's still try to extract just the JSON part if there's any extra content
         return self._gemini_parser.parse(output)

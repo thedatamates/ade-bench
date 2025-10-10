@@ -261,37 +261,15 @@ claude --output-format json -p {task_prompt} \
   --allowedTools Bash Edit Write NotebookEdit WebFetch
 
 # CODEX
-codex login --api-key {key} &&
-codex exec --skip-git-repo-check --full-auto {task_prompt}
+printenv OPENAI_API_KEY | codex login --with-api-key && \
+codex --ask-for-approval never exec --sandbox workspace-write --skip-git-repo-check {task_prompt}
 
 # GEMINI
 gemini --output-format json --yolo --prompt {task_prompt} \
   --allowed-tools Bash Edit Write NotebookEdit WebFetch
 ```
 
-Additionally, a `CLAUDE.md` file is provided to Claude Code. That file can be found in the `/shared/config` directory.
-
-#### Open AI  code
-
-When a task is run with Claude Code, the following command runs in the repo:
-
-```
-claude --output-format json -p [ task prompt ] \
-  --allowedTools Bash Edit Write NotebookEdit WebFetch
-```
-
-Additionally, a `CLAUDE.md` file is provided to Claude Code. That file can be found in the `/shared/config` directory.
-
-#### Claude code
-
-When a task is run with Claude Code, the following command runs in the repo:
-
-```
-claude --output-format json -p [ task prompt ] \
-  --allowedTools Bash Edit Write NotebookEdit WebFetch
-```
-
-Additionally, a `CLAUDE.md` file is provided to Claude Code. That file can be found in the `/shared/config` directory.
+Configurations filies for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
 
 ### How trials are evaluated
 

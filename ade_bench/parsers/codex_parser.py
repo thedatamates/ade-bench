@@ -1,24 +1,26 @@
 import json
-import re
 from typing import Dict, Any
 
 from ade_bench.parsers.base_parser import BaseParser, UnitTestStatus
 
 class CodexParser(BaseParser):
     """Parser for Codex agent responses to extract runtime, token usage, and cost metrics."""
-    
+
     def parse(self, content: str) -> Dict[str, Any]:
         """
         Parse Codex agent response to extract metrics.
-        
+
+        Codex outputs JSON lines with format:
+        {"type":"turn.completed","usage":{"input_tokens":N,"cached_input_tokens":N,"output_tokens":N}}
+
         Returns a dictionary with the following keys:
-        - runtime_ms: The higher of duration_ms and duration_api_ms
-        - input_tokens: input_tokens
+        - runtime_ms: 0 (not provided by Codex)
+        - input_tokens: input_tokens (excluding cached)
         - output_tokens: output_tokens
-        - cache_tokens: cache_creation_input_tokens + cache_read_input_tokens
-        - cost_usd: total_cost_usd
-        - num_turns: Number of turns in the conversation
-        - success: Whether the response indicates success
+        - cache_tokens: cached_input_tokens
+        - cost_usd: Estimated from https://openai.com/api/pricing/
+        - num_turns: Number of item.completed events
+        - success: Whether the response completed without errors
         """
 
         default_return = {
@@ -30,41 +32,59 @@ class CodexParser(BaseParser):
             "num_turns": 0,
             "success": False
         }
+
         try:
-            raise Exception("Unimplemented")
-            return default_return
+            # Split content into lines and parse JSON lines
+            lines = content.strip().split('\n')
+
+            total_input_tokens = 0
+            total_output_tokens = 0
+            total_cache_tokens = 0
+            num_items = 0
+            success = False
+
+            for line in lines:
+                line = line.strip()
+                if not line or not line.startswith('{'):
+                    continue
+
+                try:
+                    data = json.loads(line)
+
+                    if data.get("type") == "item.completed":
+                        num_items += 1
+
+                    # Look for turn.completed events which contain usage data
+                    if data.get("type") == "turn.completed":
+                        success = True
+
+                        usage = data.get("usage", {})
+                        # input_tokens excludes cached tokens
+                        total_input_tokens += usage.get("input_tokens", 0)
+                        total_cache_tokens += usage.get("cached_input_tokens", 0)
+                        total_output_tokens += usage.get("output_tokens", 0)
+
+                        # Cost is estimated from https://openai.com/api/pricing/
+                        cost_usd = (
+                            (total_input_tokens /1000000) * 1.25 +
+                            (total_output_tokens/1000000) * 10 +
+                            (total_cache_tokens /1000000) * 0.125
+                        )
+
+                except json.JSONDecodeError:
+                    # Skip non-JSON lines
+                    continue
+
+            return {
+                "runtime_ms": 0,
+                "input_tokens": total_input_tokens,
+                "output_tokens": total_output_tokens,
+                "cache_tokens": total_cache_tokens,
+                "cost_usd": cost_usd,
+                "num_turns": num_items,
+                "success": success
+            }
+
         except Exception as e:
             self._logger.error(f"Error parsing Codex response: {e}")
             return default_return
-    
-    def _parse_json_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse the JSON response data to extract metrics."""
-        # Extract runtime - use the higher of duration_ms and duration_api_ms
-        duration_ms = data.get("duration_ms", 0)
-        duration_api_ms = data.get("duration_api_ms", 0)
-        runtime_ms = max(duration_ms, duration_api_ms)
-        
-        # Extract token usage
-        usage = data.get("usage", {})
-        input_tokens = usage.get("input_tokens", 0) + usage.get("cache_creation_input_tokens", 0)
-        output_tokens = usage.get("output_tokens", 0)
-        cache_tokens = usage.get("cache_read_input_tokens", 0)
-        
-        # Extract number of turns
-        num_turns = data.get("num_turns", 0)
-        
-        # Extract cost
-        cost_usd = data.get("total_cost_usd", 0.0)
-        
-        # Determine success
-        success = data.get("is_error", True) == False
-        
-        return {
-            "runtime_ms": runtime_ms,
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "cache_tokens": cache_tokens,
-            "cost_usd": cost_usd,
-            "num_turns": num_turns,
-            "success": success
-        }

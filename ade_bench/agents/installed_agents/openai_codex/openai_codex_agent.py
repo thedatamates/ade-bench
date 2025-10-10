@@ -40,8 +40,8 @@ class OpenAICodexAgent(AbstractInstalledAgent):
             TerminalCommand(
                 command=
                 f"echo 'AGENT RESPONSE: ' && "
-                f"codex login --api-key {key} && "
-                f"codex exec --skip-git-repo-check --full-auto {escaped_prompt} ",
+                f"printenv OPENAI_API_KEY | codex login --with-api-key && "
+                f"codex --ask-for-approval never exec --json --sandbox danger-full-access --skip-git-repo-check {escaped_prompt}",
                 min_timeout_sec=0.0,
                 max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,
@@ -51,6 +51,4 @@ class OpenAICodexAgent(AbstractInstalledAgent):
 
     def _parse_agent_output(self, output: str) -> dict[str, Any]:
         """Parse Codex agent output to extract metrics."""
-        # The output should now be cleaner since we're using capture_entire=False
-        # But let's still try to extract just the JSON part if there's any extra content
         return self._codex_parser.parse(output)

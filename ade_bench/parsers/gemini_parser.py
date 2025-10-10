@@ -1,24 +1,26 @@
 import json
-import re
 from typing import Dict, Any
 
 from ade_bench.parsers.base_parser import BaseParser, UnitTestStatus
 
 class GeminiParser(BaseParser):
     """Parser for Gemini agent responses to extract runtime, token usage, and cost metrics."""
-    
+
     def parse(self, content: str) -> Dict[str, Any]:
         """
         Parse Gemini agent response to extract metrics.
-        
+
+        Gemini outputs JSON at the end with format:
+        {"response": "...", "stats": {"models": {"gemini-2.5-pro": {"tokens": {...}, "api": {...}}}}}
+
         Returns a dictionary with the following keys:
-        - runtime_ms: The higher of duration_ms and duration_api_ms
-        - input_tokens: input_tokens
-        - output_tokens: output_tokens
-        - cache_tokens: cache_creation_input_tokens + cache_read_input_tokens
-        - cost_usd: total_cost_usd
-        - num_turns: Number of turns in the conversation
-        - success: Whether the response indicates success
+        - runtime_ms: totalLatencyMs from api stats
+        - input_tokens: prompt tokens (excluding cached)
+        - output_tokens: candidates tokens
+        - cache_tokens: cached tokens
+        - cost_usd: Estimated from https://ai.google.dev/pricing
+        - num_turns: totalCalls from tools stats
+        - success: Whether the response completed without errors
         """
 
         default_return = {
@@ -30,41 +32,115 @@ class GeminiParser(BaseParser):
             "num_turns": 0,
             "success": False
         }
+
         try:
-            raise Exception("Unimplemented")
-            return default_return
+            # Find the last JSON object in the output (the stats)
+            # The JSON might have shell prompt appended, so we need to extract it carefully
+
+            # First, try to find where the JSON starts by looking for a line that starts with {
+            # and has "stats" in the subsequent content
+            lines = content.strip().split('\n')
+            json_str = None
+
+            # Try to find a JSON object starting from the end
+            for i in range(len(lines) - 1, -1, -1):
+                line = lines[i].strip()
+                if line.startswith('{'):
+                    # Found potential start of JSON, collect the rest
+                    potential_json_lines = lines[i:]
+                    potential_json = '\n'.join(potential_json_lines)
+
+                    # The last line might have shell prompt appended, try to extract just the JSON
+                    # Look for the closing brace and ignore anything after it
+                    # We need to find the matching closing brace for the opening one
+                    brace_count = 0
+                    json_end = -1
+                    for idx, char in enumerate(potential_json):
+                        if char == '{':
+                            brace_count += 1
+                        elif char == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                json_end = idx + 1
+                                break
+
+                    if json_end > 0:
+                        potential_json = potential_json[:json_end]
+
+                    try:
+                        data = json.loads(potential_json)
+                        # Check if it's the stats JSON we're looking for
+                        if "stats" in data:
+                            json_str = potential_json
+                            break
+                    except json.JSONDecodeError:
+                        continue
+
+            if not json_str:
+                self._logger.warning("Could not find Gemini stats JSON in output")
+                return default_return
+
+            data = json.loads(json_str)
+            stats = data.get("stats", {})
+            models_stats = stats.get("models", {})
+
+            # Gemini can use different models, find the one that was used
+            total_input_tokens = 0
+            total_output_tokens = 0
+            total_cache_tokens = 0
+            total_latency_ms = 0
+            total_num_turns = 0
+            total_cost_usd = 0.0
+
+            for model_name, model_data in models_stats.items():
+                tokens = model_data.get("tokens", {})
+                api = model_data.get("api", {})
+
+                total_latency_ms += api.get("totalLatencyMs", 0)
+                total_num_turns += api.get("totalRequests", 0)
+
+                # Accumulate tokens across all models used
+                input_tokens = tokens.get("prompt", 0)
+                candidates_tokens = tokens.get("candidates", 0)
+                thought_tokens = tokens.get("thought", 0)
+                output_tokens = candidates_tokens + thought_tokens
+                cached_tokens = tokens.get("cached", 0)
+
+                if "flash" in model_name:
+                    input_cost =    .30 / 1000000
+                    output_cost =  2.50 / 1000000
+                    cached_cost =  0.03 / 1000000
+                else:
+                    # These are "Pro" prices
+                    input_cost =   2.00 / 1000000
+                    output_cost = 10.00 / 1000000
+                    cached_cost =  0.20 / 1000000
+
+                cost_usd = (
+                    input_cost * input_tokens +
+                    output_cost * output_tokens +
+                    cached_cost * cached_tokens
+                )
+
+                # Input tokens = prompt - cached
+                total_input_tokens += input_tokens
+                total_output_tokens += output_tokens
+                total_cache_tokens += cached_tokens
+                total_cost_usd += cost_usd
+
+                # Success if we found the stats
+                success = True
+
+            return {
+                "runtime_ms": total_latency_ms,
+                "input_tokens": total_input_tokens,
+                "output_tokens": total_output_tokens,
+                "cache_tokens": total_cache_tokens,
+                "cost_usd": total_cost_usd,
+                "num_turns": total_num_turns,
+                "success": success
+            }
+
         except Exception as e:
             self._logger.error(f"Error parsing Gemini response: {e}")
             return default_return
-    
-    def _parse_json_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse the JSON response data to extract metrics."""
-        # Extract runtime - use the higher of duration_ms and duration_api_ms
-        duration_ms = data.get("duration_ms", 0)
-        duration_api_ms = data.get("duration_api_ms", 0)
-        runtime_ms = max(duration_ms, duration_api_ms)
-        
-        # Extract token usage
-        usage = data.get("usage", {})
-        input_tokens = usage.get("input_tokens", 0) + usage.get("cache_creation_input_tokens", 0)
-        output_tokens = usage.get("output_tokens", 0)
-        cache_tokens = usage.get("cache_read_input_tokens", 0)
-        
-        # Extract number of turns
-        num_turns = data.get("num_turns", 0)
-        
-        # Extract cost
-        cost_usd = data.get("total_cost_usd", 0.0)
-        
-        # Determine success
-        success = data.get("is_error", True) == False
-        
-        return {
-            "runtime_ms": runtime_ms,
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "cache_tokens": cache_tokens,
-            "cost_usd": cost_usd,
-            "num_turns": num_turns,
-            "success": success
-        }
