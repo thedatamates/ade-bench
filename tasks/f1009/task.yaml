@@ -1,0 +1,40 @@
+task_id: f1009
+status: dev
+description: Analysis using current dates.
+notes: |-
+  This uses current dates, and also requires the agent to notice that the current_age in the model is incorrect.
+prompts:
+  - key: base
+    prompt: |-
+      I want to know the current ages, from today, of all the drivers in the database. Create a new model called analysis__drivers_current_age that has two columns:
+      - current_age_in_years: The current age of the driver.
+      - drivers: The numbers of drivers that are that age.
+author_name: test
+author_email: test
+difficulty: medium
+category: analysis
+tags:
+  - relative-dates
+
+# Test setup script to run before dbt tests
+test_setup: |-
+  dbt run --select analysis__drivers_current_age
+
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: f1
+  project_type: dbt
+  project_name: f1
+
+- db_type: snowflake
+  db_name: f1
+  project_type: dbt
+  project_name: f1
+  migration_directory: f1__duckdb_to_snowflake
+
+- db_type: snowflake
+  db_name: f1
+  project_type: dbt-fusion
+  project_name: f1
+  migration_directory: f1__duckdb_to_snowflake
