@@ -54,16 +54,14 @@ if [[ "$AGENT_NAME" == "claude" ]]; then
     claude mcp list
 
 elif [[ "$AGENT_NAME" == "codex" ]]; then
-    echo "Registering dbt MCP server with Claude..."
+    echo "Registering dbt MCP server with Codex..."
     codex mcp add dbt -- uvx --env-file .env dbt-mcp
     codex mcp list
 
 elif [[ "$AGENT_NAME" == "gemini" ]]; then
-    echo "Registering dbt MCP server with Claude..."
+    echo "Registering dbt MCP server with Gemini..."
     gemini mcp add dbt uvx -- --env-file .env dbt-mcp
     gemini mcp list
-    gemini --output-format json -y -p "use the dbt mcp server to wite a query to figure out the current timestamp"
-
 
 else
     echo "Skipping dbt MCP setup - '$AGENT_NAME' is not supported"
