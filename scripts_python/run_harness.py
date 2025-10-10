@@ -133,6 +133,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Keep containers alive when tasks fail for debugging",
     )
+    parser.add_argument(
+        "--use-mcp",
+        action="store_true",
+        help="Start a dbt MCP server after setup completes",
+    )
     args = parser.parse_args()
 
     # Handle special case for "all" - load from YAML config
@@ -174,6 +179,7 @@ if __name__ == "__main__":
         db_type=args.db,
         project_type=args.project_type,
         keep_alive=args.persist,
+        use_mcp=args.use_mcp,
     )
 
     results = harness.run()

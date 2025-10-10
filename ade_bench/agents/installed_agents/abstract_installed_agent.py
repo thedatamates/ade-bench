@@ -26,8 +26,10 @@ from ade_bench.config import config
 class AbstractInstalledAgent(BaseAgent, ABC):
     NAME = AgentName.ABSTRACT_INSTALLED
 
-    def __init__(self, **kwargs):
+    def __init__(self, use_mcp: bool = False, **kwargs):
         super().__init__(**kwargs)
+        self._variant_config = {}
+        self._use_mcp = use_mcp
 
     @property
     @abstractmethod
@@ -44,6 +46,9 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         Script to install the agent in the container.
         """
         ...
+
+    def set_variant_config(self, config: dict) -> None:
+        self._variant_config = config
 
     @abstractmethod
     def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
@@ -100,6 +105,28 @@ class AbstractInstalledAgent(BaseAgent, ABC):
             block=True,
             max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
         )
+
+        # Optionally setup dbt MCP server
+        if self._use_mcp:
+            dbt_mcp_script = Path(__file__).parent.parent.parent.parent / "shared" / "scripts" / "setup-dbt-mcp.sh"
+            session.copy_to_container(
+                dbt_mcp_script,
+                container_dir="/scripts",
+                container_filename="setup-dbt-mcp.sh",
+            )
+
+            # Pass db_type, project_type, and agent name
+            db_type = self._variant_config.get('db_type', 'unknown')
+            project_type = self._variant_config.get('project_type', 'unknown')
+            agent_name = self.NAME.value if hasattr(self.NAME, 'value') else str(self.NAME)
+            session.send_keys(
+                [
+                    f"bash /scripts/setup-dbt-mcp.sh {db_type} {project_type} {agent_name}",
+                    "Enter",
+                ],
+                block=True,
+                max_timeout_sec=config.setup_timeout_sec,
+            )
 
         # Create a log file for agent output
         agent_output_file = "/tmp/agent_output.log"

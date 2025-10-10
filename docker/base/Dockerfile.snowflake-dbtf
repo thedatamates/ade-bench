@@ -9,12 +9,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dbt Fusion
-RUN curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update
+RUN export SHELL=/bin/bash && \
+    curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update
 
 # Install Snowflake connector (still needed for Snowflake connections)
 RUN pip install --no-cache-dir \
     snowflake-connector-python==3.13.1 \
-    pyyaml>=6.0
+    pyyaml>=6.0 \
+    uv>=0.7
 
 # Add dbtf to PATH
 ENV PATH="/root/.local/bin:${PATH}"

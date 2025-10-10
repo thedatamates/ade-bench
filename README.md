@@ -144,6 +144,7 @@ uv run scripts_python/run_harness.py \
   --seed \ # Optional; flag for creating solution seed CSVs !! DESTRUCTIVE !! RUN WITH CAUTION !! SEE BELOW !!
   --no-diffs \ # Optional; disables taking snapshots of diffs
   --persist \ # Optional; keeps the container alive after the trial is over or is aborted.
+  --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
 ```
 
 ---
@@ -270,6 +271,24 @@ gemini --output-format json --yolo --prompt {task_prompt} \
 ```
 
 Configurations filies for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
+
+### MCP
+
+If run with the flag `--use-mcp`, ADE-bench will create a dbt MCP server that the agent is allowed to use. The following databases and agents are supported:
+
+- Databases: `snowflake`
+- Agents: `claude`, `codex`, `gemini`
+
+Because the server runs locally, it only has access to the CLI tools. The others are disabled, because they require access to dbt Cloud account:
+
+```bash
+DISABLE_DBT_CLI=false
+DISABLE_SEMANTIC_LAYER=true
+DISABLE_DISCOVERY=true
+DISABLE_ADMIN_API=true
+DISABLE_SQL=true
+DISABLE_DBT_CODEGEN=true
+```
 
 ### How trials are evaluated
 

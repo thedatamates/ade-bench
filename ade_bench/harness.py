@@ -62,6 +62,7 @@ class Harness:
         db_type: str | None = None,
         project_type: str | None = None,
         keep_alive: bool = False,
+        use_mcp: bool = False,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -89,6 +90,7 @@ class Harness:
             db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
             project_type: Project type to filter variants (e.g., dbt, other).
             keep_alive: If True, keep containers alive when tasks fail for debugging.
+            use_mcp: If True, start a dbt MCP server after setup completes.
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -102,6 +104,7 @@ class Harness:
         self._db_filter = db_type
         self._project_type_filter = project_type
         self._keep_alive = keep_alive
+        self._use_mcp = use_mcp
 
         # Initialize setup orchestrator for variant-specific setup
         self._setup_orchestrator = SetupOrchestrator()
@@ -155,6 +158,9 @@ class Harness:
 
         if self._agent_name == AgentName.ORACLE:
             agent_kwargs["task_ids"] = [task_id]
+
+        # Pass use_mcp flag to installed agents
+        agent_kwargs["use_mcp"] = self._use_mcp
 
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 

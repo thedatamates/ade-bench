@@ -34,8 +34,6 @@ class OpenAICodexAgent(AbstractInstalledAgent):
     def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
         escaped_prompt = shlex.quote(task_prompt)
 
-        key = self._env["OPENAI_API_KEY"]
-
         return [
             TerminalCommand(
                 command=
