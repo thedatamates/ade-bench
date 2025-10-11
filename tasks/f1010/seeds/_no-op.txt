@@ -1,0 +1,9 @@
+
+
+seeds:
+  f1:
+    solution__analysis__lap_times:
+      +column_types:
+        circuit_name: varchar
+        race_year: integer
+        avg_lap_time_in_ms: integer
