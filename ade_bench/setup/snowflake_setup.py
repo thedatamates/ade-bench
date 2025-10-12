@@ -89,9 +89,11 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
             cursor.execute(use_db_query)
 
             # Drop and create role
+            admin_role = os.getenv('SNOWFLAKE_ROLE') # Grant task role to the admin role, so it can manage objects too.
             role_query = f"""
                 DROP ROLE IF EXISTS {creds['role']};
                 CREATE ROLE {creds['role']};
+                GRANT ROLE {creds['role']} TO ROLE {admin_role};
             """
             _execute_queries(cursor, role_query)
 
@@ -110,6 +112,10 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
                 GRANT SELECT, INSERT, UPDATE, DELETE ON FUTURE TABLES IN SCHEMA {database}.PUBLIC TO ROLE {role};
                 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL VIEWS IN SCHEMA {database}.PUBLIC TO ROLE {role};
                 GRANT SELECT, INSERT, UPDATE, DELETE ON FUTURE VIEWS IN SCHEMA {database}.PUBLIC TO ROLE {role};
+                GRANT OWNERSHIP ON DATABASE {database} TO ROLE {role} COPY CURRENT GRANTS;
+                GRANT OWNERSHIP ON ALL SCHEMAS IN DATABASE {database} TO ROLE {role} COPY CURRENT GRANTS;
+                GRANT OWNERSHIP ON ALL TABLES IN DATABASE {database} TO ROLE {role} COPY CURRENT GRANTS;
+                GRANT OWNERSHIP ON ALL VIEWS IN DATABASE {database} TO ROLE {role} COPY CURRENT GRANTS;
             """
 
             # Grant privileges to task role
@@ -119,14 +125,6 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
                 role=creds['role']
             )
             _execute_queries(cursor, task_grants_query)
-
-            # Grant privileges to admin role
-            admin_grants_query = grants_template.format(
-                warehouse=creds['warehouse'],
-                database=creds['database'],
-                role=os.getenv('SNOWFLAKE_ROLE', 'ACCOUNTADMIN')
-            )
-            _execute_queries(cursor, admin_grants_query)
 
             # Drop and create user
             user_query = f"""

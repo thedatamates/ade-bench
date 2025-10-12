@@ -1,7 +1,21 @@
-workday:
+workday-duckdb:
   target: dev
   outputs:
     dev:
       type: duckdb
       path: "./workday.duckdb"
       schema: main
+
+workday-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>

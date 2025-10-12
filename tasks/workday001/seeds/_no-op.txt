@@ -1,0 +1,7 @@
+
+
+seeds:
+  workday:
+    solution__foo:
+      +column_types:
+        bar: integer
