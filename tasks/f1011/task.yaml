@@ -1,5 +1,5 @@
 task_id: f1011
-status: devs
+status: ready
 description: A question to analyze existing analysis.
 notes: |-
   This is a multiple choice question to see if the models can understand various potential gotchas in analysis.

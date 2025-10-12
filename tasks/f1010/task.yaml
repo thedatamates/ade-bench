@@ -1,5 +1,5 @@
 task_id: f1010
-status: dev
+status: ready
 description: Analysis with gotchas that require understanding the data.
 notes: |-
   TODO - CAN YOU CHECK AGAINST TWO TABLES?
