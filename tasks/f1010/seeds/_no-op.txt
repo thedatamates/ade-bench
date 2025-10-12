@@ -7,3 +7,12 @@ seeds:
         circuit_name: varchar
         race_year: integer
         avg_lap_time_in_ms: integer
+    solution__analysis__lap_times_exclude_pit_stops:
+      +column_types:
+        circuit_name: varchar
+        race_year: integer
+        avg_lap_time_in_ms: integer
+    solution__driver_championships:
+      +column_types:
+        driver_full_name: varchar
+        total_championships: bigint

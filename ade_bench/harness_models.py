@@ -166,6 +166,7 @@ class SolutionSeedConfig(BaseModel):
     include_columns: Optional[List[str]] = None
     exclude_columns: Optional[List[str]] = None
     exclude_tests: Optional[List[str]] = None
+    alternates: Optional[List[str]] = None
 
 
 class TaskMetadata(BaseModel):

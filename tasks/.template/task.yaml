@@ -37,23 +37,31 @@ test_setup: |-
 #  2. Create a dbt test that checks for the existence of this table
 #  3. Create a test to compare the table to corresponding solution seed.
 #
-# As is shown for with the second through fourth tables, you can:
+# As is shown for with the tables below, you can:
 #  1. Exclude some columns from the equality test
 #  2. Only include certain columns in the equality test
 #  3. Disable the creation of both the existence and equality tests.
+#  4. Specify alternate solution seeds (for tasks with multiple valid answers)
 solution_seeds:
   - table_name: dim_products
+
   - table_name: fct_sales
     inclulde_columns:
     - id
     - item_name_displayed
     - item_name_actual
+
   - table_name: fct_transactions
     exclude_columns:
     - bribe_amount_usd
+
   - table_name: generated_income_statement
     exclude_tests:
     - equality_test # Can also be `existence_test`
+
+  - table_name: sec_filing_report
+    alternates:
+    - sec_filing_report_with_fudges
 
 # These are the different database and project variants that the task supports
 # If no migration directory is provided, then no migration script will run.

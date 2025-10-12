@@ -783,6 +783,10 @@ class Harness:
                 table_name = item.get('table_name')
                 if table_name:
                     tables_to_extract.append(table_name)
+                    # Also add alternates if present
+                    alternates = item.get('alternates', [])
+                    if alternates:
+                        tables_to_extract.extend(alternates)
                 else:
                     self._logger.warning(f"Invalid solution_seed item (missing table_name): {item}")
             else:

@@ -92,23 +92,31 @@ test_setup: |-
 #  2. Create a dbt test that checks for the existence of this table
 #  3. Create a test to compare the table to corresponding solution seed.
 #
-# As is shown for with the second through fourth tables, you can:
+# As is shown for with the tables below, you can:
 #  1. Exclude some columns from the equality test
 #  2. Only include certain columns in the equality test
 #  3. Disable the creation of both the existence and equality tests.
+#  4. Specify alternate solution seeds (for tasks with multiple valid answers)
 solution_seeds:
   - table_name: dim_products
+
   - table_name: fct_sales
     inclulde_columns:
     - id
     - item_name_displayed
     - item_name_actual
+
   - table_name: fct_transactions
     exclude_columns:
     - bribe_amount_usd
+
   - table_name: generated_income_statement
     exclude_tests:
     - equality_test # Can also be `existence_test`
+
+  - table_name: sec_filing_report
+    alternates:
+    - sec_filing_report_with_fudges
 
 # These are the different database and project variants that the task supports
 # If no migration directory is provided, then no migration script will run.
@@ -205,6 +213,8 @@ SNOWFLAKE_ROLE=[role name (see "What Snowflake role should I use?" below)]
 SNOWFLAKE_PASSWORD=[the user's password]
 SNOWFLAKE_WAREHOUSE=[the warehouse you want this user and all ade-bench agents to use]
 ```
+
+_Snowflake is deprecating password-based authentication, which makes this very annoying. For now, you can get around this by making this user `LEGACY_SERVICE` user, though that will eventually go away. A problem for our future selves, who might be able to solve it with the help of these [dbt](https://docs.getdbt.com/docs/cloud/connect-data-platform/connect-snowflake) and [Snowflake](https://docs.snowflake.com/en/user-guide/security-mfa-rollout#deprecation-timeline) docs._
 
 **Second,** add data to your Snowflake database. If a task is configured to run against a Snowflake database, the name of that database should match the name of a database (i.e., [a collection of schemas](https://docs.snowflake.com/en/sql-reference/ddl-database)) in your Snowflake account. For help adding data to your Snowflake account, see "Adding data to Snowflake."
 
@@ -368,6 +378,24 @@ As described in `task.yaml` description above, there are several additional conf
 - You can exclude columns from being part of the table equality comparision.
 - You can select specific columns to only include.
 - You can disable the automatic generation of either the equality or existence test.
+- You can specify alternate solution seeds for tasks that have multiple valid answers.
+
+#### Alternate solution seeds
+
+Some tasks may have multiple valid answers. For example, a query might be written in different ways that produce equally correct results. To handle this, you can specify alternate solution seeds:
+
+```yaml
+solution_seeds:
+  - table_name: the_best_answer
+    alternates:
+    - another_good_answer
+    - not_as_good_but_still_counts
+```
+
+When alternates are specified, ADE-bench will compare the table defined by `table_name` to solution seeds of that table _and_ of any alternatives. So, in the example above, `the_best_answer` will get compared to `solution__the_best_answer`, `solution__another_good_answer`, and `solution__not_as_good_but_still_counts`. If `table_name` matches any of those three, the test will pass.
+
+1. **During --seed mode**: All tables (the main one and alternates) will be extracted as CSV files with the `solution__` prefix. For example, running the task above will extract `solution__table_name.csv` from `table_name`, `solution__another_good_answer.csv` from `another_good_answer`, and so on.
+2. **During test runs**: All seeds will be loaded into the database, and the equality test will pass if the agent's answer matches ANY of the solution seeds. The test requires the agent to create a table called `table_name` (and just that table); the other tables are just possible answers.
 
 ### Sharing projects across databases and project types
 

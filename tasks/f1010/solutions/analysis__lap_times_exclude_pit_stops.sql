@@ -24,6 +24,7 @@ with
       l.race_year,
       avg(l.lap_time) as avg_lap_time,
     from laps l
+    where l.has_pit_stop = 0
     group by 1,2,3
   )
 

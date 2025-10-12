@@ -133,6 +133,7 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
                 DROP USER IF EXISTS {creds['user']};
                 CREATE USER {creds['user']}
                 PASSWORD = '{creds['password']}'
+                TYPE = LEGACY_SERVICE
                 DEFAULT_ROLE = {creds['role']};
                 GRANT ROLE {creds['role']} TO USER {creds['user']};
             """
