@@ -37,7 +37,6 @@ solution_seeds:
   - table_name: analysis__lap_times
     alternates:
     - analysis__lap_times_exclude_pit_stops
-  - table_name: driver_championships
 
 # Variants for different database and project combinations
 variants:

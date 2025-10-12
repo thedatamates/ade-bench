@@ -395,7 +395,7 @@ solution_seeds:
 When alternates are specified, ADE-bench will compare the table defined by `table_name` to solution seeds of that table _and_ of any alternatives. So, in the example above, `the_best_answer` will get compared to `solution__the_best_answer`, `solution__another_good_answer`, and `solution__not_as_good_but_still_counts`. If `table_name` matches any of those three, the test will pass.
 
 1. **During --seed mode**: All tables (the main one and alternates) will be extracted as CSV files with the `solution__` prefix. For example, running the task above will extract `solution__table_name.csv` from `table_name`, `solution__another_good_answer.csv` from `another_good_answer`, and so on.
-2. **During test runs**: All seeds will be loaded into the database, and the equality test will pass if the agent's answer matches ANY of the solution seeds. The test requires the agent to create a table called `table_name` (and just that table); the other tables are just possible answers.
+2. **During test runs**: All seeds will be loaded into the database, and the equality test will pass if the agent's answer matches ANY of the solution seeds. In the exapmle above, the agent would be expected to create a table called `table_name` (and just that table), and for that table to one of the three seeds.
 
 ### Sharing projects across databases and project types
 
