@@ -11,6 +11,7 @@ import tempfile
 import time
 import boto3
 from tenacity import RetryError
+import cProfile
 
 from ade_bench.agents.agent_factory import AgentFactory
 from ade_bench.agents.agent_name import AgentName
@@ -144,6 +145,10 @@ class Harness:
     @property
     def _log_output_path(self) -> Path:
         return self._run_path / "run.log"
+
+    @property
+    def _cProfile_output_path(self) -> Path:
+        return self._run_path / "cProfile.prof"
 
     def _create_agent_for_task(self, task_id: str) -> BaseAgent:
         """Create a fresh agent for a specific task.
@@ -1174,15 +1179,21 @@ class Harness:
         log_harness_info(logger, "system", "start", "STARTING HARNESS RUN")
         log_harness_info(logger, "system", "start", f"Run ID: {self._run_id}")
 
+        # TODO: Conditional Profiling
+        profiler = cProfile.Profile()
+        profiler.enable()
+
         self._write_run_metadata()
-
         results = self._execute_tasks()
-
         self._update_metadata_on_end(results=results)
+
+        profiler.disable()
+        profiler.dump_stats(self._cProfile_output_path)
 
         # Stop the Rich logger (only if dynamic logging is enabled)
         if ade_bench_config.use_dynamic_logging:
             rich_logger.stop()
+        
 
         # Generate HTML results dashboard
         if not self._disable_diffs:
@@ -1202,6 +1213,13 @@ class Harness:
             "system",
             "finish",
             f"Harness run completed: {successful_tasks} of {total_tasks} tasks successful"
+        )
+
+        log_harness_info(
+            self._logger,
+            "system",
+            "finish",
+            f"Profiling informationn from cProfiler saved to {self._cProfile_output_path}."
         )
 
         return results
