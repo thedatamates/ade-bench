@@ -12,8 +12,12 @@ author_email: test
 difficulty: medium
 category: debug
 tags:
+  - data-hygiene
+  - data-inspection
   - dbt
-  - data
+  - dbt-packages
+  - debugging
+  - model-refactor
 
 # Test setup script to run before dbt tests
 test_setup: |-

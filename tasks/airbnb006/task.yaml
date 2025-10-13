@@ -13,7 +13,8 @@ difficulty: medium
 category: hygiene
 tags:
   - dbt
-  - naming
+  - dbt-hygiene
+  - model-refactor
 
 # Test setup script to run before dbt tests
 test_setup: |-

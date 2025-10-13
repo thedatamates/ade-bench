@@ -15,8 +15,12 @@ author_email: test
 difficulty: medium
 category: model-creation
 tags:
+  - analysis
+  - data-hygiene
+  - data-inspection
   - dbt
-  - data-quality
+  - debugging
+  - dbt-project-configuration
 
 # Tables to compare for solution
 solution_seeds:

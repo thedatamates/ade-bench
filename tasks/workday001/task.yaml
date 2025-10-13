@@ -10,9 +10,7 @@ author_name: test
 author_email: test
 difficulty: medium
 category: model-creation
-tags:
-  - dbt
-  - model-refactor
+tags: []
 
 # Test setup script to run before dbt tests
 test_setup: |-

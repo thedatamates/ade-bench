@@ -18,9 +18,14 @@ author_email: test
 difficulty: easy
 category: jinja
 tags:
+  - data-inspection
   - dbt
-  - jinja
+  - dbt-macros
+  - dbt-packages
   - dbt-utils
+  - debugging
+  - jinja
+  - model-refactor
 
 # Test setup script to run before dbt tests
 test_setup: |-

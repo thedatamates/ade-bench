@@ -12,8 +12,9 @@ author_email: test
 difficulty: medium
 category: data-transformation
 tags:
+  - data-inspection
   - dbt
-  - macros
+  - model-refactor
 
 # Variants for different database and project combinations
 variants:

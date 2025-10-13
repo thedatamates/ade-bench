@@ -12,7 +12,7 @@ difficulty: medium
 category: debugging
 tags:
   - dbt
-  - data-quality
+  - model-creation
 
 # Tables to compare for solution
 solution_seeds:

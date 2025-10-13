@@ -26,7 +26,8 @@ difficulty: medium
 category: data-transformation
 tags:
   - dbt
-  - macros
+  - external-knowledge
+  - model-creation
 
 # Tables to compare for solution
 solution_seeds:

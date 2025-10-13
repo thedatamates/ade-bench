@@ -18,7 +18,7 @@ difficulty: medium
 category: model-refactor
 tags:
   - dbt
-  - data
+  - model-refactor
 
 # Test setup script to run before dbt tests
 test_setup: |-

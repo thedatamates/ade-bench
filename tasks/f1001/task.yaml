@@ -13,7 +13,11 @@ difficulty: medium
 category: model-creation
 tags:
   - dbt
+  - dbt-hygiene
+  - debugging
+  - model-creation
   - model-refactor
+  - dbt-materialization
 
 # Test setup script to run before dbt tests
 test_setup: |-

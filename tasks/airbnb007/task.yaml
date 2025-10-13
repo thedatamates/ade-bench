@@ -12,7 +12,9 @@ difficulty: hard
 category: model-creation
 tags:
   - dbt
-  - naming
+  - model-creation
+  - dbt-materialization
+  - dbt-project-configuration
 
 # Tables to compare for solution
 solution_seeds:

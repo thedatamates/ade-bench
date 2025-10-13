@@ -12,6 +12,8 @@ difficulty: easy
 category: debug
 tags:
   - dbt
+  - debugging
+  - dbt-project-configuration
 
 # Test setup script to run before dbt tests
 test_setup: |-

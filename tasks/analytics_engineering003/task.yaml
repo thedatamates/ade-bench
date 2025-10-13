@@ -11,6 +11,7 @@ difficulty: easy
 category: model_creation
 tags:
   - dbt
+  - model-creation
 
 # Optional test setup script to run before dbt tests
 test_setup: |-

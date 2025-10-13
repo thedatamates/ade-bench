@@ -14,7 +14,9 @@ author_email: test
 difficulty: medium
 category: analysis
 tags:
-  - relative-dates
+  - analysis
+  - dbt
+  - external-knowledge
 
 # Test setup script to run before dbt tests
 test_setup: |-

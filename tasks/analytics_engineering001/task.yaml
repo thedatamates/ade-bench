@@ -11,6 +11,7 @@ difficulty: easy
 category: diagnostic
 tags:
   - dbt
+  - diagnostic
 
 # Variants for different database and project combinations
 variants:

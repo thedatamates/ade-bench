@@ -11,7 +11,7 @@ difficulty: hard
 category: model_creation
 tags:
   - dbt
-  - join
+  - model-creation
 
 # Test setup script to run before dbt tests
 test_setup: |-

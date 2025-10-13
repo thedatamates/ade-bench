@@ -49,9 +49,7 @@ difficulty: hard
 category: data-transformation
 tags:
   - dbt
-  - aggregation
-  - joins
-  - analytics
+  - model-creation
 
 # Test setup script to run before dbt tests
 test_setup: |-

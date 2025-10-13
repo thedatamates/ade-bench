@@ -11,7 +11,11 @@ author_email: test
 difficulty: medium
 category: logic
 tags:
+  - analysis
+  - data-inspection
   - dbt
+  - debugging
+  - model-refactor
 
 # Variants for different database and project combinations
 variants:
