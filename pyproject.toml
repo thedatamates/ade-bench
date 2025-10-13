@@ -40,7 +40,7 @@ dev = [
 [project.scripts]
 wizard = "ade_bench.cli.wizard:main"
 ade-bench = "ade_bench.cli.ab.main:app"
-ab = "ade_bench.cli.ab.main:app"
+ade = "ade_bench.cli.ab.main:app"
 
 [build-system]
 requires = ["hatchling"]
