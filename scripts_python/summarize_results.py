@@ -1,13 +1,13 @@
 from tabulate import tabulate
 from ade_bench.harness_models import BenchmarkResults
-from ade_bench.utils.results_writer import format_trial_result
+from ade_bench.utils.results_writer import format_trial_result, get_failure_type
 from typing import Dict, List, Any
 
 
 def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     """Generate a JSON summary of benchmark results."""
     table_data = []
-    headers = ["Task", "Result", "Tests", "Passed", "Passed %", "Time (s)", "Cost", "Input Tokens", "Output Tokens", "Cache Tokens", "Turns"]
+    headers = ["Task", "Result", "Failure Type", "Tests", "Passed", "Passed %", "Time (s)", "Cost", "Input Tokens", "Output Tokens", "Cache Tokens", "Turns"]
 
     total_tests = 0
     total_tests_passed = 0
@@ -37,6 +37,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
 
         # Format values for HTML display (with commas)
         result_status = "p" if calc['_is_resolved'] else "FAIL"
+        failure_type = get_failure_type(result)
         cost_str = f"${calc['_cost_usd']:.2f}"
         input_tokens_str = f"{calc['_input_tokens']:,}"
         output_tokens_str = f"{calc['_output_tokens']:,}"
@@ -47,6 +48,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
         table_data.append({
             'task_id': calc['task_id'],
             'result': result_status,
+            'failure_type': failure_type,
             'status_class': calc['status_class'],
             'tests': str(calc['_tests']),
             'passed': str(calc['_tests_passed']),
@@ -77,6 +79,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     total_row = {
         'task_id': f"TOTAL (n={len(results.results)})",
         'result': f"{overall_accuracy:.0f}%",
+        'failure_type': "",
         'status_class': 'total-row',
         'tests': str(total_tests),
         'passed': str(total_tests_passed),
@@ -105,6 +108,7 @@ def format_summary_table(summary: Dict[str, Any]) -> List[List[str]]:
         table_data.append([
             task['task_id'],
             task['result'],
+            task['failure_type'],
             task['tests'],
             task['passed'],
             task['passed_percentage'],
@@ -124,6 +128,7 @@ def format_summary_table(summary: Dict[str, Any]) -> List[List[str]]:
     table_data.append([
         total_row['task_id'],
         total_row['result'],
+        total_row['failure_type'],
         total_row['tests'],
         total_row['passed'],
         total_row['passed_percentage'],
@@ -151,6 +156,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
         row = [
             task['task_id'],
             task['result'],
+            task['failure_type'],
             task['tests'],
             task['passed'],
             task['passed_percentage'],
@@ -169,6 +175,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
     total_row_data = [
         total_row['task_id'],
         total_row['result'],
+        total_row['failure_type'],
         total_row['tests'],
         total_row['passed'],
         total_row['passed_percentage'],

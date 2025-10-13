@@ -36,7 +36,7 @@ from ade_bench.utils.logger import logger, log_harness_info, rich_logger, initia
 from ade_bench.utils.test_generator import generate_solution_tests
 from ade_bench.utils.timeout_manager import TimeoutManager
 from ade_bench.utils.debug_breakpoint import breakpoint, DebugBreakpointException
-from ade_bench.utils.results_writer import ResultsTSVWriter
+from ade_bench.utils.results_writer import write_results_tsv
 
 
 class Harness:
@@ -311,7 +311,7 @@ class Harness:
                 self._logger,
                 trial_handler.task_id,
                 "done",
-                f"ERROR - test execution timed out after {timeouts.test_execution} seconds"
+                f"TIMEOUT - test execution timed out after {timeouts.test_execution} seconds"
             )
 
             # Kill the session to stop the test
@@ -437,7 +437,7 @@ class Harness:
                 self._logger,
                 trial_handler.task_id,
                 "done",
-                f"ERROR - agent operation timed out after {timeouts.total_agent_operation} seconds (setup + execution + cleanup)"
+                f"TIMEOUT - agent operation timed out after {timeouts.total_agent_operation} seconds (setup + execution + cleanup)"
             )
 
             # Try to copy logs before killing the session (for agents that support it)
@@ -530,7 +530,7 @@ class Harness:
                 self._logger,
                 trial_handler.task_id,
                 "done",
-                f"ERROR - task setup timed out after {timeouts.setup} seconds"
+                f"TIMEOUT - task setup timed out after {timeouts.setup} seconds"
             )
             return FailureMode.SETUP_TIMEOUT
         except Exception as e:
@@ -548,6 +548,9 @@ class Harness:
             trial_name=trial_handler.trial_name,
             task_id=trial_handler.task_id,
             task_prompt=trial_handler.task_prompt,
+            agent=str(self._agent_name.value),
+            db_type=config.get("db_type"),
+            project_type=config.get("project_type"),
         )
 
         with spin_up_terminal(
@@ -925,6 +928,10 @@ class Harness:
     def _write_results(self, results: BenchmarkResults) -> None:
         self._results_output_path.write_text(results.model_dump_json(indent=4))
 
+        # Also write TSV
+        tsv_path = self._run_path / "results.tsv"
+        write_results_tsv(results, tsv_path, self._run_id)
+
     def _get_git_commit_hash(self) -> str:
         """Get the current git commit hash."""
         try:
@@ -1089,11 +1096,17 @@ class Harness:
             logger.error(
                 f"Harness execution failed for {task_path} with key {task_key}: {e}"
             )
+            # Update logger table
+            log_harness_info(logger, trial_handler.task_id, "done", f"ERROR - {e}")
+
             trial_results = TrialResults(
                 trial_name=trial_name,
                 task_id=trial_handler.task_id,
                 task_prompt=trial_handler.task_prompt,
-                failure_mode=FailureMode.UNKNOWN_AGENT_ERROR,
+                failure_mode=FailureMode.UNKNOWN_HARNESS_ERROR,
+                agent=str(self._agent_name.value),
+                db_type=config.get("db_type"),
+                project_type=config.get("project_type"),
             )
             return trial_results
 
@@ -1148,10 +1161,6 @@ class Harness:
         if ade_bench_config.use_dynamic_logging:
             initialize_dynamic_logging(task_ids)
 
-        # Initialize the results TSV writer
-        tsv_writer = ResultsTSVWriter(self._run_path, self._agent_name, self._run_id)
-        tsv_writer.initialize()
-
         # Calculate total number of tasks (matching tasks * attempts)
         total_tasks = len(matching_tasks) * self._n_attempts
         max_workers = min(total_tasks, self._n_concurrent_trials)
@@ -1181,9 +1190,6 @@ class Harness:
                 completed_tasks += 1
 
                 self._write_results(results)
-
-                # Append to TSV file
-                tsv_writer.append_result(trial_results, config)
 
                 # Log progress update
                 successful_tasks = sum(1 for result in results.results if result.is_resolved)

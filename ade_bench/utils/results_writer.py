@@ -4,8 +4,45 @@ import csv
 from pathlib import Path
 from typing import Dict
 
-from ade_bench.harness_models import TrialResults
-from ade_bench.agents.agent_name import AgentName
+from ade_bench.harness_models import TrialResults, BenchmarkResults, FailureMode
+
+
+def get_failure_type(result: TrialResults) -> str:
+    """
+    Determine the failure type based on the result.
+
+    Returns:
+        - Empty string if test passed
+        - "eval_error" if dbt compile passed but tests failed
+        - "compile_error" if dbt compile failed
+        - "timeout" if test timed out
+        - The failure_mode value for other failures
+        - "unknown" if failure_mode is None/UNSET
+    """
+    # If test passed, no failure type
+    if result.is_resolved:
+        return ""
+
+    # Check for timeout (regardless of is_resolved state)
+    if result.failure_mode in [FailureMode.AGENT_TIMEOUT, FailureMode.SETUP_TIMEOUT, FailureMode.TEST_TIMEOUT]:
+        return result.failure_mode.value
+
+    # If is_resolved is False and failure_mode is UNSET, check parser results
+    if result.is_resolved is False and result.failure_mode == FailureMode.UNSET:
+        if result.parser_results and "dbt_compile" in result.parser_results:
+            from ade_bench.parsers.base_parser import UnitTestStatus
+            if result.parser_results["dbt_compile"] == UnitTestStatus.FAILED:
+                return "compile_error"
+            else:
+                # dbt compile passed, but other tests failed
+                return "eval_error"
+
+    # Otherwise, use the failure_mode value
+    if result.failure_mode in [FailureMode.NONE, FailureMode.UNSET, None]:
+        return "unknown"
+
+    # Return the actual failure mode value
+    return result.failure_mode.value
 
 
 def format_trial_result(result: TrialResults) -> Dict[str, any]:
@@ -52,79 +89,71 @@ def format_trial_result(result: TrialResults) -> Dict[str, any]:
     }
 
 
-class ResultsTSVWriter:
-    """Writes experiment results to a TSV file in real-time."""
+def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str) -> None:
+    """
+    Write benchmark results to a TSV file.
 
-    def __init__(self, output_path: Path, agent_name: AgentName, run_id: str):
-        """
-        Initialize the TSV writer.
+    Args:
+        results: BenchmarkResults object containing all trial results
+        output_path: Path to the output TSV file
+        run_id: Experiment run ID
+    """
+    headers = [
+        "experiment_id",
+        "task_id",
+        "result",
+        "failure_type",
+        "tests",
+        "passed",
+        "passed_percentage",
+        "time_seconds",
+        "cost",
+        "input_tokens",
+        "output_tokens",
+        "cache_tokens",
+        "turns",
+        "agent",
+        "db_type",
+        "project_type"
+    ]
 
-        Args:
-            output_path: Directory where the TSV file will be created
-            agent_name: Name of the agent being used
-            run_id: Unique identifier for this experiment run
-        """
-        self.tsv_path = output_path / "results.tsv"
-        self.agent_name = agent_name
-        self.run_id = run_id
+    with open(output_path, 'w', newline='') as f:
+        writer = csv.writer(f, delimiter='\t')
+        writer.writerow(headers)
 
-    def initialize(self) -> None:
-        """Initialize the TSV file with headers."""
-        headers = [
-            "experiment_id",
-            "task_id",
-            "result",
-            "tests",
-            "passed",
-            "passed_percentage",
-            "time_seconds",
-            "cost",
-            "input_tokens",
-            "output_tokens",
-            "cache_tokens",
-            "turns",
-            "agent",
-            "db_type",
-            "project_type"
-        ]
+        for trial_result in sorted(results.results, key=lambda x: x.task_id):
+            # Use shared formatting function to get calculated values
+            calc = format_trial_result(trial_result)
 
-        with open(self.tsv_path, 'w', newline='') as f:
-            writer = csv.writer(f, delimiter='\t')
-            writer.writerow(headers)
+            # Determine result status
+            if calc['_is_resolved']:
+                result_status = "pass"
+            elif calc['_is_resolved'] is None:
+                result_status = ""
+            else:
+                result_status = "fail"
 
-    def append_result(self, trial_result: TrialResults, config: Dict) -> None:
-        """
-        Append a single task result to the TSV file.
+            # Get failure type
+            failure_type = get_failure_type(trial_result)
 
-        Args:
-            trial_result: The trial results to append
-            config: The variant configuration containing db_type and project_type
-        """
-        # Use shared formatting function to get calculated values
-        calc = format_trial_result(trial_result)
+            row = [
+                run_id,
+                calc['task_id'],
+                result_status,
+                failure_type,
+                calc['_tests'],
+                calc['_tests_passed'],
+                calc['_passed_percentage'],
+                calc['_runtime_seconds'],
+                calc['_cost_usd'],
+                calc['_input_tokens'],
+                calc['_output_tokens'],
+                calc['_cache_tokens'],
+                calc['_turns'],
+                trial_result.agent or "",
+                trial_result.db_type or "",
+                trial_result.project_type or ""
+            ]
 
-        # Format for TSV (no commas, simple formatting)
-        result_status = "PASS" if calc['_is_resolved'] else "FAIL"
-
-        row = [
-            self.run_id,
-            calc['task_id'],
-            result_status,
-            calc['_tests'],
-            calc['_tests_passed'],
-            calc['_passed_percentage'],
-            calc['_runtime_seconds'],
-            calc['_cost_usd'],
-            calc['_input_tokens'],
-            calc['_output_tokens'],
-            calc['_cache_tokens'],
-            calc['_turns'],
-            str(self.agent_name.value),
-            config.get("db_type", ""),
-            config.get("project_type", "")
-        ]
-
-        with open(self.tsv_path, 'a', newline='') as f:
-            writer = csv.writer(f, delimiter='\t')
             writer.writerow(row)
 
