@@ -13,7 +13,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: hard
-category: model-creation
 tags:
   - analysis
   - data-hygiene

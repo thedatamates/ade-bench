@@ -9,7 +9,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: debugging
 tags:
   - dbt
   - model-creation

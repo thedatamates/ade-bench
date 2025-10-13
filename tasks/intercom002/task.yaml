@@ -46,7 +46,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: hard
-category: data-transformation
 tags:
   - dbt
   - model-creation

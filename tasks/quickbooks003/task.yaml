@@ -10,7 +10,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: hard
-category: jinja
 tags:
   - data-hygiene
   - data-inspection

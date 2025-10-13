@@ -181,7 +181,6 @@ class TaskMetadata(BaseModel):
     description: str
     prompt: str
     difficulty: str = Field(pattern="^(easy|medium|hard)$")
-    category: str
     tags: List[str] = Field(default_factory=list)
     test_type: str = "sql"
     db_type: str = "duckdb"

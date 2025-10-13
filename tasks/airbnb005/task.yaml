@@ -23,7 +23,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: data-transformation
 tags:
   - dbt
   - external-knowledge

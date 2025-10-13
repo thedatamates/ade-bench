@@ -8,7 +8,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: model_creation
 tags:
   - dbt
   - model-creation

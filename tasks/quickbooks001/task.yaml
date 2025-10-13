@@ -10,7 +10,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: easy
-category: debug
 tags:
   - data-hygiene
   - data-inspection

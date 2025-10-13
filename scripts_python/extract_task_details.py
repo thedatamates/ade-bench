@@ -57,7 +57,6 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
         description = clean_text_for_spreadsheet(task_config.get('description', ''))
         status = clean_text_for_spreadsheet(task_config.get('status', ''))
         difficulty = clean_text_for_spreadsheet(task_config.get('difficulty', ''))
-        category = clean_text_for_spreadsheet(task_config.get('category', ''))
         tags = task_config.get('tags', [])
 
         # Extract info from variants
@@ -97,7 +96,6 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
                 'prompt': '',
                 'notes': notes,
                 'difficulty': difficulty,
-                'category': category,
                 'tags': clean_text_for_spreadsheet(', '.join(tags) if tags else '')
             })
         else:
@@ -118,7 +116,6 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
                     'prompt': prompt_text,
                     'notes': notes,
                     'difficulty': difficulty,
-                    'category': category,
                     'tags': clean_text_for_spreadsheet(', '.join(tags) if tags else '')
                 })
 
@@ -175,7 +172,6 @@ def main():
         'project_types',
         'project_name',
         'database_name',
-        'category',
         'key',
         'description',
         'prompt',
@@ -220,7 +216,6 @@ def main():
     print(f"\nSummary:")
     print(f"- Total tasks: {len(df['task_id'].unique())}")
     print(f"- Total rows: {len(df)}")
-    print(f"- Categories: {', '.join(sorted(df['category'].unique()))}")
     print(f"- Difficulties: {', '.join(sorted(df['difficulty'].unique()))}")
 
 

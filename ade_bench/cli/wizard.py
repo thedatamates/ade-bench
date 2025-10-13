@@ -25,12 +25,6 @@ def main():
         default="medium",
     )
 
-    category = click.prompt(
-        "Category",
-        default="data-transformation",
-        help="e.g., data-transformation, reporting, modeling",
-    )
-
     # Database configuration
     db_type = click.prompt(
         "Database type",
@@ -56,7 +50,6 @@ def main():
         "title": title,
         "description": description,
         "difficulty": difficulty,
-        "category": category,
         "tags": [],
         "test_type": "sql",
         "db_type": db_type,

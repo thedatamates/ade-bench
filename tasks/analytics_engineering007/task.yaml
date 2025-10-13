@@ -11,7 +11,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: schema_change
 tags:
   - data-change
   - data-inspection

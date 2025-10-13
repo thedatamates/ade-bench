@@ -16,7 +16,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: jinja
 tags:
   - data-inspection
   - dbt

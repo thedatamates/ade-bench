@@ -25,7 +25,6 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: analysis
 tags:
   - analysis
   - dbt
