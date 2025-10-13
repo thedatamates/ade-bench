@@ -36,6 +36,7 @@ from ade_bench.utils.logger import logger, log_harness_info, rich_logger, initia
 from ade_bench.utils.test_generator import generate_solution_tests
 from ade_bench.utils.timeout_manager import TimeoutManager
 from ade_bench.utils.debug_breakpoint import breakpoint, DebugBreakpointException
+from ade_bench.utils.results_writer import ResultsTSVWriter
 
 
 class Harness:
@@ -304,6 +305,15 @@ class Harness:
                 f"{timeouts.test_execution}s for task "
                 f"{trial_handler.task_id}."
             )
+
+            # Update logger table
+            log_harness_info(
+                self._logger,
+                trial_handler.task_id,
+                "done",
+                f"ERROR - test execution timed out after {timeouts.test_execution} seconds"
+            )
+
             # Kill the session to stop the test
             try:
                 session.kill_session()
@@ -422,6 +432,14 @@ class Harness:
                 f"cleanup={timeouts.cleanup}s)"
             )
 
+            # Update logger table
+            log_harness_info(
+                self._logger,
+                trial_handler.task_id,
+                "done",
+                f"ERROR - agent operation timed out after {timeouts.total_agent_operation} seconds (setup + execution + cleanup)"
+            )
+
             # Try to copy logs before killing the session (for agents that support it)
             if hasattr(agent, '_copy_log_file_from_container'):
                 try:
@@ -508,6 +526,12 @@ class Harness:
 
         except asyncio.TimeoutError:
             self._logger.warning(f"Setup timed out after {timeouts.setup}s for task {trial_handler.task_id}")
+            log_harness_info(
+                self._logger,
+                trial_handler.task_id,
+                "done",
+                f"ERROR - task setup timed out after {timeouts.setup} seconds"
+            )
             return FailureMode.SETUP_TIMEOUT
         except Exception as e:
             self._logger.error(f"Setup failed for task {trial_handler.task_id}: {e}")
@@ -1124,6 +1148,10 @@ class Harness:
         if ade_bench_config.use_dynamic_logging:
             initialize_dynamic_logging(task_ids)
 
+        # Initialize the results TSV writer
+        tsv_writer = ResultsTSVWriter(self._run_path, self._agent_name, self._run_id)
+        tsv_writer.initialize()
+
         # Calculate total number of tasks (matching tasks * attempts)
         total_tasks = len(matching_tasks) * self._n_attempts
         max_workers = min(total_tasks, self._n_concurrent_trials)
@@ -1141,17 +1169,21 @@ class Harness:
                         task_key=task_key,
                         config=config,
                     )
-                    future_to_task[future] = (trial_name, attempt)
+                    future_to_task[future] = (trial_name, attempt, config)
 
             # Track progress
             completed_tasks = 0
 
             for future in as_completed(future_to_task):
+                trial_name, attempt, config = future_to_task[future]
                 trial_results = future.result()
                 results.results.append(trial_results)
                 completed_tasks += 1
 
                 self._write_results(results)
+
+                # Append to TSV file
+                tsv_writer.append_result(trial_results, config)
 
                 # Log progress update
                 successful_tasks = sum(1 for result in results.results if result.is_resolved)
