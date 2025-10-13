@@ -218,6 +218,14 @@ def main():
     print(f"- Total rows: {len(df)}")
     print(f"- Difficulties: {', '.join(sorted(df['difficulty'].unique()))}")
 
+    # Get unique individual tags (split comma-separated tag strings)
+    all_tags = set()
+    for tags_str in df['tags'].dropna():
+        if tags_str:
+            tags = [tag.strip() for tag in str(tags_str).split(',')]
+            all_tags.update(tags)
+    print(f"- Tags: {', '.join(sorted(all_tags))}")
+
 
 if __name__ == "__main__":
     main()
