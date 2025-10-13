@@ -59,8 +59,11 @@ ab runs open 2025-10-07__11-45-04
 Interact with individual tasks:
 
 ```bash
-# List all available tasks with their supported variants
-ab tasks list
+# List all available tasks with their prompts
+ade tasks list
+
+# Get tasks list with details and copy to clipboard in TSV format
+ade tasks list --copy
 
 # Launch an interactive shell into a task
 ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt
