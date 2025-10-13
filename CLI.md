@@ -7,12 +7,12 @@ The `ab` command line interface provides an easy way to run ADE-bench tasks and 
 ADE-bench CLI is installed when you install the ADE-bench package. You can also use the wrapper script directly from the repository:
 
 ```bash
-# From the repository
-./ab --help
+# install local package from root of project
+pip install -e .
 
-# Or after installing the package
+# after installing the package
 ade-bench --help
-ab --help  # Shorthand alias
+ade --help  # Shorthand alias
 ```
 
 ## Commands
