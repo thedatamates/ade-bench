@@ -32,10 +32,12 @@ task_ids:
   - f1005
   - f1006
   - f1007
+  - f1009
+  - f1010
+  - f1011
   - intercom001
   - intercom002
   - intercom003
   - quickbooks001
   - quickbooks002
-  - quickbooks003
   - quickbooks004

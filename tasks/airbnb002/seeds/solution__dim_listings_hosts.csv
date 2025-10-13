@@ -2923,7 +2923,7 @@ CREATED_AT,UPDATED_AT,LISTING_ID,LISTING_NAME,ROOM_TYPE,MINIMUM_NIGHTS,PRICE,HOS
 2021-11-18 11:09:29,2021-11-18 11:09:29,7911896,Beautiful Studio in Central Berlin,Entire home/apt,5,35.000,9704111,Catherine,f,d7db46efd917b6a9a55a037679517a9f
 2015-08-19 06:45:13,2015-08-19 06:45:13,7911904,Comfy Zimmer,Private room,1,26.000,41718759,Tibor,f,b3d70c266558d514614637d276b1c7c2
 2021-10-24 05:22:20,2021-10-24 05:22:20,7913656,A piece of paradise in Neukölln,Private room,1,22.000,15194048,Rosa,f,e9b9c2776b77b6371a64034b75fce4b4
-2015-09-17 07:25:25,2015-09-17 07:25:25,7914186,\Comfortable In Friedrichshain//,Private room,7,17.000,40586748,Konstantin,f,c646b2a4895a03061792b68b03fa824c
+2015-09-17 07:25:25,2015-09-17 07:25:25,7914186,Comfortable In Friedrichshain//,Private room,7,17.000,40586748,Konstantin,f,c646b2a4895a03061792b68b03fa824c
 2015-09-02 04:34:10,2015-09-02 04:34:10,7914317,Cosy room in the heart of Neukölln,Private room,6,39.000,41724536,Kitty,f,99d3f0e3444071722c2737be34f082f7
 2015-09-26 07:36:40,2015-09-26 07:36:40,7916154,ML86 Schöneberg City West - 67m²,Entire home/apt,3,51.000,41741297,Jörn,f,f5f4b5591a4810dcac5896ecdf60de08
 2015-08-14 16:00:42,2015-08-14 16:00:42,7925838,Schönes Zimmer am Kanal (Gräfekiez),Private room,3,48.000,36517313,Katja,t,301dbf2871506cdb4bf4ce53e64b9cf9
@@ -9696,7 +9696,7 @@ CREATED_AT,UPDATED_AT,LISTING_ID,LISTING_NAME,ROOM_TYPE,MINIMUM_NIGHTS,PRICE,HOS
 2018-07-28 21:11:33,2018-07-28 21:11:33,27054905,charmante Altbauwhng. in Friedrichshain,Entire home/apt,2,23.000,33587771,Lina Yasmin,t,e3265eb2bfa9995f8990722381bd0613
 2021-11-12 04:37:29,2021-11-12 04:37:29,27055854,"Wohnung privatem Parkplatz,ruhig und grünen Lage",Entire home/apt,90,40.000,115853077,Elena,f,06eb0c6a63108f3b0d578c7a0de161cc
 2018-08-06 20:32:35,2018-08-06 20:32:35,27056596,"Großes Zimmer - Spreeblick & Müggelwald 24,-",Private room,4,26.000,99506045,Marie,t,ffe7568521bb800250bba67e14e0ecaa
-2018-07-25 07:19:51,2018-07-25 07:19:51,27057198,Berlin-Mitte/Heart of Berlin\ Luxury & Quiet Place,Entire home/apt,3,145.000,203584355,Oliver,f,7ea88582111ec6a1b99f2786852dd64d
+2018-07-25 07:19:51,2018-07-25 07:19:51,27057198,Berlin-Mitte/Heart of Berlin Luxury & Quiet Place,Entire home/apt,3,145.000,203584355,Oliver,f,7ea88582111ec6a1b99f2786852dd64d
 2018-07-30 04:59:42,2018-07-30 04:59:42,27072298,Großes Apartment - Zentral in Berlin,Entire home/apt,1,110.000,57540342,Paul,f,706e70146c5e70a4110dbc388b9b7b34
 2018-08-21 01:21:10,2018-08-21 01:21:10,27073991,Gästesuite im modernen Architektenhaus,Entire home/apt,3,35.000,27887965,Frida,f,136634430610d6f335dce0388e8ad795
 2018-07-31 17:04:01,2018-07-31 17:04:01,27082482,Huge 5 room Apt. near Kudamm!,Entire home/apt,1,120.000,21909957,Akiva,f,50a5af490b241b167a77f3dab2a75faa
