@@ -104,8 +104,19 @@ class Dataset:
                 tasks[task_id] = (task_path, specific_task_key)
             return tasks
 
-        with open(yaml_path) as f:
-            task_data = yaml.safe_load(f)
+        try:
+            with open(yaml_path) as f:
+                task_data = yaml.safe_load(f)
+        except FileNotFoundError:
+            # Provide a more helpful error message if the task directory doesn't exist
+            potential_flag = task_path.name
+            if potential_flag in ["run-id", "db", "agent", "project-type"]:
+                raise FileNotFoundError(
+                    f"Task '{potential_flag}' not found. This looks like it might be an option. "
+                    f"Did you mean to use --{potential_flag} instead? "
+                    f"Example: --{potential_flag} value"
+                )
+            raise
 
         for prompt in task_data["prompts"]:
             task_id = self._create_task_id(task_path.name, prompt["key"])
