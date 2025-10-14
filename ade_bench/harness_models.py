@@ -71,6 +71,7 @@ class TrialResults(BaseModel):
     agent: str | None = None
     db_type: str | None = None
     project_type: str | None = None
+    used_mcp: bool | None = None
 
 
 class BenchmarkResults(BaseModel):

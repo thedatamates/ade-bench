@@ -102,6 +102,7 @@ def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str)
         "experiment_id",
         "task_id",
         "result",
+        "result_num",
         "failure_type",
         "tests",
         "passed",
@@ -114,7 +115,8 @@ def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str)
         "turns",
         "agent",
         "db_type",
-        "project_type"
+        "project_type",
+        "used_mcp"
     ]
 
     with open(output_path, 'w', newline='') as f:
@@ -128,10 +130,13 @@ def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str)
             # Determine result status
             if calc['_is_resolved']:
                 result_status = "pass"
+                result_status_num = 1
             elif calc['_is_resolved'] is None:
                 result_status = ""
+                result_status_num = None
             else:
                 result_status = "fail"
+                result_status_num = 0
 
             # Get failure type
             failure_type = get_failure_type(trial_result)
@@ -140,6 +145,7 @@ def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str)
                 run_id,
                 calc['task_id'],
                 result_status,
+                result_status_num,
                 failure_type,
                 calc['_tests'],
                 calc['_tests_passed'],
@@ -152,7 +158,8 @@ def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str)
                 calc['_turns'],
                 trial_result.agent or "",
                 trial_result.db_type or "",
-                trial_result.project_type or ""
+                trial_result.project_type or "",
+                trial_result.used_mcp if trial_result.used_mcp is not None else ""
             ]
 
             writer.writerow(row)

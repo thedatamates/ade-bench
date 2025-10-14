@@ -551,6 +551,7 @@ class Harness:
             agent=str(self._agent_name.value),
             db_type=config.get("db_type"),
             project_type=config.get("project_type"),
+            used_mcp=self._use_mcp,
         )
 
         with spin_up_terminal(
@@ -1107,6 +1108,7 @@ class Harness:
                 agent=str(self._agent_name.value),
                 db_type=config.get("db_type"),
                 project_type=config.get("project_type"),
+                used_mcp=self._use_mcp,
             )
             return trial_results
 
