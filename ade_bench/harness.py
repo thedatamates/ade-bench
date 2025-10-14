@@ -160,6 +160,10 @@ class Harness:
         if self._agent_name == AgentName.ORACLE:
             agent_kwargs["task_ids"] = [task_id]
 
+        # Pass model_name to agents (if provided)
+        if self._model_name:
+            agent_kwargs["model_name"] = self._model_name
+
         # Pass use_mcp flag to installed agents
         agent_kwargs["use_mcp"] = self._use_mcp
 

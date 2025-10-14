@@ -34,12 +34,23 @@ class OpenAICodexAgent(AbstractInstalledAgent):
     def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
         escaped_prompt = shlex.quote(task_prompt)
 
+        if self._model_name:
+            model_command = f" --model {self._model_name}"
+        else:
+            model_command = ""
+
+        command = (
+            f"echo 'AGENT RESPONSE: ' && "
+            f"printenv OPENAI_API_KEY | codex login --with-api-key && "
+            f"codex --ask-for-approval never {model_command} "
+            f"exec "
+            f"--json --sandbox danger-full-access --skip-git-repo-check "
+            f"{escaped_prompt}"
+        )
+
         return [
             TerminalCommand(
-                command=
-                f"echo 'AGENT RESPONSE: ' && "
-                f"printenv OPENAI_API_KEY | codex login --with-api-key && "
-                f"codex --ask-for-approval never exec --json --sandbox danger-full-access --skip-git-repo-check {escaped_prompt}",
+                command=command,
                 min_timeout_sec=0.0,
                 max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,

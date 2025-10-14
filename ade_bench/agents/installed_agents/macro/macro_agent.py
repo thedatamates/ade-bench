@@ -17,9 +17,10 @@ class MacroAgent(BaseAgent):
     LOG_FILENAME = "logs.jsonl"
     LOG_DIR = "/var/log/macro-agent"
 
-    def __init__(self, additional_args: str = "", **kwargs):
+    def __init__(self, additional_args: str = "", model_name: str | None = None, **kwargs):
         super().__init__(**kwargs)
         self.additional_args = additional_args
+        # Note: model_name is accepted for compatibility but not used by Macro
 
 
     @property

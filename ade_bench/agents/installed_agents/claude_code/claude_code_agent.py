@@ -31,14 +31,18 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
         return Path(__file__).parent / "claude-code-setup.sh"
 
     def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
+        header = "echo 'AGENT RESPONSE: ' && "
         escaped_prompt = shlex.quote(task_prompt)
+        command = f"{header} claude --output-format json -p {escaped_prompt}"
+
+        if self._model_name:
+            command += f" --model {self._model_name}"
+
+        command += f" --allowedTools {' '.join(self.ALLOWED_TOOLS)}"
 
         return [
             TerminalCommand(
-                command=
-                f"echo 'AGENT RESPONSE: ' && "
-                f"claude --output-format json -p {escaped_prompt} --allowedTools "
-                f"{' '.join(self.ALLOWED_TOOLS)}",
+                command=command,
                 min_timeout_sec=0.0,
                 max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,
