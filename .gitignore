@@ -43,6 +43,7 @@ experiments/
 results/
 outputs/
 profiling/summaries
+profiling/statistics
 
 # Docker
 .docker/
