@@ -141,8 +141,13 @@ def copy_to_clipboard(text: str) -> bool:
         return False
 
 
-def main():
-    """Main function to extract task details and generate CSV."""
+def main(output_file: Path | None = None, quiet: bool = False):
+    """Main function to extract task details and generate CSV.
+
+    Args:
+        output_file: Optional path to save the TSV file to
+        quiet: If True, suppress verbose output
+    """
     # Get the tasks directory
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
@@ -152,7 +157,8 @@ def main():
         print(f"Error: Tasks directory not found at {tasks_dir}")
         sys.exit(1)
 
-    print(f"Extracting task details from {tasks_dir}...")
+    if not quiet:
+        print(f"Extracting task details from {tasks_dir}...")
 
     # Extract task details
     task_details = extract_task_details(tasks_dir)
@@ -187,6 +193,17 @@ def main():
 
     # Generate TSV for clipboard (better for Google Sheets)
     tsv_content = df.to_csv(index=False, sep='\t')
+
+    # Save to file if output_file is provided
+    if output_file:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(tsv_content)
+        if not quiet:
+            print(f"Successfully wrote task details to {output_file}")
+            print(f"  - Total tasks: {len(df['task_id'].unique())}")
+            print(f"  - Total rows: {len(df)}")
+        return
 
     # Print the CSV in a pretty format
     print("\n" + "="*80)
