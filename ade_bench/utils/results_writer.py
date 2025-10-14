@@ -24,7 +24,7 @@ def get_failure_type(result: TrialResults) -> str:
         return ""
 
     # Check for timeout (regardless of is_resolved state)
-    if result.failure_mode in [FailureMode.AGENT_TIMEOUT, FailureMode.SETUP_TIMEOUT, FailureMode.TEST_TIMEOUT]:
+    if result.failure_mode in [FailureMode.AGENT_TIMEOUT, FailureMode.AGENT_SETUP_TIMEOUT, FailureMode.SETUP_TIMEOUT, FailureMode.TEST_TIMEOUT]:
         return result.failure_mode.value
 
     # If is_resolved is False and failure_mode is UNSET, check parser results

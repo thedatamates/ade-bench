@@ -17,6 +17,7 @@ class FailureMode(Enum):
     NONE = "none"
     UNKNOWN = "unknown"
     SETUP_TIMEOUT = "setup_timeout"
+    AGENT_SETUP_TIMEOUT = "agent_setup_timeout"
     AGENT_TIMEOUT = "agent_timeout"
     TEST_TIMEOUT = "test_timeout"
     UNKNOWN_AGENT_ERROR = "unknown_agent_error"

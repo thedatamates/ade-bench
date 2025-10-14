@@ -17,7 +17,7 @@ from typing import Any
 
 from ade_bench.agents.agent_name import AgentName
 from ade_bench.agents.base_agent import AgentResult, BaseAgent
-from ade_bench.harness_models import TerminalCommand
+from ade_bench.harness_models import TerminalCommand, FailureMode
 from ade_bench.terminal.tmux_session import TmuxSession
 from ade_bench.utils.logger import log_harness_info, logger
 from ade_bench.config import config
@@ -69,63 +69,81 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         logging_dir: Path | None = None,
         task_name: str | None = None,
     ) -> AgentResult:
-        session.copy_to_container(
-            self._install_agent_script,
-            container_dir="/installed-agent",
-            container_filename="install-agent.sh",
-        )
-
-        # Execute outside the session to avoid exposing the env variables.
-        env_setup_content = self._create_env_setup_file()
-        session.container.exec_run(
-            [
-                "sh",
-                "-c",
-                (
-                    f"echo {shlex.quote(env_setup_content)} > "
-                    "/installed-agent/setup-env.sh"
-                ),
-            ]
-        )
-
-        session.send_keys(
-            [
-                "source /installed-agent/setup-env.sh",
-                "Enter",
-            ],
-            block=True,
-            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
-        )
-
-        session.send_keys(
-            [
-                "source /installed-agent/install-agent.sh",
-                "Enter",
-            ],
-            block=True,
-            max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
-        )
-
-        # Optionally setup dbt MCP server
-        if self._use_mcp:
-            dbt_mcp_script = Path(__file__).parent.parent.parent.parent / "shared" / "scripts" / "setup-dbt-mcp.sh"
+        # Agent setup phase - catch timeouts here and return with AGENT_SETUP_TIMEOUT
+        try:
             session.copy_to_container(
-                dbt_mcp_script,
-                container_dir="/scripts",
-                container_filename="setup-dbt-mcp.sh",
+                self._install_agent_script,
+                container_dir="/installed-agent",
+                container_filename="install-agent.sh",
             )
 
-            # Pass db_type, project_type, and agent name
-            db_type = self._variant_config.get('db_type', 'unknown')
-            project_type = self._variant_config.get('project_type', 'unknown')
-            agent_name = self.NAME.value if hasattr(self.NAME, 'value') else str(self.NAME)
+            # Execute outside the session to avoid exposing the env variables.
+            env_setup_content = self._create_env_setup_file()
+            session.container.exec_run(
+                [
+                    "sh",
+                    "-c",
+                    (
+                        f"echo {shlex.quote(env_setup_content)} > "
+                        "/installed-agent/setup-env.sh"
+                    ),
+                ]
+            )
+
             session.send_keys(
                 [
-                    f"bash /scripts/setup-dbt-mcp.sh {db_type} {project_type} {agent_name}",
+                    "source /installed-agent/setup-env.sh",
                     "Enter",
                 ],
                 block=True,
-                max_timeout_sec=config.setup_timeout_sec,
+                max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
+            )
+
+            session.send_keys(
+                [
+                    "source /installed-agent/install-agent.sh",
+                    "Enter",
+                ],
+                block=True,
+                max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
+            )
+
+            # Optionally setup dbt MCP server
+            if self._use_mcp:
+                dbt_mcp_script = Path(__file__).parent.parent.parent.parent / "shared" / "scripts" / "setup-dbt-mcp.sh"
+                session.copy_to_container(
+                    dbt_mcp_script,
+                    container_dir="/scripts",
+                    container_filename="setup-dbt-mcp.sh",
+                )
+
+                # Pass db_type, project_type, and agent name
+                db_type = self._variant_config.get('db_type', 'unknown')
+                project_type = self._variant_config.get('project_type', 'unknown')
+                agent_name = self.NAME.value if hasattr(self.NAME, 'value') else str(self.NAME)
+                session.send_keys(
+                    [
+                        f"bash /scripts/setup-dbt-mcp.sh {db_type} {project_type} {agent_name}",
+                        "Enter",
+                    ],
+                    block=True,
+                    max_timeout_sec=config.setup_timeout_sec,
+                )
+        except TimeoutError:
+            log_harness_info(
+                logger,
+                task_name,
+                "agent",
+                f"Agent setup timed out after {config.setup_timeout_sec}s during setup and installation phase"
+            )
+            return AgentResult(
+                input_tokens=0,
+                output_tokens=0,
+                cache_tokens=0,
+                num_turns=0,
+                runtime_ms=0,
+                cost_usd=0.0,
+                failure_mode=FailureMode.AGENT_SETUP_TIMEOUT,
             )
 
         # Create a log file for agent output

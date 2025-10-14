@@ -424,9 +424,10 @@ class Harness:
         except asyncio.TimeoutError:
             timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
             self._logger.warning(
-                f"Agent timed out after "
+                f"Agent execution timed out after "
                 f"{timeouts.total_agent_operation}s for task "
                 f"{trial_handler.task_id}. "
+                f"This is the total operation timeout (not agent setup). "
                 f"(Breakdown: setup={timeouts.setup}s, "
                 f"execution={timeouts.agent_execution}s, "
                 f"cleanup={timeouts.cleanup}s)"
@@ -437,7 +438,7 @@ class Harness:
                 self._logger,
                 trial_handler.task_id,
                 "done",
-                f"TIMEOUT - agent operation timed out after {timeouts.total_agent_operation} seconds (setup + execution + cleanup)"
+                f"TIMEOUT - agent execution timed out after {timeouts.total_agent_operation} seconds (total operation including setup + execution + cleanup)"
             )
 
             # Try to copy logs before killing the session (for agents that support it)
@@ -657,10 +658,21 @@ class Harness:
             if file_diff_handler:
                 file_diff_handler.handle_phase_diffing(terminal.container, "agent", trial_handler.task_id, self._logger)
 
-            # If agent timed out, stop the task immediately (don't run tests)
-            if agent_failure_mode == FailureMode.AGENT_TIMEOUT:
+            # If agent setup timed out, stop the task immediately (don't run tests)
+            if agent_failure_mode == FailureMode.AGENT_SETUP_TIMEOUT:
                 results.failure_mode = agent_failure_mode
-                self._logger.info(f"Task {trial_handler.task_id} halted due to agent timeout")
+                self._logger.info(f"Task {trial_handler.task_id} halted due to agent setup or installation timeout")
+                # Session should be killed
+                try:
+                    session.kill_session()
+                except Exception as e:
+                    self._logger.debug(f"Session already killed or error during cleanup: {e}")
+                return results
+
+            # If agent timed out, stop the task immediately (don't run tests)
+            elif agent_failure_mode == FailureMode.AGENT_TIMEOUT:
+                results.failure_mode = agent_failure_mode
+                self._logger.info(f"Task {trial_handler.task_id} halted due to agent execution timeout")
                 # Session already killed in _run_agent, but try again to be safe
                 try:
                     session.kill_session()
