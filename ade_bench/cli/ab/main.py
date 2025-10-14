@@ -21,79 +21,79 @@ app = typer.Typer(help="ADE-bench: Analytics and Data Engineering Benchmark")
 @app.command()
 def run(
     tasks: List[str] = typer.Argument(
-        ..., 
+        ...,
         help="Task ID(s) to run. Use 'all' to run all tasks from the YAML configuration"
     ),
     db: str = typer.Option(
-        ..., 
-        "--db", 
+        ...,
+        "--db",
         help="Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake)"
     ),
     project_type: str = typer.Option(
-        ..., 
-        "--project-type", 
+        ...,
+        "--project-type",
         help="Project type to filter variants (e.g., dbt, other)"
     ),
     output_path: Path = typer.Option(
-        Path("experiments"), 
-        "--output-path", 
-        "-o", 
+        Path("experiments"),
+        "--output-path",
+        "-o",
         help="Path to the output directory"
     ),
     agent: str = typer.Option(
-        "oracle", 
-        "--agent", 
+        "oracle",
+        "--agent",
         case_sensitive=False,
         help="The agent to benchmark (e.g., oracle, claude-code, macro)"
     ),
     model_name: str = typer.Option(
-        "", 
-        "--model-name", 
+        "",
+        "--model-name",
         help="The LLM model to use (e.g., claude-3-5-sonnet-20241022, gpt-4)"
     ),
     no_rebuild: bool = typer.Option(
-        False, 
-        "--no-rebuild", 
+        False,
+        "--no-rebuild",
         help="Don't rebuild Docker images"
     ),
     cleanup: bool = typer.Option(
-        False, 
-        "--cleanup", 
+        False,
+        "--cleanup",
         help="Cleanup Docker containers and images after running the task"
     ),
     n_concurrent_trials: int = typer.Option(
-        4, 
-        "--n-concurrent-trials", 
+        4,
+        "--n-concurrent-trials",
         help="Maximum number of tasks to run concurrently"
     ),
     exclude_tasks: Optional[List[str]] = typer.Option(
-        None, 
-        "--exclude-tasks", 
+        None,
+        "--exclude-tasks",
         help="Task IDs to exclude from the run"
     ),
     n_attempts: int = typer.Option(
-        1, 
-        "--n-attempts", 
+        1,
+        "--n-attempts",
         help="Number of attempts to make for each task"
     ),
     seed: bool = typer.Option(
-        False, 
-        "--seed", 
+        False,
+        "--seed",
         help="Extract specified tables as CSV files after harness run completes"
     ),
     agent_args: str = typer.Option(
-        "", 
-        "--agent-args", 
+        "",
+        "--agent-args",
         help="Additional arguments to pass to the agent binary (e.g., '--verbose --debug')"
     ),
     no_diffs: bool = typer.Option(
-        False, 
-        "--no-diffs", 
+        False,
+        "--no-diffs",
         help="Disable file diffing and HTML generation"
     ),
     persist: bool = typer.Option(
-        False, 
-        "--persist", 
+        False,
+        "--persist",
         help="Keep containers alive when tasks fail for debugging"
     ),
     run_id: str = typer.Option(
@@ -115,17 +115,22 @@ def run(
         "INFO",
         "--log-level",
         help="Set the logging level"
+    ),
+    use_mcp: bool = typer.Option(
+        False,
+        "--use-mcp",
+        help="Enable MCP (Model Context Protocol) for the agent"
     )
 ):
     """
     Run ADE-bench with specified tasks and configuration.
-    
+
     Example:
     ab run airbnb001 --db duckdb --project-type dbt --agent oracle
     """
     # Convert log level string to int
     log_level_int = getattr(logging, log_level.upper(), logging.INFO)
-    
+
     # Check for common mistakes in task_ids that look like flags
     flag_looking_args = [task for task in tasks if task.startswith("run-id") or task.startswith("--")]
     if flag_looking_args:
@@ -134,7 +139,7 @@ def run(
         if not typer.confirm("Continue anyway?"):
             typer.echo("Aborting.")
             raise typer.Exit(code=1)
-            
+
     # Convert agent string to AgentName enum
     try:
         agent_name = AgentName(agent.lower())
@@ -142,22 +147,22 @@ def run(
         typer.echo(f"Error: Invalid agent name '{agent}'")
         typer.echo(f"Available agents: {', '.join([a.value for a in AgentName])}")
         raise typer.Exit(code=1)
-    
+
     # Setup path variables
     dataset_config = Path("datasets/ade-bench-core.yaml")
     dataset_path = Path("tasks")
     task_ids = tasks
-    
+
     if len(tasks) == 1 and tasks[0].lower() == "all":
         task_ids = None
-        
+
     agent_kwargs = {}
-    
+
     if agent_name == AgentName.ORACLE:
         agent_kwargs["dataset_path"] = dataset_path
     elif agent_args:
         agent_kwargs["additional_args"] = agent_args
-    
+
     # Create and run the harness
     harness = Harness(
         dataset_path=dataset_path,
@@ -181,8 +186,9 @@ def run(
         db_type=db,
         project_type=project_type,
         keep_alive=persist,
+        use_mcp=use_mcp,
     )
-    
+
     results = harness.run()
     display_detailed_results(results)
 
@@ -191,7 +197,7 @@ def run(
 def view():
     """
     View the results of previous benchmark runs.
-    
+
     Opens the results HTML viewer in your default browser.
     """
     from scripts_python.view_results import main as view_results_main
