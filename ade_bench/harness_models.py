@@ -69,6 +69,7 @@ class TrialResults(BaseModel):
     recording_path: str | None = None
     # Experiment metadata
     agent: str | None = None
+    model_name: str | None = None
     db_type: str | None = None
     project_type: str | None = None
     used_mcp: bool | None = None

@@ -114,6 +114,7 @@ def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str)
         "cache_tokens",
         "turns",
         "agent",
+        "model_name",
         "db_type",
         "project_type",
         "used_mcp"
@@ -157,6 +158,7 @@ def write_results_tsv(results: BenchmarkResults, output_path: Path, run_id: str)
                 calc['_cache_tokens'],
                 calc['_turns'],
                 trial_result.agent or "",
+                trial_result.model_name or "",
                 trial_result.db_type or "",
                 trial_result.project_type or "",
                 trial_result.used_mcp if trial_result.used_mcp is not None else ""

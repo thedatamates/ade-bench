@@ -45,6 +45,7 @@ def migrate_row(row: Dict[str, str], experiment_id: str) -> Dict[str, str]:
     Migrations:
     - Add 'uses_mcp' column based on experiment configuration
     - Remove 'result_num' column if it exists
+    - Add 'model_name' column if it doesn't exist (set to empty string)
 
     Args:
         row: The row data to migrate
@@ -70,6 +71,10 @@ def migrate_row(row: Dict[str, str], experiment_id: str) -> Dict[str, str]:
     if 'result_num' in migrated_row:
         del migrated_row['result_num']
 
+    # Migration 3: Add model_name if it doesn't exist
+    if 'model_name' not in migrated_row:
+        migrated_row['model_name'] = ''
+
     return migrated_row
 
 
@@ -92,6 +97,7 @@ def get_canonical_column_order() -> List[str]:
         'cache_tokens',
         'turns',
         'agent',
+        'model_name',
         'db_type',
         'project_type',
         'uses_mcp'
