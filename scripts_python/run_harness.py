@@ -62,7 +62,7 @@ if __name__ == "__main__":
         default=datetime.now().strftime("%Y-%m-%d__%H-%M-%S"),
     )
     parser.add_argument(
-        "--model-name",
+        "--",
         type=str,
         help="The LLM model to use (e.g., claude-3-5-sonnet-20241022, gpt-4)",
         default=""

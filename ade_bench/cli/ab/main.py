@@ -48,7 +48,7 @@ def run(
     ),
     model_name: str = typer.Option(
         "",
-        "--model-name",
+        "--model",
         help="The LLM model to use (e.g., claude-3-5-sonnet-20241022, gpt-4)"
     ),
     no_rebuild: bool = typer.Option(

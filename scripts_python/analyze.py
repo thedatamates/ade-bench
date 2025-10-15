@@ -23,11 +23,12 @@ from typing import Dict, List, Any
 # Define how each experiment should be migrated.
 # Add new experiments here with their specific settings.
 EXPERIMENT_MIGRATIONS = {
-    '2025-10-13__21-24-29': {
-        'uses_mcp': True,
+    # These experiments had used_mcp: True in their TSVs, force to False
+    '2025-10-13__23-26-56': {
+        'uses_mcp': False,
     },
-    '2025-10-13__22-33-51': {
-        'uses_mcp': True,
+    '2025-10-14__16-31-08': {
+        'uses_mcp': False,
     }
 }
 
