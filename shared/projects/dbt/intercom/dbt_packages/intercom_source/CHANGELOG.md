@@ -1,10 +1,10 @@
 # dbt_intercom_source v0.8.1
-This release includes the following updates. 
+This release includes the following updates.
 
 ## Documentation
 - Corrected references to connectors and connections in the README. ([#39](https://github.com/fivetran/dbt_intercom_source/pull/39))
 
-## Under the Hood
+## Under The Hood
 - Prepends `materialized` configs in the package's `dbt_project.yml` file with `+` to improve compatibility with the newer versions of dbt-core starting with v1.10.0. ([PR #40](https://github.com/fivetran/dbt_intercom_source/pull/40))
 - Updates the package maintainer pull request template. ([PR #41](https://github.com/fivetran/dbt_intercom_source/pull/41))
 

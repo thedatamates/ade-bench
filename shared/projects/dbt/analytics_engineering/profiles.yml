@@ -11,7 +11,7 @@ analytics_engineering-snowflake:
   outputs:
     dev:
       type: snowflake
-      ## Added by when task is created
+      ## Added when task is created
       account: <account>
       user: <user>
       password: <password>

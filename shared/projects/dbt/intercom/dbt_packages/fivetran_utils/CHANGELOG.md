@@ -10,12 +10,12 @@
 
 # dbt_fivetran_utils v0.4.9
 
-## Feature Update
+## Feature update
 - Added macro `extract_url_parameter` to create special logic for Databricks instances not supported by `dbt_utils.get_url_parameter()`. The macro uses `dbt_utils.get_url_parameter()` for default, non-Databricks targets. See [README](https://github.com/fivetran/dbt_fivetran_utils/blob/releases/v0.4.latest/README.md#extract_url_parameter-source) for more details ([PR #130](https://github.com/fivetran/dbt_fivetran_utils/pull/130)).
 - Made the `try_cast()` [macro](https://github.com/fivetran/dbt_fivetran_utils/tree/releases/v0.4.latest#try_cast-source) compatible with SQL Server ([PR #131](https://github.com/fivetran/dbt_fivetran_utils/pull/131)).
 - Made the  `json_parse()` [macro](https://github.com/fivetran/dbt_fivetran_utils/tree/releases/v0.4.latest#date_spine-source) compatible with SQL Server ([PR #131](https://github.com/fivetran/dbt_fivetran_utils/pull/131)).
 - Added a `date_spine()` [macro](https://github.com/fivetran/dbt_fivetran_utils/tree/releases/v0.4.latest#json_parse-source) ([PR #131](https://github.com/fivetran/dbt_fivetran_utils/pull/131)).
-  - For non-SQL Server databases, this will simply call [`dbt_utils.date_spine()`](https://github.com/dbt-labs/dbt-utils#date_spine-source). 
+  - For non-SQL Server databases, this will simply call [`dbt_utils.date_spine()`](https://github.com/dbt-labs/dbt-utils#date_spine-source).
   - For SQL Server targets, this will manually create a spine, with code heavily leveraged from [`tsql-utils.date_spine()`](https://github.com/dbt-msft/tsql-utils/blob/main/macros/dbt_utils/datetime/date_spine.sql) but [adjusted for recent changes to dbt_utils](https://github.com/dbt-msft/tsql-utils/issues/96).
 
 ## Bug Fix
@@ -29,9 +29,9 @@
 # dbt_fivetran_utils v0.4.7
 [PR #118](https://github.com/fivetran/dbt_fivetran_utils/pull/118) includes the following updates.
 ## Feature Updates
-- Update to the `union_data` macro to ensure a source connection is established when just one schema is being used with the macro. ([code link for reference](https://github.com/fivetran/dbt_fivetran_utils/blob/bdece2dd5fcc47ae80f63b777d52a13eecb3416f/macros/union_data.sql#L112-L115)) 
+- Update to the `union_data` macro to ensure a source connection is established when just one schema is being used with the macro. ([code link for reference](https://github.com/fivetran/dbt_fivetran_utils/blob/bdece2dd5fcc47ae80f63b777d52a13eecb3416f/macros/union_data.sql#L112-L115))
     - The previous build did allow the macro to read data from the correct location; however, it did not leverage the source. Therefore, the models using this macro would result in not having a source connection. This has since been updated in this release and all versions of this macro (whether unioning or not) will attempt to leverage the source function.
-- In addition to the above update, a specific code adjustment was provided for the LinkedIn Company Pages and Instagram Business Pages packages as the sources are not named the same as their default schema. This was the core issue that resulted in dbt_fivetran_utils v0.4.5 being rolled back. This has now been addressed and may be expanded in the future for any other packages with mismatching source/default_schema names. ([code link for reference](https://github.com/fivetran/dbt_fivetran_utils/blob/bdece2dd5fcc47ae80f63b777d52a13eecb3416f/macros/union_data.sql#L95-L108)) 
+- In addition to the above update, a specific code adjustment was provided for the LinkedIn Company Pages and Instagram Business Pages packages as the sources are not named the same as their default schema. This was the core issue that resulted in dbt_fivetran_utils v0.4.5 being rolled back. This has now been addressed and may be expanded in the future for any other packages with mismatching source/default_schema names. ([code link for reference](https://github.com/fivetran/dbt_fivetran_utils/blob/bdece2dd5fcc47ae80f63b777d52a13eecb3416f/macros/union_data.sql#L95-L108))
     - For additional context, this is the approach taken as renaming the sources could result in incompatible versions of base package and fivetran_utils. Particularly, this could result in package users having a different experience based on the version of their base package. Which is not the behavior we would prefer for this new feature.
 
 ## Under the Hood
@@ -46,7 +46,7 @@
 # dbt_fivetran_utils v0.4.5
 ## Feature Updates
 [PR #110](https://github.com/fivetran/dbt_fivetran_utils/pull/110) includes the following feature updates:
-- Update to the `union_data` macro to ensure a source connection is established when just one schema is being used with the macro. 
+- Update to the `union_data` macro to ensure a source connection is established when just one schema is being used with the macro.
     - The previous build did allow the macro to read data from the correct location; however, it did not leverage the source. Therefore, the models using this macro would result in not having a source connection. This has since been updated in this release and all versions of this macro (whether unioning or not) will attempt to leverage the source function.
 # dbt_fivetran_utils v0.4.4
 
@@ -100,7 +100,7 @@
 - `packages.yml` update for `dbt_utils` from `[">=0.8.0", "<0.9.0"]` to `1.0.0-b2`
 
 # dbt_fivetran_utils v0.3.9
-## 🎉 Features 🎉 
+## 🎉 Features 🎉
 - Addition of the `transform` argument to the `persist_pass_through_columns` macro. This argument is optional and will take in a SQL function (most likely an aggregate such as `sum`) you would like to apply to the passthrough columns ([81](https://github.com/fivetran/dbt_fivetran_utils/pull/81)).
 
 # dbt_fivetran_utils v0.3.8
@@ -114,14 +114,14 @@
 # dbt_fivetran_utils v0.3.7
 - Rollback of the v0.3.6 release that introduced a bug for Snowflake users.
 # dbt_fivetran_utils v0.3.6
-## 🎉 Features 🎉 
-- New macro `get_column_names_only` that further automates the staging model creation to prefill column fields in the final select statement. 
+## 🎉 Features 🎉
+- New macro `get_column_names_only` that further automates the staging model creation to prefill column fields in the final select statement.
 - Updated bash script `generate_models` to incorporate this new macro.
 # dbt_fivetran_utils v0.3.5
-## 🎉 Features 🎉 
+## 🎉 Features 🎉
 - The `try_cast` macro has been added. This macro will try to cast the field to the specified datatype. If it cannot be cast, then a `null` value is provided. Please note, Postgres and Redshift destinations are only compatible with try_cast and the numeric datatype.
 # dbt_fivetran_utils v0.3.4
-## 🎉 Features 🎉 
+## 🎉 Features 🎉
 Added a new macro called `generate_docs` which returns a `source` command leveraging `generate_docs.sh` to do the following:
 - seeds, runs and creates documentation for integration tests models
 - moves `catalog.json`, `index.html`, `manifest.json` and `run_results.json` into a `<project_name>/docs` folder
@@ -134,7 +134,7 @@ When ran, this feature will remove existing files in the `<project_name>/docs` i
 ([#63](https://github.com/fivetran/dbt_fivetran_utils/pull/63/files)) This release of the `dbt_fivetran_utils` package includes the following updates to the README:
 - Add a Table of Contents to allow for quicker searches.
 - Leverage new Categories to better organize macros.
-- Update the `staging_models_automation` macro to reflect usage of the new `generate_columns.sh` and `generate_models.sh` scripts. 
+- Update the `staging_models_automation` macro to reflect usage of the new `generate_columns.sh` and `generate_models.sh` scripts.
 - Update the `generate_models.sh` script to create the models/macros folders if empty or replace any existing content in the models/macros folders.
 # dbt_fivetran_utils v0.3.2
 ## Fixes
@@ -162,7 +162,7 @@ When ran, this feature will remove existing files in the `<project_name>/docs` i
 
 ## Bug Fixes
 - Added a specific Snowflake macro designation for the `json_extract_path` macro. ([#50](https://github.com/fivetran/dbt_fivetran_utils/pull/50))
-    - This Snowflake version of the macro includes a `try_parse_json` function within the `json_extract_path` function. This allows for the macro to succeed if not all fields are a json object that are being passed through. If a field is not a json object, then a `null` record is generated. 
+    - This Snowflake version of the macro includes a `try_parse_json` function within the `json_extract_path` function. This allows for the macro to succeed if not all fields are a json object that are being passed through. If a field is not a json object, then a `null` record is generated.
 - Updated the Redshift macro designation for the `json_extract_path` macro. ([#50](https://github.com/fivetran/dbt_fivetran_utils/pull/50))
     - Similar to the above, Redshift cannot parse the field if every record is not a json object. This update converts a non-json field to `null` so the function does not fail.
 

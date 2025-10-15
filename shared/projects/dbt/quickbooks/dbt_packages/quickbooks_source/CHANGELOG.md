@@ -1,12 +1,12 @@
 # dbt_quickbooks_source v0.10.1
-[PR #53](https://github.com/fivetran/dbt_quickbooks_source/pull/53) introduces the following updates: 
+[PR #53](https://github.com/fivetran/dbt_quickbooks_source/pull/53) introduces the following updates:
 
 ## 🎉 Feature Update 🎉
 - Added the following fields to support the new multicurrency feature in the [v0.14.0 release of the `dbt_quickbooks` package](https://github.com/fivetran/dbt_quickbooks/releases/tag/v0.14.0):
   - `home_total_amount`, into `stg_quickbooks__deposit`.
   - `exchange_rate`, into `stg_quickbooks__estimate`.
 
-## 🚘 Under the Hood 🚘
+## 🚘 Under The Hood 🚘
 - Included auto-releaser GitHub Actions workflow to automate future releases.
 - Updated the maintainer PR template to resemble the most up to date format.
 - Removed the check docs GitHub Action as it is no longer necessary.
@@ -65,8 +65,8 @@ This will be a breaking change to those whose source tables still use the old ti
 
 # dbt_quickbooks_source v0.7.0
 ## 🎉 🚨 Breaking Changes and New Feature 🚨 🎉:
-- Add union schema ability to run QuickBooks across a number of schemas. ([#26](https://github.com/fivetran/dbt_quickbooks_source/pull/26) and [#35](https://github.com/fivetran/dbt_quickbooks_source/pull/35)) 
-    - Huge thanks to [@ligfx](https://github.com/ligfx) for [putting in the hard work](https://github.com/fivetran/dbt_quickbooks_source/pull/26) to help integrate this feature! 
+- Add union schema ability to run QuickBooks across a number of schemas. ([#26](https://github.com/fivetran/dbt_quickbooks_source/pull/26) and [#35](https://github.com/fivetran/dbt_quickbooks_source/pull/35))
+    - Huge thanks to [@ligfx](https://github.com/ligfx) for [putting in the hard work](https://github.com/fivetran/dbt_quickbooks_source/pull/26) to help integrate this feature!
 ## 🎉 Additional Features
 - Addition of all `class_id` fields to relevant models to support adding classes upstream into your general ledger models. [#35](https://github.com/fivetran/dbt_quickbooks_source/pull/35)
 - Updated README to follow latest package standards. [#37](https://github.com/fivetran/dbt_quickbooks_source/pull/37)
@@ -122,7 +122,7 @@ This will be a breaking change to those whose source tables still use the old ti
   >**Note**: the `credit_card_payment_txn` source and models are disabled by default. In order to enabled them, you will want to set the `using_credit_card_payment_txn` variable to `true` in your dbt_project.yml.
 
 ## Under the Hood
-- A GitHub workflow has been added to ensure the dbt docs are regenerated before each merge to the `main` release branch. 
+- A GitHub workflow has been added to ensure the dbt docs are regenerated before each merge to the `main` release branch.
 
 # dbt_quickbooks_source v0.5.0
 ## 🚨 Breaking Changes 🚨
