@@ -6,8 +6,6 @@ This script:
 1. Creates an "analysis" directory in dev
 2. Merges all .tsv files from experiments_saved into a single TSV
 3. Applies migrations to normalize column structure:
-   - Adds 'uses_mcp' column if missing (defaulting to False)
-   - Removes 'result_num' column if present
 4. Extracts task details and saves to analysis directory
 """
 
@@ -25,51 +23,58 @@ from typing import Dict, List, Any
 EXPERIMENT_MIGRATIONS = {
     # These experiments had used_mcp: True in their TSVs, force to False
     '2025-10-13__23-26-56': {
-        'uses_mcp': False,
+        'used_mcp': False,
     },
     '2025-10-14__16-31-08': {
-        'uses_mcp': False,
+        'used_mcp': False,
+    },
+    '2025-10-15__08-38-38': {
+        'model_name': 'claude-3-5-haiku-20241022',
     }
 }
 
 # Default migration settings for experiments not explicitly configured
 DEFAULT_MIGRATION = {
-    'uses_mcp': False,
+    'used_mcp': False,
     'model_name': ''
 }
 # =============================================================================
 
 
+def migrate_field(row: Dict[str, str], experiment_id: str, field_name: str) -> str:
+    """
+    Apply standard migration logic for a field.
+
+    Args:
+        row: The row data
+        experiment_id: The experiment ID
+        field_name: The field to migrate
+    """
+
+    if field_name not in row:
+        # Set default
+        return str(DEFAULT_MIGRATION.get(field_name, ''))
+    elif experiment_id in EXPERIMENT_MIGRATIONS and field_name in EXPERIMENT_MIGRATIONS[experiment_id]:
+        # Replace
+        return str(EXPERIMENT_MIGRATIONS[experiment_id][field_name])
+    else:
+        # Use existing value
+        return str(row[field_name])
+
+
 def migrate_row(row: Dict[str, str], experiment_id: str) -> Dict[str, str]:
     """
     Apply migrations to normalize a row's structure based on experiment config.
-
-    Migrations:
-    - Add 'uses_mcp' column based on experiment configuration
-    - Remove 'result_num' column if it exists
-    - Add 'model_name' column if it doesn't exist (set to empty string)
-
-    Args:
-        row: The row data to migrate
-        experiment_id: The experiment ID to look up migration settings
     """
     migrated_row = row.copy()
 
-    # Migration 1: Handle uses_mcp column
-    if 'used_mcp' not in migrated_row:
-        migrated_row['uses_mcp'] = DEFAULT_MIGRATION.get('uses_mcp')
-    elif experiment_id in EXPERIMENT_MIGRATIONS and 'uses_mcp' in EXPERIMENT_MIGRATIONS[experiment_id]:
-        migrated_row['uses_mcp'] = EXPERIMENT_MIGRATIONS[experiment_id]['uses_mcp']
-    else:
-        migrated_row['uses_mcp'] = migrated_row['used_mcp']
+    # Handle field migrations using the standard function
+    migrated_row['used_mcp'] = migrate_field(row, experiment_id, 'used_mcp')
+    migrated_row['model_name'] = migrate_field(row, experiment_id, 'model_name')
 
-    # Migration 2: Remove result_num if present
+    # Remove old columns
     if 'result_num' in migrated_row:
         del migrated_row['result_num']
-
-    # Migration 3: Add model_name if it doesn't exist
-    if 'model_name' not in migrated_row:
-        migrated_row['model_name'] = DEFAULT_MIGRATION.get('model_name')
 
     return migrated_row
 
@@ -96,7 +101,7 @@ def get_canonical_column_order() -> List[str]:
         'model_name',
         'db_type',
         'project_type',
-        'uses_mcp'
+        'used_mcp'
     ]
 
 
