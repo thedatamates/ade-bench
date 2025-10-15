@@ -1,12 +1,9 @@
 #!/bin/bash
 echo "Setup OpenAI Codex"
-apt-get update
-apt-get install -y curl
 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
-source "$HOME/.nvm/nvm.sh"
-nvm install 22
-npm -v
+# Node.js should already be pre-installed in the Docker image
+node --version
+npm --version
 
 echo "installing OpenAI Codex"
 
