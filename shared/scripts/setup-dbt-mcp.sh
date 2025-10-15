@@ -25,8 +25,9 @@ if [[ ! " snowflake " =~ " $DB_TYPE " ]]; then
     exit 0
 fi
 
-# Get working directory
+# Get working directory and env file location
 project_dir=$(pwd)
+env_file="${project_dir}/.env"
 
 # Find dbt path
 dbt_path=$(which dbt)
@@ -37,7 +38,7 @@ fi
 
 # Create .env file for dbt-mcp
 # TODO, because this probably a janky way to do this.
-cat > .env << EOF
+cat > "$env_file" << EOF
 DBT_PROJECT_DIR=$project_dir
 DBT_PATH=$dbt_path
 DISABLE_DBT_CLI=false
@@ -48,19 +49,26 @@ DISABLE_SQL=true
 DISABLE_DBT_CODEGEN=true
 EOF
 
+# Check if dbt-mcp is already installed (pre-installed in Docker image)
+if ! command -v dbt-mcp &> /dev/null; then
+    echo "dbt-mcp not found, installing..."
+    uv tool install dbt-mcp --force
+    echo "dbt-mcp installed"
+fi
+
 if [[ "$AGENT_NAME" == "claude" ]]; then
     echo "Registering dbt MCP server with Claude..."
-    claude mcp add dbt -- uvx --env-file .env dbt-mcp
+    claude mcp add dbt -- uvx --env-file "$env_file" dbt-mcp
     claude mcp list
 
 elif [[ "$AGENT_NAME" == "codex" ]]; then
     echo "Registering dbt MCP server with Codex..."
-    codex mcp add dbt -- uvx --env-file .env dbt-mcp
+    codex mcp add dbt -- uvx --env-file "$env_file" dbt-mcp
     codex mcp list
 
 elif [[ "$AGENT_NAME" == "gemini" ]]; then
     echo "Registering dbt MCP server with Gemini..."
-    gemini mcp add dbt uvx -- --env-file .env dbt-mcp
+    gemini mcp add dbt uvx -- --env-file "$env_file" dbt-mcp
     gemini mcp list
 
 else

@@ -14,6 +14,11 @@ RUN pip install --no-cache-dir \
     pyyaml>=6.0 \
     uv>=0.7
 
+# Pre-install dbt-mcp to speed up MCP setup
+# NOT NEEDED BECAUSE MCP IS NOT SUPPORTED FOR DUCKDB
+# RUN uv tool install dbt-mcp
+# ENV PATH="/root/.local/bin:${PATH}"
+
 # Set up workspace
 WORKDIR /app
 
