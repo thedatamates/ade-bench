@@ -30,6 +30,9 @@ EXPERIMENT_MIGRATIONS = {
     },
     '2025-10-15__08-38-38': {
         'model_name': 'claude-3-5-haiku-20241022',
+    },
+    '2025-10-15__09-20-36': {
+        'model_name': 'claude-3-5-haiku-20241022',
     }
 }
 
