@@ -49,7 +49,6 @@ outputs/
 
 # dbt
 target/
-dbt_packages/
 logs/
 *.log
 .user.yml
