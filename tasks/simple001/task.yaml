@@ -1,6 +1,6 @@
 task_id: simple001
 status: ready
-description: A lightweight task for testing.
+description: A lightweight task for testing. NOT A REAL TASK.
 prompts:
   - key: base
     prompt: |-
