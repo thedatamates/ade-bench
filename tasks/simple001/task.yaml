@@ -1,5 +1,5 @@
 task_id: simple001
-status: ready
+status: dev
 description: A lightweight task for testing. NOT A REAL TASK.
 prompts:
   - key: base

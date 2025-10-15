@@ -35,6 +35,7 @@ EXPERIMENT_MIGRATIONS = {
 # Default migration settings for experiments not explicitly configured
 DEFAULT_MIGRATION = {
     'uses_mcp': False,
+    'model_name': ''
 }
 # =============================================================================
 
@@ -54,19 +55,13 @@ def migrate_row(row: Dict[str, str], experiment_id: str) -> Dict[str, str]:
     """
     migrated_row = row.copy()
 
-    # Get migration settings for this experiment
-    migration_config = EXPERIMENT_MIGRATIONS.get(experiment_id, DEFAULT_MIGRATION)
-
-    # Migration 1: Set uses_mcp based on configuration
-    # Remove old column names if they exist
-    if 'used_mcp' in migrated_row:
-        del migrated_row['used_mcp']
-    if 'uses_mcp' in migrated_row:
-        del migrated_row['uses_mcp']
-
-    # Set the correct value from config
-    uses_mcp_value = migration_config.get('uses_mcp', False)
-    migrated_row['uses_mcp'] = str(uses_mcp_value)
+    # Migration 1: Handle uses_mcp column
+    if 'used_mcp' not in migrated_row:
+        migrated_row['uses_mcp'] = DEFAULT_MIGRATION.get('uses_mcp')
+    elif experiment_id in EXPERIMENT_MIGRATIONS and 'uses_mcp' in EXPERIMENT_MIGRATIONS[experiment_id]:
+        migrated_row['uses_mcp'] = EXPERIMENT_MIGRATIONS[experiment_id]['uses_mcp']
+    else:
+        migrated_row['uses_mcp'] = migrated_row['used_mcp']
 
     # Migration 2: Remove result_num if present
     if 'result_num' in migrated_row:
@@ -74,7 +69,7 @@ def migrate_row(row: Dict[str, str], experiment_id: str) -> Dict[str, str]:
 
     # Migration 3: Add model_name if it doesn't exist
     if 'model_name' not in migrated_row:
-        migrated_row['model_name'] = ''
+        migrated_row['model_name'] = DEFAULT_MIGRATION.get('model_name')
 
     return migrated_row
 
