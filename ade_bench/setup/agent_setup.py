@@ -36,3 +36,5 @@ def setup_agent_config(terminal, task_id: str, trial_handler, logger) -> None:
         _copy_config_file(terminal, trial_handler, "GEMINI.md")
     elif agent_name == AgentName.OPENAI_CODEX:
         _copy_config_file(terminal, trial_handler, "AGENTS.md")
+    elif agent_name == AgentName.MACRO:
+        _copy_config_file(terminal, trial_handler, "MACRO.md")
