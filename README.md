@@ -635,6 +635,17 @@ alias ade-config='uv run scripts_python/extract_task_details.py'
 $ ade-config
 ```
 
+## Citations
+
+ADE-Bench borrowed heavily from [Terminal-Bench](https://github.com/laude-institute/terminal-bench) and [Spider 2.0](https://github.com/xlang-ai/Spider2/), without which none of this would exist:
+
+- The Terminal-Bench Team. (Apr 2025). *Terminal-Bench: A Benchmark for AI Agents in Terminal Environments.* Available: https://github.com/laude-institute/terminal-bench
+- Fangyu Lei, Jixuan Chen, Yuxiao Ye, Ruisheng Cao, Dongchan Shin, Hongjin Su, Zhaoqing Suo, Hongcheng Gao, Wenjing Hu, Pengcheng Yin, Victor Zhong, Caiming Xiong, Ruoxi Sun, Qian Liu, Sida Wang, & Tao Yu. (2024). *Spider 2.0: Evaluating Language Models on Real-World Enterprise Text-to-SQL Workflows.*  Available: https://arxiv.org/abs/2411.07763
+
+## Contact?
+
+If you want to learn more or get involved, feel free to reach out to me (Benn) at benn.electronicmail@gmail.com. You can also fill out [this form](https://docs.google.com/forms/d/e/1FAIpQLSdADsmhkYXGk90FTHP9vmp6sN1ObZgRYfnbELjq_-UnBXW_0g/viewform), and we'll be about a mailing list, or Slack channel, or whatever is cool now.
+
 ---
 
 [^1] ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.

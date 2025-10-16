@@ -7,8 +7,8 @@ else
 fi
 
 ## Note that not classifed is changed to unclassified
-f1="position_desc = 'max("
-r1="position_desc = 'sum("
+f1="max("
+r1="sum("
 
 "${SED_CMD[@]}" "s/${f1}/${r1}/g" models/stats/constructor_points.sql
 

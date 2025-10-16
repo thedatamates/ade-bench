@@ -19,6 +19,9 @@ tags:
   - debugging
   - model-refactor
 
+test_setup: |-
+  dbt run
+
 # Tables to compare for solution
 solution_seeds:
   - table_name: int_quickbooks__refund_receipt_transactions
