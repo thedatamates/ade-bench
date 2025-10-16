@@ -1,6 +1,6 @@
 task_id: f1003
 status: ready
-description: Add new stats models based on yml config
+description: Fix an issue with inconsistent results in a model.
 notes: |-
   Fixing the issue noted in f1002.
 prompts:
