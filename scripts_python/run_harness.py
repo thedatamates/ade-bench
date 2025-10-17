@@ -138,6 +138,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Start a dbt MCP server after setup completes",
     )
+    parser.add_argument(
+        "--with-profiling",
+        action="store_true",
+        help="Run the harness with a python profiler",
+    )
     args = parser.parse_args()
 
     # Handle special case for "all" - load from YAML config
@@ -180,6 +185,7 @@ if __name__ == "__main__":
         project_type=args.project_type,
         keep_alive=args.persist,
         use_mcp=args.use_mcp,
+        with_profiling=args.with_profiling,
     )
 
     results = harness.run()

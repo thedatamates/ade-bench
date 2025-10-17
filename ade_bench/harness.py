@@ -11,6 +11,8 @@ import tempfile
 import time
 import boto3
 from tenacity import RetryError
+import json
+import cProfile
 
 from ade_bench.agents.agent_factory import AgentFactory
 from ade_bench.agents.agent_name import AgentName
@@ -64,6 +66,7 @@ class Harness:
         project_type: str | None = None,
         keep_alive: bool = False,
         use_mcp: bool = False,
+        with_profiling: bool = False,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -92,6 +95,7 @@ class Harness:
             project_type: Project type to filter variants (e.g., dbt, other).
             keep_alive: If True, keep containers alive when tasks fail for debugging.
             use_mcp: If True, start a dbt MCP server after setup completes.
+            with_profiling: If True, will enable the cProfiler.
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -106,6 +110,7 @@ class Harness:
         self._project_type_filter = project_type
         self._keep_alive = keep_alive
         self._use_mcp = use_mcp
+        self._with_profiling = with_profiling
 
         # Initialize setup orchestrator for variant-specific setup
         self._setup_orchestrator = SetupOrchestrator()
@@ -145,6 +150,19 @@ class Harness:
     @property
     def _log_output_path(self) -> Path:
         return self._run_path / "run.log"
+
+    @property
+    def profiler_output_path(self) -> Path:
+        # TODO: for now the path will be hardcoded in the future let's make this configurable
+        return Path("profiling/summaries/" + self._run_id + "/")
+
+    @property
+    def _cProfile_output_path(self) -> Path:
+        return self.profiler_output_path / "cProfile.prof"
+    
+    @property
+    def _profiler_metadata_output_path(self) -> Path:
+        return self.profiler_output_path / "metatdata.json"
 
     def _create_agent_for_task(self, task_id: str) -> BaseAgent:
         """Create a fresh agent for a specific task.
@@ -1232,15 +1250,37 @@ class Harness:
         log_harness_info(logger, "system", "start", "STARTING HARNESS RUN")
         log_harness_info(logger, "system", "start", f"Run ID: {self._run_id}")
 
+        profiler = cProfile.Profile()
+        start_time = None
+
+        if self._with_profiling:
+            self.profiler_output_path.mkdir(parents=True, exist_ok=True)
+            profiler.enable()
+            start_time = time.perf_counter()
+
         self._write_run_metadata()
-
         results = self._execute_tasks()
-
         self._update_metadata_on_end(results=results)
+
+        if self._with_profiling:
+            profiler.disable()
+            execution_time = time.perf_counter() - start_time
+            profiler.dump_stats(self._cProfile_output_path)
+
+            profiling_metadata = {
+                "execution_time_seconds": execution_time,
+                "n_concurrent_trials": self._n_concurrent_trials,
+                "disable_diffs": self._disable_diffs,
+                "agent_name": self._agent_name.value,
+            }
+
+            with open(self._profiler_metadata_output_path, "w") as f:
+                json.dump(profiling_metadata, f, indent=4)
 
         # Stop the Rich logger (only if dynamic logging is enabled)
         if ade_bench_config.use_dynamic_logging:
             rich_logger.stop()
+        
 
         # Generate HTML results dashboard
         if not self._disable_diffs:
@@ -1261,5 +1301,13 @@ class Harness:
             "finish",
             f"Harness run completed: {successful_tasks} of {total_tasks} tasks successful"
         )
+
+        if self._with_profiling:
+            log_harness_info(
+                self._logger,
+                "system",
+                "finish",
+                f"Profiling informationn from cProfiler saved to {self._cProfile_output_path}."
+            )
 
         return results
