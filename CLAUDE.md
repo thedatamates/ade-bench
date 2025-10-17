@@ -54,7 +54,7 @@ uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
 
 ### Key Parameters:
 - `--agent`: Agent type (oracle, terminus, etc.)
-- `--model-name`: LLM model for AI agents
+- `--model`: LLM model for AI agents
 - `--dataset-config`: YAML file defining task collection
 - `--n-concurrent-trials`: Parallel execution (default: 4)
 - `--no-rebuild`: Skip Docker rebuilds

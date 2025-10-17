@@ -1,7 +1,21 @@
-quickbooks:
+quickbooks-duckdb:
   target: dev
   outputs:
     dev:
       type: duckdb
       path: "./quickbooks.duckdb"
       schema: main
+
+quickbooks-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>

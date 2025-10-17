@@ -45,7 +45,7 @@ class SetupOrchestrator:
             log_harness_info(self.logger, task_id, "setup", f"Setting up DuckDB database...")
             setup_duckdb(self.terminal, self.session, variant, self.trial_handler)
         elif db_type == 'snowflake':
-            log_harness_info(self.logger, task_id, "setup", f"Setting up Snowflake database at {variant.get('db_name')}...")
+            log_harness_info(self.logger, task_id, "setup", f"Setting up Snowflake database from {variant.get('db_name')}...")
             setup_snowflake(self.terminal, self.session, task_id, variant, self.trial_handler)
             log_harness_info(self.logger, task_id, "setup", f"Snowflake setup complete.")
 

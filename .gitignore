@@ -40,6 +40,7 @@ ENV/
 
 # Experiments and results
 experiments/
+experiments_saved/
 results/
 outputs/
 profiling/summaries
@@ -50,7 +51,6 @@ profiling/statistics
 
 # dbt
 target/
-dbt_packages/
 logs/
 *.log
 .user.yml

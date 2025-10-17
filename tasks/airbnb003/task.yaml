@@ -10,13 +10,12 @@ prompts:
 author_name: test
 author_email: test
 difficulty: easy
-category: data-transformation
 tags:
   - dbt
-  - aggregation
-  - joins
-  - e-commerce
-  - analytics
+  - dbt-macros
+  - jinja
+  - model-refactor
+  - dbt-materialization
 
 # Test setup script to run before dbt tests
 test_setup: |-

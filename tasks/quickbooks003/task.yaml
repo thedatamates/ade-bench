@@ -1,4 +1,4 @@
-task_id: quickbooks002
+task_id: quickbooks003
 status: ready
 description: Remove dbt variable and solve data issue
 notes: |-
@@ -10,10 +10,16 @@ prompts:
 author_name: test
 author_email: test
 difficulty: hard
-category: jinja
 tags:
+  - data-hygiene
+  - data-inspection
   - dbt
-  - schema-change
+  - dbt-hygiene
+  - dbt-packages
+  - dbt-utils
+  - jinja
+  - model-refactor
+  - dbt-project-configuration
 
 # Test setup script to run before dbt tests
 test_setup: |-

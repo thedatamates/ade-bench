@@ -32,13 +32,16 @@ class GeminiCLIAgent(AbstractInstalledAgent):
         return Path(__file__).parent / "gemini_cli-setup.sh"
 
     def _run_agent_commands(self, task_prompt: str) -> list[TerminalCommand]:
+        header = "echo 'AGENT RESPONSE: ' && "
         escaped_prompt = shlex.quote(task_prompt)
+        command = f"{header} gemini --output-format json -y -p {escaped_prompt}"
+
+        if self._model_name:
+            command += f" --model {self._model_name}"
 
         return [
             TerminalCommand(
-                command=
-                f"echo 'AGENT RESPONSE: ' && "
-                f"gemini --output-format json -y -p {escaped_prompt}",
+                command=command,
                 min_timeout_sec=0.0,
                 max_timeout_sec=config.default_agent_timeout_sec,
                 block=True,

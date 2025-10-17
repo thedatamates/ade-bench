@@ -2,6 +2,9 @@ FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y \
     tmux asciinema \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir \
@@ -11,6 +14,10 @@ RUN pip install --no-cache-dir \
     pyyaml>=6.0 \
     uv>=0.7
 
+# Pre-install dbt-mcp to speed up MCP setup
+# NOT NEEDED BECAUSE MCP IS NOT SUPPORTED FOR DUCKDB
+# RUN uv tool install dbt-mcp
+# ENV PATH="/root/.local/bin:${PATH}"
 
 # Set up workspace
 

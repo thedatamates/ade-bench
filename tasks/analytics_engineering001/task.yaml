@@ -8,9 +8,9 @@ prompts:
 author_name: test
 author_email: test
 difficulty: easy
-category: diagnostic
 tags:
   - dbt
+  - diagnostic
 
 # Variants for different database and project combinations
 variants:

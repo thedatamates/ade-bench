@@ -11,9 +11,9 @@ prompts:
 author_name: test
 author_email: test
 difficulty: hard
-category: model-creation
 tags:
   - dbt
+  - model-creation
 
 # Test setup script to run before dbt tests
 test_setup: |-

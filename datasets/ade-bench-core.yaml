@@ -1,4 +1,4 @@
-dataset_name: "ADE-Bench Core v1.0"
+dataset_name: "ADE-Bench Core v0.1"
 description: "Core benchmarking tasks for data analysts using dbt and SQL"
 dataset_path: "tasks"
 
@@ -40,4 +40,5 @@ task_ids:
   - intercom003
   - quickbooks001
   - quickbooks002
+  - quickbooks003
   - quickbooks004

@@ -8,10 +8,12 @@ prompts:
 author_name: test
 author_email: test
 difficulty: easy
-category: model_refactor
 tags:
+  - data-hygiene
+  - data-inspection
   - dbt
-  - join
+  - debugging
+  - model-creation
 
 # Test setup script to run before dbt tests
 test_setup: |-

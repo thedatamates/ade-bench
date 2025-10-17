@@ -62,7 +62,7 @@ if __name__ == "__main__":
         default=datetime.now().strftime("%Y-%m-%d__%H-%M-%S"),
     )
     parser.add_argument(
-        "--model-name",
+        "--model",
         type=str,
         help="The LLM model to use (e.g., claude-3-5-sonnet-20241022, gpt-4)",
         default=""
@@ -167,7 +167,7 @@ if __name__ == "__main__":
         output_path=args.output_path,
         run_id=args.run_id,
         agent_name=args.agent,
-        model_name=args.model_name,
+        model_name=args.model,
         agent_kwargs=agent_kwargs,
         no_rebuild=args.no_rebuild,
         cleanup=args.cleanup,

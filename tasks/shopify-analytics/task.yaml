@@ -8,13 +8,7 @@ prompts:
 author_name: test
 author_email: test
 difficulty: easy
-category: data-transformation
-tags:
-  - dbt
-  - aggregation
-  - joins
-  - e-commerce
-  - analytics
+tags: []
 
 # Variants for different database and project combinations
 variants:

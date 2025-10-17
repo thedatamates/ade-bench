@@ -12,10 +12,13 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: jinja
 tags:
   - dbt
-  - schema-change
+  - dbt-hygiene
+  - dbt-packages
+  - jinja
+  - model-refactor
+  - dbt-project-configuration
 
 # Test setup script to run before dbt tests
 test_setup: |-

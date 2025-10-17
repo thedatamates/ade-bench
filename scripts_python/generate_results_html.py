@@ -143,6 +143,35 @@ class ResultsHTMLGenerator:
         with open(output_path, 'w') as f:
             f.write(html_content)
 
+        # Copy TSV files to HTML directory
+        self._copy_tsv_files()
+
+    def _copy_tsv_files(self):
+        """Copy TSV files as plaintext."""
+        import shutil
+
+        # Source TSV file
+        source_tsv = self.experiment_dir / "results.tsv"
+
+        if not source_tsv.exists():
+            print(f"Warning: TSV file not found at {source_tsv}")
+            return
+
+        # Copy TSV with headers as .txt
+        dest_tsv = self.html_dir / "results_tsv.txt"
+        shutil.copy2(source_tsv, dest_tsv)
+
+        # Create TSV without headers as .txt
+        with open(source_tsv, 'r') as f:
+            lines = f.readlines()
+
+        dest_tsv_no_header = self.html_dir / "results_tsv_no_header.txt"
+        if len(lines) > 1:
+            with open(dest_tsv_no_header, 'w') as f:
+                f.writelines(lines[1:])
+        else:
+            dest_tsv_no_header.touch()
+
     def _generate_task_detail_pages(self, task_data: Dict[str, Any]):
         """Generate detail pages for a specific task."""
         task_id = task_data['task_id']

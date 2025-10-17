@@ -2,7 +2,7 @@ task_id: f1006
 status: ready
 description: Fix a calculation error that requires a semantic understanding of data, with no example of correction.
 notes: |-
-  This task changes both driver_points andconstructor_points.
+  This task changes both driver_points and constructor_points.
 prompts:
   - key: base
     prompt: |-
@@ -13,10 +13,13 @@ prompts:
 author_name: test
 author_email: test
 difficulty: hard
-category: model-creation
 tags:
+  - analysis
+  - data-hygiene
+  - data-inspection
   - dbt
-  - data-quality
+  - debugging
+  - dbt-project-configuration
 
 # Tables to compare for solution
 solution_seeds:

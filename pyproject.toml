@@ -11,6 +11,7 @@ dependencies = [
     "libtmux>=0.23",
     "tqdm>=4.65",
     "click>=8.1",
+    "typer>=0.9.0",
     "rich>=13.0",
     "jinja2>=3.1",
     "python-dotenv>=1.0",
@@ -38,6 +39,8 @@ dev = [
 
 [project.scripts]
 wizard = "ade_bench.cli.wizard:main"
+ade-bench = "ade_bench.cli.ab.main:app"
+ade = "ade_bench.cli.ab.main:app"
 
 [build-system]
 requires = ["hatchling"]

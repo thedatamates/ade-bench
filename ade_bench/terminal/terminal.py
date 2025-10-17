@@ -129,9 +129,10 @@ def spin_up_terminal(
         terminal.start()
         yield terminal
     finally:
-        # Only cleanup if keep_alive is False or if the task succeeded
+        # Only cleanup if keep_alive is False
         if not keep_alive:
             terminal.stop()
         else:
             # If keep_alive is True, just stop the services but don't remove containers
+            logger.info(f"Keeping container {client_container_name} alive for debugging (--persist flag was used)")
             terminal.stop_services_only()

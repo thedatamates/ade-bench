@@ -1,0 +1,35 @@
+task_id: simple001
+status: dev
+description: A lightweight task for testing. NOT A REAL TASK.
+prompts:
+  - key: base
+    prompt: |-
+      Change the dim_customer model to be called dimension_customer.
+author_name: test
+author_email: test
+difficulty: easy
+tags:
+  - dbt
+  - diagnostic
+
+test_setup: |-
+  dbt run --select dimension_customer
+
+# Variants for different database and project combinations
+variants:
+- db_type: duckdb
+  db_name: simple
+  project_type: dbt
+  project_name: simple
+
+- db_type: snowflake
+  db_name: simple
+  project_type: dbt
+  project_name: simple
+  migration_directory: simple__duckdb_to_snowflake
+
+- db_type: snowflake
+  db_name: simple
+  project_type: dbt-fusion
+  project_name: simple
+  migration_directory: simple__duckdb_to_snowflake

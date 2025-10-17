@@ -33,7 +33,6 @@ transaction_lines_files=(
 )
 
 ap_ar="quickbooks__ap_ar_enhanced.sql"
-dbt_yml="dbt_project.yml" 
 
 ## Solutions directory
 SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
@@ -51,4 +50,17 @@ for file in "${transaction_lines_files[@]}"; do
 done
 
 cp $SOLUTIONS_DIR/$ap_ar models/$ap_ar
+
+
+## Update the dbt_project.yml file
+find="profile: 'quickbooks-duckdb'"
+
+if [[ "$*" == *"--db-type=snowflake"* ]]; then
+    replace="profile: 'quickbooks-snowflake'"
+else
+    replace="profile: 'quickbooks-duckdb'"
+fi
+
+dbt_yml="dbt_project.yml"
+sed -i "s/${find}/${replace}/g" $SOLUTIONS_DIR/$dbt_yml
 cp $SOLUTIONS_DIR/$dbt_yml $dbt_yml

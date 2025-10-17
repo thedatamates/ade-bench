@@ -57,7 +57,6 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
         description = clean_text_for_spreadsheet(task_config.get('description', ''))
         status = clean_text_for_spreadsheet(task_config.get('status', ''))
         difficulty = clean_text_for_spreadsheet(task_config.get('difficulty', ''))
-        category = clean_text_for_spreadsheet(task_config.get('category', ''))
         tags = task_config.get('tags', [])
 
         # Extract info from variants
@@ -97,7 +96,6 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
                 'prompt': '',
                 'notes': notes,
                 'difficulty': difficulty,
-                'category': category,
                 'tags': clean_text_for_spreadsheet(', '.join(tags) if tags else '')
             })
         else:
@@ -118,7 +116,6 @@ def extract_task_details(tasks_dir: Path) -> List[Dict[str, Any]]:
                     'prompt': prompt_text,
                     'notes': notes,
                     'difficulty': difficulty,
-                    'category': category,
                     'tags': clean_text_for_spreadsheet(', '.join(tags) if tags else '')
                 })
 
@@ -144,8 +141,13 @@ def copy_to_clipboard(text: str) -> bool:
         return False
 
 
-def main():
-    """Main function to extract task details and generate CSV."""
+def main(output_file: Path | None = None, quiet: bool = False):
+    """Main function to extract task details and generate CSV.
+
+    Args:
+        output_file: Optional path to save the TSV file to
+        quiet: If True, suppress verbose output
+    """
     # Get the tasks directory
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
@@ -155,7 +157,8 @@ def main():
         print(f"Error: Tasks directory not found at {tasks_dir}")
         sys.exit(1)
 
-    print(f"Extracting task details from {tasks_dir}...")
+    if not quiet:
+        print(f"Extracting task details from {tasks_dir}...")
 
     # Extract task details
     task_details = extract_task_details(tasks_dir)
@@ -175,7 +178,6 @@ def main():
         'project_types',
         'project_name',
         'database_name',
-        'category',
         'key',
         'description',
         'prompt',
@@ -191,6 +193,17 @@ def main():
 
     # Generate TSV for clipboard (better for Google Sheets)
     tsv_content = df.to_csv(index=False, sep='\t')
+
+    # Save to file if output_file is provided
+    if output_file:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(tsv_content)
+        if not quiet:
+            print(f"Successfully wrote task details to {output_file}")
+            print(f"  - Total tasks: {len(df['task_id'].unique())}")
+            print(f"  - Total rows: {len(df)}")
+        return
 
     # Print the CSV in a pretty format
     print("\n" + "="*80)
@@ -220,8 +233,15 @@ def main():
     print(f"\nSummary:")
     print(f"- Total tasks: {len(df['task_id'].unique())}")
     print(f"- Total rows: {len(df)}")
-    print(f"- Categories: {', '.join(sorted(df['category'].unique()))}")
     print(f"- Difficulties: {', '.join(sorted(df['difficulty'].unique()))}")
+
+    # Get unique individual tags (split comma-separated tag strings)
+    all_tags = set()
+    for tags_str in df['tags'].dropna():
+        if tags_str:
+            tags = [tag.strip() for tag in str(tags_str).split(',')]
+            all_tags.update(tags)
+    print(f"- Tags: {', '.join(sorted(all_tags))}")
 
 
 if __name__ == "__main__":

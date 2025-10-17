@@ -23,10 +23,10 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: data-transformation
 tags:
   - dbt
-  - macros
+  - external-knowledge
+  - model-creation
 
 # Tables to compare for solution
 solution_seeds:

@@ -38,6 +38,7 @@ from ade_bench.utils.logger import logger, log_harness_info, rich_logger, initia
 from ade_bench.utils.test_generator import generate_solution_tests
 from ade_bench.utils.timeout_manager import TimeoutManager
 from ade_bench.utils.debug_breakpoint import breakpoint, DebugBreakpointException
+from ade_bench.utils.results_writer import write_results_tsv
 
 
 class Harness:
@@ -176,6 +177,10 @@ class Harness:
 
         if self._agent_name == AgentName.ORACLE:
             agent_kwargs["task_ids"] = [task_id]
+
+        # Pass model_name to agents (if provided)
+        if self._model_name:
+            agent_kwargs["model_name"] = self._model_name
 
         # Pass use_mcp flag to installed agents
         agent_kwargs["use_mcp"] = self._use_mcp
@@ -322,6 +327,15 @@ class Harness:
                 f"{timeouts.test_execution}s for task "
                 f"{trial_handler.task_id}."
             )
+
+            # Update logger table
+            log_harness_info(
+                self._logger,
+                trial_handler.task_id,
+                "done",
+                f"TIMEOUT - test execution timed out after {timeouts.test_execution} seconds"
+            )
+
             # Kill the session to stop the test
             try:
                 session.kill_session()
@@ -432,12 +446,21 @@ class Harness:
         except asyncio.TimeoutError:
             timeouts = TimeoutManager.get_timeouts_for_task(trial_handler.task)
             self._logger.warning(
-                f"Agent timed out after "
+                f"Agent execution timed out after "
                 f"{timeouts.total_agent_operation}s for task "
                 f"{trial_handler.task_id}. "
+                f"This is the total operation timeout (not agent setup). "
                 f"(Breakdown: setup={timeouts.setup}s, "
                 f"execution={timeouts.agent_execution}s, "
                 f"cleanup={timeouts.cleanup}s)"
+            )
+
+            # Update logger table
+            log_harness_info(
+                self._logger,
+                trial_handler.task_id,
+                "done",
+                f"TIMEOUT - agent execution timed out after {timeouts.total_agent_operation} seconds (total operation including setup + execution + cleanup)"
             )
 
             # Try to copy logs before killing the session (for agents that support it)
@@ -526,6 +549,12 @@ class Harness:
 
         except asyncio.TimeoutError:
             self._logger.warning(f"Setup timed out after {timeouts.setup}s for task {trial_handler.task_id}")
+            log_harness_info(
+                self._logger,
+                trial_handler.task_id,
+                "done",
+                f"TIMEOUT - task setup timed out after {timeouts.setup} seconds"
+            )
             return FailureMode.SETUP_TIMEOUT
         except Exception as e:
             self._logger.error(f"Setup failed for task {trial_handler.task_id}: {e}")
@@ -542,6 +571,11 @@ class Harness:
             trial_name=trial_handler.trial_name,
             task_id=trial_handler.task_id,
             task_prompt=trial_handler.task_prompt,
+            agent=str(self._agent_name.value),
+            model_name=self._model_name,
+            db_type=config.get("db_type"),
+            project_type=config.get("project_type"),
+            used_mcp=self._use_mcp,
         )
 
         with spin_up_terminal(
@@ -647,10 +681,21 @@ class Harness:
             if file_diff_handler:
                 file_diff_handler.handle_phase_diffing(terminal.container, "agent", trial_handler.task_id, self._logger)
 
-            # If agent timed out, stop the task immediately (don't run tests)
-            if agent_failure_mode == FailureMode.AGENT_TIMEOUT:
+            # If agent setup timed out, stop the task immediately (don't run tests)
+            if agent_failure_mode == FailureMode.AGENT_SETUP_TIMEOUT:
                 results.failure_mode = agent_failure_mode
-                self._logger.info(f"Task {trial_handler.task_id} halted due to agent timeout")
+                self._logger.info(f"Task {trial_handler.task_id} halted due to agent setup or installation timeout")
+                # Session should be killed
+                try:
+                    session.kill_session()
+                except Exception as e:
+                    self._logger.debug(f"Session already killed or error during cleanup: {e}")
+                return results
+
+            # If agent timed out, stop the task immediately (don't run tests)
+            elif agent_failure_mode == FailureMode.AGENT_TIMEOUT:
+                results.failure_mode = agent_failure_mode
+                self._logger.info(f"Task {trial_handler.task_id} halted due to agent execution timeout")
                 # Session already killed in _run_agent, but try again to be safe
                 try:
                     session.kill_session()
@@ -919,6 +964,10 @@ class Harness:
     def _write_results(self, results: BenchmarkResults) -> None:
         self._results_output_path.write_text(results.model_dump_json(indent=4))
 
+        # Also write TSV
+        tsv_path = self._run_path / "results.tsv"
+        write_results_tsv(results, tsv_path, self._run_id)
+
     def _get_git_commit_hash(self) -> str:
         """Get the current git commit hash."""
         try:
@@ -1083,11 +1132,19 @@ class Harness:
             logger.error(
                 f"Harness execution failed for {task_path} with key {task_key}: {e}"
             )
+            # Update logger table
+            log_harness_info(logger, trial_handler.task_id, "done", f"ERROR - {e}")
+
             trial_results = TrialResults(
                 trial_name=trial_name,
                 task_id=trial_handler.task_id,
                 task_prompt=trial_handler.task_prompt,
-                failure_mode=FailureMode.UNKNOWN_AGENT_ERROR,
+                failure_mode=FailureMode.UNKNOWN_HARNESS_ERROR,
+                agent=str(self._agent_name.value),
+                model_name=self._model_name,
+                db_type=config.get("db_type"),
+                project_type=config.get("project_type"),
+                used_mcp=self._use_mcp,
             )
             return trial_results
 
@@ -1159,12 +1216,13 @@ class Harness:
                         task_key=task_key,
                         config=config,
                     )
-                    future_to_task[future] = (trial_name, attempt)
+                    future_to_task[future] = (trial_name, attempt, config)
 
             # Track progress
             completed_tasks = 0
 
             for future in as_completed(future_to_task):
+                trial_name, attempt, config = future_to_task[future]
                 trial_results = future.result()
                 results.results.append(trial_results)
                 completed_tasks += 1

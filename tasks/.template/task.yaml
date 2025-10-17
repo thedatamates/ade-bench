@@ -16,7 +16,6 @@ prompts: #
 author_name: The name of the task author.
 author_email: The author's email.
 difficulty: How hard the task is.
-category: The category of problem the task is testing.
 tags:
   # Additional tags to help with organization
   - dbt

@@ -27,10 +27,12 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: model-refactor
 tags:
+  - data-change
+  - data-inspection
   - dbt
-  - data
+  - debugging
+  - model-refactor
 
 # Test setup script to run before dbt tests
 test_setup: |-

@@ -10,10 +10,11 @@ prompts:
 author_name: test
 author_email: test
 difficulty: hard
-category: jinja
 tags:
   - dbt
-  - jinja
+  - dbt-hygiene
+  - dbt-packages
+  - model-refactor
 
 # Test setup script to run before dbt tests
 test_setup: |-

@@ -16,10 +16,11 @@ prompts:
 author_name: test
 author_email: test
 difficulty: medium
-category: debugging
 tags:
+  - data-inspection
   - dbt
-  - data-quality
+  - debugging
+  - model-refactor
 
 # Tables to compare for solution
 solution_seeds:

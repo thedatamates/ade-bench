@@ -1,0 +1,6 @@
+version: 1
+sources:
+  - name: simple
+    schema: main
+    tables:
+      - name: customer

@@ -1,12 +1,13 @@
 from tabulate import tabulate
 from ade_bench.harness_models import BenchmarkResults
+from ade_bench.utils.results_writer import format_trial_result, get_failure_type
 from typing import Dict, List, Any
 
 
 def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     """Generate a JSON summary of benchmark results."""
     table_data = []
-    headers = ["Task", "Result", "Tests", "Passed", "Passed %", "Time (s)", "Cost", "Input Tokens", "Output Tokens", "Cache Tokens", "Turns"]
+    headers = ["Task", "Result", "Failure Type", "Tests", "Passed", "Passed %", "Time (s)", "Cost", "Input Tokens", "Output Tokens", "Cache Tokens", "Turns"]
 
     total_tests = 0
     total_tests_passed = 0
@@ -19,64 +20,55 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     resolved_count = 0
 
     for result in sorted(results.results, key=lambda x: x.task_id):
-        # Calculate test statistics
-        if result.parser_results:
-            tests = len(result.parser_results)
-            tests_passed = sum(1 for status in result.parser_results.values() if status.value == "passed")
-            passed_percentage = (tests_passed / tests * 100) if tests > 0 else 0
-        else:
-            tests = 0
-            tests_passed = 0
-            passed_percentage = 0
+        # Use shared formatting function to get calculated values
+        calc = format_trial_result(result)
 
         # Accumulate totals
-        total_tests += tests
-        total_tests_passed += tests_passed
-        total_runtime += result.runtime_ms or 0
-        total_cost += result.cost_usd or 0.0
-        total_input_tokens += result.input_tokens or 0
-        total_output_tokens += result.output_tokens or 0
-        total_cache_tokens += result.cache_tokens or 0
-        total_turns += result.num_turns or 0
-        if result.is_resolved:
+        total_tests += calc['_tests']
+        total_tests_passed += calc['_tests_passed']
+        total_runtime += calc['_runtime_ms']
+        total_cost += calc['_cost_usd']
+        total_input_tokens += calc['_input_tokens']
+        total_output_tokens += calc['_output_tokens']
+        total_cache_tokens += calc['_cache_tokens']
+        total_turns += calc['_turns']
+        if calc['_is_resolved']:
             resolved_count += 1
 
-        # Format values
-        result_status = "p" if result.is_resolved else "FAIL"
-        runtime_seconds = (result.runtime_ms / 1000) if result.runtime_ms else 0
-        runtime_str = f"{runtime_seconds:.0f}"
-        cost_str = f"${result.cost_usd:.2f}" if result.cost_usd else "$0.00"
-        input_tokens_str = f"{result.input_tokens:,}" if result.input_tokens else "0"
-        output_tokens_str = f"{result.output_tokens:,}" if result.output_tokens else "0"
-        cache_tokens_str = f"{result.cache_tokens:,}" if result.cache_tokens else "0"
-        turns_str = f"{result.num_turns:,}" if result.num_turns else "0"
-
-        # Format percentage - show nothing if 100%
-        percentage_str = "" if passed_percentage == 100.0 else f"{passed_percentage:.0f}%"
+        # Format values for HTML display (with commas)
+        result_status = "p" if calc['_is_resolved'] else "FAIL"
+        failure_type = get_failure_type(result)
+        cost_str = f"${calc['_cost_usd']:.2f}"
+        input_tokens_str = f"{calc['_input_tokens']:,}"
+        output_tokens_str = f"{calc['_output_tokens']:,}"
+        cache_tokens_str = f"{calc['_cache_tokens']:,}"
+        turns_str = f"{calc['_turns']:,}"
+        percentage_str = "" if calc['_passed_percentage'] == 100.0 else f"{calc['_passed_percentage']:.0f}%"
 
         table_data.append({
-            'task_id': result.task_id,
+            'task_id': calc['task_id'],
             'result': result_status,
-            'status_class': 'success' if result.is_resolved else 'failed',
-            'tests': str(tests),
-            'passed': str(tests_passed),
+            'failure_type': failure_type,
+            'status_class': calc['status_class'],
+            'tests': str(calc['_tests']),
+            'passed': str(calc['_tests_passed']),
             'passed_percentage': percentage_str,
-            'time_seconds': runtime_str,
+            'time_seconds': f"{calc['_runtime_seconds']:.0f}",
             'cost': cost_str,
             'input_tokens': input_tokens_str,
             'output_tokens': output_tokens_str,
             'cache_tokens': cache_tokens_str,
             'turns': turns_str,
             # Store numeric values for totals calculation
-            '_tests_num': tests,
-            '_passed_num': tests_passed,
-            '_runtime_ms': result.runtime_ms or 0,
-            '_cost_usd': result.cost_usd or 0.0,
-            '_input_tokens': result.input_tokens or 0,
-            '_output_tokens': result.output_tokens or 0,
-            '_cache_tokens': result.cache_tokens or 0,
-            '_turns': result.num_turns or 0,
-            '_is_resolved': result.is_resolved
+            '_tests_num': calc['_tests'],
+            '_passed_num': calc['_tests_passed'],
+            '_runtime_ms': calc['_runtime_ms'],
+            '_cost_usd': calc['_cost_usd'],
+            '_input_tokens': calc['_input_tokens'],
+            '_output_tokens': calc['_output_tokens'],
+            '_cache_tokens': calc['_cache_tokens'],
+            '_turns': calc['_turns'],
+            '_is_resolved': calc['_is_resolved']
         })
 
     # Calculate totals
@@ -87,6 +79,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     total_row = {
         'task_id': f"TOTAL (n={len(results.results)})",
         'result': f"{overall_accuracy:.0f}%",
+        'failure_type': "",
         'status_class': 'total-row',
         'tests': str(total_tests),
         'passed': str(total_tests_passed),
@@ -115,6 +108,7 @@ def format_summary_table(summary: Dict[str, Any]) -> List[List[str]]:
         table_data.append([
             task['task_id'],
             task['result'],
+            task['failure_type'],
             task['tests'],
             task['passed'],
             task['passed_percentage'],
@@ -134,6 +128,7 @@ def format_summary_table(summary: Dict[str, Any]) -> List[List[str]]:
     table_data.append([
         total_row['task_id'],
         total_row['result'],
+        total_row['failure_type'],
         total_row['tests'],
         total_row['passed'],
         total_row['passed_percentage'],
@@ -161,6 +156,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
         row = [
             task['task_id'],
             task['result'],
+            task['failure_type'],
             task['tests'],
             task['passed'],
             task['passed_percentage'],
@@ -179,6 +175,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
     total_row_data = [
         total_row['task_id'],
         total_row['result'],
+        total_row['failure_type'],
         total_row['tests'],
         total_row['passed'],
         total_row['passed_percentage'],

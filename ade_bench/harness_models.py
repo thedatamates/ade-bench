@@ -17,9 +17,11 @@ class FailureMode(Enum):
     NONE = "none"
     UNKNOWN = "unknown"
     SETUP_TIMEOUT = "setup_timeout"
+    AGENT_SETUP_TIMEOUT = "agent_setup_timeout"
     AGENT_TIMEOUT = "agent_timeout"
     TEST_TIMEOUT = "test_timeout"
     UNKNOWN_AGENT_ERROR = "unknown_agent_error"
+    UNKNOWN_HARNESS_ERROR = "unknown_harness_error"
     PARSE_ERROR = "parse_error"
     FATAL_LLM_PARSE_ERROR = "fatal_llm_parse_error"
     CONTEXT_LENGTH_EXCEEDED = "context_length_exceeded"
@@ -66,6 +68,12 @@ class TrialResults(BaseModel):
     cost_usd: float | None = None
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()))
     recording_path: str | None = None
+    # Experiment metadata
+    agent: str | None = None
+    model_name: str | None = None
+    db_type: str | None = None
+    project_type: str | None = None
+    used_mcp: bool | None = None
 
 
 class BenchmarkResults(BaseModel):
@@ -176,7 +184,6 @@ class TaskMetadata(BaseModel):
     description: str
     prompt: str
     difficulty: str = Field(pattern="^(easy|medium|hard)$")
-    category: str
     tags: List[str] = Field(default_factory=list)
     test_type: str = "sql"
     db_type: str = "duckdb"

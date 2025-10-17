@@ -44,7 +44,7 @@ class DbtParser(BaseParser):
 
         # Case 1: Compilation error
         if has_compilation_error:
-            return "ERROR - dbt compilation error found"
+            return "FAIL - dbt compilation error found"
 
         test_results = {k: v for k, v in results.items() if k != "dbt_compile"}
 

@@ -8,9 +8,9 @@ prompts:
 author_name: test
 author_email: test
 difficulty: easy
-category: model_creation
 tags:
   - dbt
+  - model-creation
 
 # Optional test setup script to run before dbt tests
 test_setup: |-
