@@ -186,8 +186,6 @@ class DockerComposeManager:
         if isinstance(paths, Path):
             paths = [paths]
 
-        container.exec_run(f"mkdir -p {container_dir}")
-
         tar_stream = DockerComposeManager._create_tar_archive(paths, container_filename)
         container.put_archive(container_dir, tar_stream.read())
         tar_stream.close()
