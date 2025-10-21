@@ -22,7 +22,7 @@ app = typer.Typer(help="ADE-bench: Analytics and Data Engineering Benchmark")
 def run(
     tasks: List[str] = typer.Argument(
         ...,
-        help="Task ID(s) to run. Use 'all' to run all tasks from the YAML configuration"
+        help="Task ID(s) to run. Use 'all' to run all ready tasks, '@experiment_set' to run an experiment set, 'task+' for wildcards"
     ),
     db: str = typer.Option(
         ...,
@@ -149,7 +149,6 @@ def run(
         raise typer.Exit(code=1)
 
     # Setup path variables
-    dataset_config = Path("datasets/ade-bench-core.yaml")
     dataset_path = Path("tasks")
     task_ids = tasks
 
@@ -180,7 +179,6 @@ def run(
         n_concurrent_trials=n_concurrent_trials,
         exclude_task_ids=set(exclude_tasks) if exclude_tasks else None,
         n_attempts=n_attempts,
-        dataset_config=dataset_config,
         create_seed=seed,
         disable_diffs=no_diffs,
         db_type=db,

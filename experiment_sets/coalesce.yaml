@@ -1,0 +1,34 @@
+experiment_name: "coalesce"
+description: "Tasks used for Coalesce presentation"
+
+task_ids:
+- airbnb001
+- airbnb002
+- airbnb003
+- airbnb004
+- airbnb005
+- airbnb006
+- airbnb007
+- airbnb008
+- airbnb009
+- analytics_engineering001
+- analytics_engineering002
+- analytics_engineering003
+- analytics_engineering004
+- asana001
+- asana002
+- asana004
+- asana005
+- f1001
+- f1002
+- f1003
+- f1004
+- f1005
+- f1006
+- f1007
+- f1009
+- f1010
+- f1011
+- intercom001
+- intercom002
+- intercom003

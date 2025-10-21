@@ -141,7 +141,7 @@ This command runs the benchmark. There are lots of flags for running it. Don't f
 
 ```bash
 uv run scripts_python/run_harness.py \
-  --tasks foo001 foo002 \ # Say `all` to run all the tasks in datasets/ade-bench-core.yaml.
+  --tasks foo001 foo002 \ # Say `all` to run all ready tasks.
   --db snowflake \ # Which database variant to run
   --project-type dbt \ # Which project variant to run (currently dbt or dbt-fusion)
   --agent oracle \ # Which agent to use (e.g., `oracle`, `claude`, `macro`)
@@ -155,6 +155,18 @@ uv run scripts_python/run_harness.py \
   --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
 ```
 
+### Task selection
+
+There are several ways to select tasks to run:
+
+```bash
+ade run airbnb001  # Run a specific task
+ade run f1006.hard  # Run a specific task with a specific variant
+ade run airbnb001 airbnb002  # Run multiple tasks
+ade run all  # Run all ready tasks
+ade run @coalesce  # Run an experiment set
+ade run f1+ simple+  # Run wildcard patterns
+```
 ---
 
 ## How it works, in detail
@@ -591,7 +603,7 @@ breakpoint("optional message")
 
 This will halt the harness at that point. If you run the harness with the `--persist` flag, the container will then be kept alive, as it was when the harness was halted.
 
----
+
 ## Tips! Tricks! Other things we recommend!
 
 - **Disable diffs to speed things up.** If you trying to run a bunch of tasks, or testing something where you don't care about looking at diffs, use the `--no-diffs` flag. Diffs can be slow, and ADE-bench will run faster if they're turned off.
@@ -603,7 +615,9 @@ This will halt the harness at that point. If you run the harness with the `--per
 alias ade-run='uv run scripts_python/run_harness.py'
 alias ade-log='uv run scripts_python/view_results.py'
 # Usage
-$ ade-run --db snowflake --project-type dbt --task all --agent oracle
+$ ade-run all --db snowflake --project-type dbt --agent oracle
+$ ade-run @coalesce --db snowflake --project-type dbt --agent oracle
+$ ade-run f1+ simple+ --db snowflake --project-type dbt --agent oracle
 $ ade-log
 
 

@@ -1,0 +1,6 @@
+experiment_name: "fast"
+description: "Fast tasks for testing"
+
+task_ids:
+- simple001
+- simple002

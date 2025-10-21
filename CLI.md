@@ -23,16 +23,22 @@ Run ADE-bench tasks with specific configurations:
 
 ```bash
 # Run a specific task
-ab run airbnb001 --db duckdb --project-type dbt --agent oracle
+ade run airbnb001 --db duckdb --project-type dbt --agent oracle
+
+# Run a specific task with a specific variant
+ade run f1006.hard --db duckdb --project-type dbt --agent oracle
 
 # Run multiple tasks
-ab run airbnb001 airbnb002 --db duckdb --project-type dbt --agent oracle
+ade run airbnb001 airbnb002 --db duckdb --project-type dbt --agent oracle
 
-# Run all tasks
-ab run all --db duckdb --project-type dbt --agent oracle
+# Run all ready tasks
+ade run all --db duckdb --project-type dbt --agent oracle
 
-# Run with a specific run ID for tracking
-ab run airbnb001 --db duckdb --project-type dbt --agent oracle --run-id my-experiment-001
+# Run an experiment set
+ade run @coalesce --db duckdb --project-type dbt --agent oracle
+
+# Run wildcard patterns
+ade run f1+ simple+ --db duckdb --project-type dbt --agent oracle
 
 # Note: All options require double-dashes (--option value), NOT single-dash or no dash
 # CORRECT:    --run-id test-run-001
@@ -45,13 +51,13 @@ View the results of your benchmark runs:
 
 ```bash
 # Open the most recent run results in your browser
-ab view
+ade view
 
 # List recent runs
-ab runs list
+ade runs list
 
 # Open a specific run
-ab runs open 2025-10-07__11-45-04
+ade runs open 2025-10-07__11-45-04
 ```
 
 ### Task Management
@@ -66,22 +72,22 @@ ade tasks list
 ade tasks list --copy
 
 # Launch an interactive shell into a task
-ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt
+ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt
 
 # Include solution and test files in the interactive environment
-ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --include-all
+ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --include-all
 
 # Set up a specific agent for testing (in a tmux session)
-ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code
+ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code
 
 # Run the agent on a task and then drop into interactive mode
-ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code --step post-agent
+ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code --step post-agent
 
 # Run the agent, evaluate the results, and then drop into interactive mode
-ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code --step post-eval
+ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude-code --step post-eval
 
 # Specify a run ID for the output directory
-ab tasks interact --task-id airbnb001 --db duckdb --project-type dbt --run-id debug-session
+ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --run-id debug-session
 ```
 
 ### Database Migration
@@ -90,16 +96,16 @@ Migrate DuckDB databases to Snowflake:
 
 ```bash
 # Migrate all DuckDB databases to Snowflake
-ab migrate duckdb-to-snowflake
+ade migrate duckdb-to-snowflake
 
 # Migrate specific databases only
-ab migrate duckdb-to-snowflake --include airbnb analytics_engineering
+ade migrate duckdb-to-snowflake --include airbnb analytics_engineering
 
 # Exclude specific databases
-ab migrate duckdb-to-snowflake --exclude quickbooks
+ade migrate duckdb-to-snowflake --exclude quickbooks
 
 # Use database export for better performance
-ab migrate duckdb-to-snowflake --use-database-export
+ade migrate duckdb-to-snowflake --use-database-export
 ```
 
 ## Command Help
@@ -107,8 +113,8 @@ ab migrate duckdb-to-snowflake --use-database-export
 For detailed help on any command, use the `--help` flag:
 
 ```bash
-ab --help
-ab run --help
-ab runs --help
-ab migrate --help
+ade --help
+ade run --help
+ade runs --help
+ade migrate --help
 ```

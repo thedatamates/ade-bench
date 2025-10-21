@@ -46,9 +46,6 @@ uv run wizard
 ### Run benchmarks:
 ```bash
 # With oracle agent
-uv run scripts_python/run_harness.py --agent oracle --dataset-config datasets/ade-bench-core.yaml
-
-# With specific tasks
 uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
 ```
 

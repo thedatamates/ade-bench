@@ -59,7 +59,6 @@ class Harness:
         n_concurrent_trials: int = 4,
         exclude_task_ids: set[str] | None = None,
         n_attempts: int = 1,
-        dataset_config: Path | None = None,
         create_seed: bool = False,
         disable_diffs: bool = False,
         db_type: str | None = None,
@@ -101,7 +100,6 @@ class Harness:
         self._start_time = datetime.now(timezone.utc).isoformat()
 
         self._dataset_path = dataset_path
-        self._dataset_config = dataset_config
         self._task_ids = task_ids
         self._exclude_task_ids = exclude_task_ids
         self._create_seed = create_seed
@@ -159,7 +157,7 @@ class Harness:
     @property
     def _cProfile_output_path(self) -> Path:
         return self.profiler_output_path / "cProfile.prof"
-    
+
     @property
     def _profiler_metadata_output_path(self) -> Path:
         return self.profiler_output_path / "metatdata.json"
@@ -188,16 +186,12 @@ class Harness:
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 
     def _init_dataset(self) -> None:
-        if self._task_ids:
-            # Use task_ids when specific tasks are provided
-            self._dataset = Dataset(
-                dataset_path=self._dataset_path,
-                task_ids=self._task_ids,
-                exclude_task_ids=self._exclude_task_ids,
-            )
-        else:
-            # Use YAML config when no specific task_ids are provided (i.e., "all" was used)
-            self._dataset = Dataset.from_yaml(self._dataset_config)
+        # Always use the same Dataset constructor - it handles both cases internally
+        self._dataset = Dataset(
+            dataset_path=self._dataset_path,
+            task_ids=self._task_ids,
+            excluded_task_ids=self._exclude_task_ids,
+        )
 
     def _init_logger(self) -> None:
         file_handler = logging.FileHandler(self._log_output_path)
@@ -1280,7 +1274,7 @@ class Harness:
         # Stop the Rich logger (only if dynamic logging is enabled)
         if ade_bench_config.use_dynamic_logging:
             rich_logger.stop()
-        
+
 
         # Generate HTML results dashboard
         if not self._disable_diffs:

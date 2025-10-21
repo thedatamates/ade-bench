@@ -1,4 +1,4 @@
-{% set table_name = 'stg_f1_dataset__results' %}
+{% set table_name = 'foo' %}
 
 
 
