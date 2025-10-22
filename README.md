@@ -502,7 +502,7 @@ This is probably the easiest way to do that:
     git clone https://github.com/thedatamates/ade-bench.git
     cd ade-bench
     ```
-2. Download the DuckDB databases, and put them in the `/shared/databases/duckdb` directory. You can download those here: https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE
+2. Download the DuckDB databases from [here](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE), and put them in the `/shared/databases/duckdb` directory.
     ```shell
     uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
     ```
