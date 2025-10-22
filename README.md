@@ -486,7 +486,7 @@ Fuck if I know.
 
 You need [Docker Compose](https://docs.docker.com/compose/install/)? And [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)?
 
-You can test if each of these are installed like this:
+Test if each of these are installed:
 
 ```shell
 uv --version
@@ -504,7 +504,6 @@ cd ade-bench
 ```
 2. Download the DuckDB databases, and put them in the `/shared/databases/duckdb` directory. You can download those here: https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE
 ```shell
-mkdir -p shared/databases/duckdb
 uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
 ```
 3. Run a basic execution:
