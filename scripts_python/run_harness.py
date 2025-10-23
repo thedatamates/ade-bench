@@ -25,7 +25,7 @@ if __name__ == "__main__":
         "-t", "--tasks",
         type=str,
         nargs="+",
-        required=True,
+        default=["all"],
         help=("Task ID(s) to run. Use 'all' to run all tasks from the YAML configuration"),
     )
 
