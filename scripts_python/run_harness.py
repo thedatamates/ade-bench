@@ -145,8 +145,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # Handle special case for "all" - load from YAML config
-    dataset_config = Path("datasets/ade-bench-core.yaml")
     dataset_path = Path("tasks")
     task_ids = args.tasks
 
@@ -178,7 +176,6 @@ if __name__ == "__main__":
         n_concurrent_trials=args.n_concurrent_trials,
         exclude_task_ids=set(args.exclude_tasks) if args.exclude_tasks else None,
         n_attempts=args.n_attempts,
-        dataset_config=dataset_config,
         create_seed=args.seed,
         disable_diffs=args.no_diffs,
         db_type=args.db,
