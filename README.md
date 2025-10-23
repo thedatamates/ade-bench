@@ -525,6 +525,17 @@ GRANT CREATE ROLE ON ACCOUNT TO ROLE <ade_bench_admin_role>;
 -- Alteratively:
 GRANT ROLE useradmin TO ROLE <ade_bench_admin_role>;
 ```
+
+### Anthropic Claude setup
+
+1. Login at https://platform.claude.com
+1. Go to https://platform.claude.com/settings/keys
+1. Create API key
+1. Create in Workspace: Default
+1. Name your key: whatever you want :)
+1. Save the key in a secure location
+1. Assign the key to `ANTHROPIC_API_KEY` within the `.env` file
+
 ---
 
 ## Configuration
