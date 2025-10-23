@@ -484,16 +484,32 @@ $ uv run scripts_python/migrate_duckdb_to_snowflake.py --exclude bar
 
 Fuck if I know.
 
-You need Docker? And uv? Honestly, I'd just trying running it and seeing what happens?
+You need [Docker Compose](https://docs.docker.com/compose/install/)? And [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)?
+
+Test if each of these are installed:
+
+```shell
+uv --version
+docker compose version
+```
+
+Honestly, I'd just trying running it and seeing what happens?
 
 This is probably the easiest way to do that:
 
 1. Clone the repo.
-2. Download the DuckDB databases, and put them in the `/shared/databases/duckdb` directory. You can download those here: https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE
+    ```shell
+    git clone https://github.com/thedatamates/ade-bench.git
+    cd ade-bench
+    ```
+2. Download the DuckDB databases from [here](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE), and put them in the `/shared/databases/duckdb` directory.
+    ```shell
+    uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
+    ```
 3. Run a basic execution:
-```
-uv run scripts_python/run_harness.py --tasks analytics_engineering001 --db duckdb --project-type dbt --agent oracle
-```
+    ```shell
+    uv run scripts_python/run_harness.py --tasks analytics_engineering001 --db duckdb --project-type dbt --agent oracle
+    ```
 4. See what it tells you to do? I think it'll ask if you have Docker and uv, and maybe some stuff like dbt, Snowflake CLIs, DuckDB, and Claude Code, for the agents. But that might all be handled by Dockerfile. Though, it is useful to have that stuff for dev. This section is still under development, ok?
 
 ### Snowflake setup
