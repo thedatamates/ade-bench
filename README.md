@@ -509,11 +509,12 @@ GRANT CREATE ROLE ON ACCOUNT TO ROLE <ade_bench_admin_role>;
 -- Alteratively:
 GRANT ROLE useradmin TO ROLE <ade_bench_admin_role>;
 ```
+
 ---
 
 ## Configuration
 
-Configuration is all managed through the `.env` file. It's fairly self-explanatory, but for completeness, why not:
+Configuration is all managed through the `.env` file. Create this file (if it doesn't already exist) by making a copy of `.env.example`. It's fairly self-explanatory, but for completeness, why not:
 
 ```yaml
 # API Keys for LLM providers
