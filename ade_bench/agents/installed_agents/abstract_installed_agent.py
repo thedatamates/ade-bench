@@ -72,12 +72,6 @@ class AbstractInstalledAgent(BaseAgent, ABC):
     ) -> AgentResult:
         # Agent setup phase - catch timeouts here and return with AGENT_SETUP_TIMEOUT
         try:
-            session.copy_to_container(
-                self._install_agent_script,
-                container_dir="/installed-agent",
-                container_filename="install-agent.sh",
-            )
-
             # Execute outside the session to avoid exposing the env variables.
             env_setup_content = self._create_env_setup_file()
             session.container.exec_run(
@@ -102,7 +96,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
 
             session.send_keys(
                 [
-                    "source /installed-agent/install-agent.sh",
+                    f"source /shared/agents/{self.NAME.value}/setup.sh",
                     "Enter",
                 ],
                 block=True,
