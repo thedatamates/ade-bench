@@ -307,6 +307,13 @@ def interact(
                 typer.echo(f"Warning: Unknown agent '{agent}', skipping agent setup")
                 typer.echo(f"Available agents: {', '.join([a.value for a in AgentName])}")
         
+        for script_path in trial_handler.task.test_script_paths:
+            terminal.copy_to_container(
+                paths=[script_path],
+                container_dir=str(DockerComposeManager.CONTAINER_SCRIPTS_DIR),
+                container_filename=script_path.name
+            )
+
         # Always copy test files for post-agent and post-eval
         if step in ["post-agent", "post-eval"] or include_all:
             typer.echo("Copying solution and test files...")
@@ -315,7 +322,7 @@ def interact(
             if trial_handler.solutions_dir.exists():
                 terminal.copy_to_container(
                     paths=[trial_handler.solutions_dir], 
-                    container_dir="/solutions"
+                    container_dir="/oracle/solutions"
                 )
             
             # Copy test files
@@ -332,12 +339,19 @@ def interact(
             if solution_script.exists():
                 terminal.copy_to_container(
                     paths=[solution_script],
-                    container_dir="/app",
+                    container_dir="/oracle",
                     container_filename="solution.sh"
                 )
                 
                 # Make it executable
-                container.exec_run("chmod +x /app/solution.sh")
+                container.exec_run("chmod +x /oracle/solution.sh")
+
+            # Copy seeds directory if it exists
+            if trial_handler.seeds_dir.exists():
+                terminal.copy_to_container(
+                    paths=[trial_handler.seeds_dir],
+                    container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
+                )
         # For post-agent and post-eval modes, we need to run the agent
         if step in ["post-agent", "post-eval"] and agent:
             typer.echo(f"Running {agent} agent on task {task_id}...")
@@ -369,7 +383,7 @@ def interact(
                 # Use the standard TerminalCommand with config timeout
                 from ade_bench.config import config
                 session.send_command(TerminalCommand(
-                    command="/app/solution.sh",
+                    command="/oracle/solution.sh",
                     block=True,
                     max_timeout_sec=config.default_agent_timeout_sec,
                     append_enter=True,

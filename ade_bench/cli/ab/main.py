@@ -44,7 +44,7 @@ def run(
         "oracle",
         "--agent",
         case_sensitive=False,
-        help="The agent to benchmark (e.g., oracle, claude-code, macro)"
+        help="The agent to benchmark (e.g., oracle, claude, macro)"
     ),
     model_name: str = typer.Option(
         "",
