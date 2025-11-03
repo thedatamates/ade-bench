@@ -16,9 +16,9 @@ class SuperpowersPlugin(BasePlugin):
 
     def pre_agent(self, context: PluginContext) -> None:
         """Install superpowers before agent starts"""
-        script_path = context.trial_handler.shared_path / "plugins/superpowers/install.sh"
+        script_path = context.trial_handler._shared_path / "plugins/superpowers/install.sh"
 
-        # Copy script to container at /scripts/ (same location as setup-dbt-mcp.sh)
+        # Copy script to container at /scripts/
         context.terminal.copy_to_container(
             script_path,
             Path("/scripts/install-superpowers.sh")
@@ -30,3 +30,4 @@ class SuperpowersPlugin(BasePlugin):
             "bash /scripts/install-superpowers.sh",
             timeout_s=300
         )
+
