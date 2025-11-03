@@ -32,8 +32,9 @@ class SuperpowersPlugin(BasePlugin):
         # Copy script to container at /scripts/
         logger.info(f"[SuperpowersPlugin] Copying script to container at /scripts/install-superpowers.sh")
         context.terminal.copy_to_container(
-            script_path,
-            Path("/scripts/install-superpowers.sh")
+            paths=script_path,
+            container_dir="/scripts",
+            container_filename="install-superpowers.sh"
         )
         logger.info(f"[SuperpowersPlugin] Script copied successfully")
 

@@ -33,8 +33,9 @@ class DbtMcpPlugin(BasePlugin):
 
         logger.info(f"[DbtMcpPlugin] Copying script to container at /scripts/setup-dbt-mcp.sh")
         context.terminal.copy_to_container(
-            script_path,
-            Path("/scripts/setup-dbt-mcp.sh")
+            paths=script_path,
+            container_dir="/scripts",
+            container_filename="setup-dbt-mcp.sh"
         )
         logger.info(f"[DbtMcpPlugin] Script copied successfully")
 
