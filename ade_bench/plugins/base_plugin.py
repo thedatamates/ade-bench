@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from ade_bench.agents.agent_name import AgentName
     from ade_bench.terminal.docker_compose_manager import DockerComposeManager
     from ade_bench.handlers.trial_handler import TrialHandler
 
@@ -18,7 +19,7 @@ class PluginContext:
     trial_handler: "TrialHandler"
     task_id: str
     variant: dict
-    agent_name: Optional[str] = None
+    agent_name: Optional["AgentName"] = None
     db_type: Optional[str] = None
     project_type: Optional[str] = None
 

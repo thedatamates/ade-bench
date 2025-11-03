@@ -664,8 +664,8 @@ class Harness:
                 trial_handler=trial_handler,
                 task_id=trial_handler.task_id,
                 variant=config,
-                agent_name=task_agent.name,
-                db_type=config.get("db_type"),
+                agent_name=task_agent.NAME,
+                db_type=config.get("database", {}).get("type") if config.get("database") else config.get("db_type"),
                 project_type=config.get("project_type"),
             )
 
