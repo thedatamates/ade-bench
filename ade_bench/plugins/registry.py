@@ -3,10 +3,13 @@
 
 from typing import List
 from ade_bench.plugins.base_plugin import BasePlugin, PluginContext
+from ade_bench.plugins.superpowers import SuperpowersPlugin
 
 
-# Static list of available plugins - will be populated in later tasks
-AVAILABLE_PLUGINS: List[type[BasePlugin]] = []
+# Static list of available plugins
+AVAILABLE_PLUGINS: List[type[BasePlugin]] = [
+    SuperpowersPlugin,
+]
 
 
 class PluginRegistry:
