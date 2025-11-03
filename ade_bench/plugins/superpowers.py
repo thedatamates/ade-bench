@@ -40,10 +40,13 @@ class SuperpowersPlugin(BasePlugin):
 
         # Execute installation
         logger.info(f"[SuperpowersPlugin] Executing installation script")
-        context.terminal.run(
-            context.session,
-            "bash /scripts/install-superpowers.sh",
-            timeout_s=300
+        context.session.send_keys(
+            [
+                "bash /scripts/install-superpowers.sh",
+                "Enter",
+            ],
+            block=True,
+            max_timeout_sec=300
         )
         logger.info(f"[SuperpowersPlugin] Superpowers installation completed")
 

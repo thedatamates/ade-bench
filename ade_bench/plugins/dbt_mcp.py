@@ -43,9 +43,12 @@ class DbtMcpPlugin(BasePlugin):
         agent_name = context.agent_name.value if context.agent_name else "unknown"
 
         logger.info(f"[DbtMcpPlugin] Executing dbt-mcp setup for {agent_name}")
-        context.terminal.run(
-            context.session,
-            f"bash /scripts/setup-dbt-mcp.sh {context.db_type} {context.project_type} {agent_name}",
-            timeout_s=300
+        context.session.send_keys(
+            [
+                f"bash /scripts/setup-dbt-mcp.sh {context.db_type} {context.project_type} {agent_name}",
+                "Enter",
+            ],
+            block=True,
+            max_timeout_sec=300
         )
         logger.info(f"[DbtMcpPlugin] dbt-mcp setup completed")
