@@ -28,6 +28,7 @@ from ade_bench.harness_models import (
     TrialResults,
 )
 from ade_bench.setup.setup_orchestrator import SetupOrchestrator
+from ade_bench.plugins.base_plugin import PluginContext
 from ade_bench.llms.base_llm import ContextLengthExceededError, ParseError
 from ade_bench.parsers.base_parser import UnitTestStatus, ParserResult
 from ade_bench.terminal.docker_compose_manager import DockerComposeManager
@@ -656,6 +657,21 @@ class Harness:
             if hasattr(task_agent, 'set_variant_config'):
                 task_agent.set_variant_config(config)
 
+            # Build context for agent-phase hooks
+            context = PluginContext(
+                terminal=terminal,
+                session=session,
+                trial_handler=trial_handler,
+                task_id=trial_handler.task_id,
+                variant=config,
+                agent_name=task_agent.name,
+                db_type=config.get("db_type"),
+                project_type=config.get("project_type"),
+            )
+
+            # PRE-AGENT HOOKS
+            self.plugin_registry.run_hooks("pre_agent", context)
+
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent...")
             try:
                 agent_result, agent_failure_mode = self._run_agent(
@@ -720,6 +736,9 @@ class Harness:
                 results.num_turns = agent_result.num_turns
                 results.runtime_ms = agent_result.runtime_ms
                 results.cost_usd = agent_result.cost_usd
+
+            # POST-TRIAL HOOKS
+            self.plugin_registry.run_hooks("post_trial", context)
 
             # Always kill the agent session to ensure cleanup, regardless of success/failure
             try:
