@@ -84,5 +84,8 @@ dmypy.json
 # uv
 .uv/
 
+# Worktrees
+.worktrees/
+
 # misc
 zz-*
