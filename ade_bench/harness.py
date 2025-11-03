@@ -66,6 +66,7 @@ class Harness:
         keep_alive: bool = False,
         use_mcp: bool = False,
         with_profiling: bool = False,
+        enabled_plugins: list[str] | None = None,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -95,6 +96,7 @@ class Harness:
             keep_alive: If True, keep containers alive when tasks fail for debugging.
             use_mcp: If True, start a dbt MCP server after setup completes.
             with_profiling: If True, will enable the cProfiler.
+            enabled_plugins: List of plugin names to enable (from CLI --plugins).
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -111,7 +113,10 @@ class Harness:
         self._with_profiling = with_profiling
 
         # Initialize setup orchestrator for variant-specific setup
-        self._setup_orchestrator = SetupOrchestrator()
+        self._setup_orchestrator = SetupOrchestrator(enabled_plugins=enabled_plugins)
+
+        # Keep reference to registry for pre-agent/post-trial hooks
+        self.plugin_registry = self._setup_orchestrator.plugin_registry
 
         self._output_path = output_path
         self._agent_name = agent_name

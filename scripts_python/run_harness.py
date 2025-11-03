@@ -143,6 +143,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Run the harness with a python profiler",
     )
+    parser.add_argument(
+        "--plugins",
+        type=str,
+        default="",
+        help="Comma-separated list of plugins to enable (e.g., 'superpowers,dbt-mcp')",
+    )
     args = parser.parse_args()
 
     dataset_path = Path("tasks")
@@ -159,6 +165,9 @@ if __name__ == "__main__":
         case _:
             if args.agent_args:
                 agent_kwargs["additional_args"] = args.agent_args
+
+    # Parse plugins string into list
+    enabled_plugins = [p.strip() for p in args.plugins.split(",") if p.strip()]
 
     harness = Harness(
         dataset_path=dataset_path,
@@ -183,6 +192,7 @@ if __name__ == "__main__":
         keep_alive=args.persist,
         use_mcp=args.use_mcp,
         with_profiling=args.with_profiling,
+        enabled_plugins=enabled_plugins,
     )
 
     results = harness.run()
