@@ -3,8 +3,7 @@
 
 from abc import ABC
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ade_bench.terminal.docker_compose_manager import DockerComposeManager
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
 class PluginContext:
     """Immutable context passed to plugin hooks"""
     terminal: "DockerComposeManager"
-    session: any  # libtmux Session
+    session: Any  # libtmux Session
     trial_handler: "TrialHandler"
     task_id: str
     variant: dict
