@@ -120,6 +120,11 @@ def run(
         False,
         "--use-mcp",
         help="Enable MCP (Model Context Protocol) for the agent"
+    ),
+    with_profiling: bool = typer.Option(
+        False,
+        "--with-profiling",
+        help="Run the harness with a python profiler",
     )
 ):
     """
@@ -185,6 +190,7 @@ def run(
         project_type=project_type,
         keep_alive=persist,
         use_mcp=use_mcp,
+        with_profiling=with_profiling
     )
 
     results = harness.run()
