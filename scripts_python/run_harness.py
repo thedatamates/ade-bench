@@ -134,11 +134,6 @@ if __name__ == "__main__":
         help="Keep containers alive when tasks fail for debugging",
     )
     parser.add_argument(
-        "--use-mcp",
-        action="store_true",
-        help="Start a dbt MCP server after setup completes",
-    )
-    parser.add_argument(
         "--with-profiling",
         action="store_true",
         help="Run the harness with a python profiler",
@@ -190,7 +185,6 @@ if __name__ == "__main__":
         db_type=args.db,
         project_type=args.project_type,
         keep_alive=args.persist,
-        use_mcp=args.use_mcp,
         with_profiling=args.with_profiling,
         enabled_plugins=enabled_plugins,
     )

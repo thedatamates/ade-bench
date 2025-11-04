@@ -26,10 +26,9 @@ from ade_bench.config import config
 class AbstractInstalledAgent(BaseAgent, ABC):
     NAME = AgentName.ABSTRACT_INSTALLED
 
-    def __init__(self, use_mcp: bool = False, model_name: str | None = None, **kwargs):
+    def __init__(self, model_name: str | None = None, **kwargs):
         super().__init__(**kwargs)
         self._variant_config = {}
-        self._use_mcp = use_mcp
         self._model_name = model_name
 
     @property

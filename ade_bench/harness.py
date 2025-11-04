@@ -65,7 +65,6 @@ class Harness:
         db_type: str | None = None,
         project_type: str | None = None,
         keep_alive: bool = False,
-        use_mcp: bool = False,
         with_profiling: bool = False,
         enabled_plugins: list[str] | None = None,
     ):
@@ -95,7 +94,6 @@ class Harness:
             db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
             project_type: Project type to filter variants (e.g., dbt, other).
             keep_alive: If True, keep containers alive when tasks fail for debugging.
-            use_mcp: If True, start a dbt MCP server after setup completes.
             with_profiling: If True, will enable the cProfiler.
             enabled_plugins: List of plugin names to enable (from CLI --plugins).
         """
@@ -110,7 +108,6 @@ class Harness:
         self._db_filter = db_type
         self._project_type_filter = project_type
         self._keep_alive = keep_alive
-        self._use_mcp = use_mcp
         self._with_profiling = with_profiling
 
         # Initialize setup orchestrator for variant-specific setup
@@ -185,9 +182,6 @@ class Harness:
         # Pass model_name to agents (if provided)
         if self._model_name:
             agent_kwargs["model_name"] = self._model_name
-
-        # Pass use_mcp flag to installed agents
-        agent_kwargs["use_mcp"] = self._use_mcp
 
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 
@@ -575,7 +569,7 @@ class Harness:
             model_name=self._model_name,
             db_type=config.get("db_type"),
             project_type=config.get("project_type"),
-            used_mcp=self._use_mcp,
+            used_mcp=self.plugin_registry.did_plugin_run("dbt-mcp"),
         )
 
         with spin_up_terminal(
@@ -1162,7 +1156,7 @@ class Harness:
                 model_name=self._model_name,
                 db_type=config.get("db_type"),
                 project_type=config.get("project_type"),
-                used_mcp=self._use_mcp,
+                used_mcp=self.plugin_registry.did_plugin_run("dbt-mcp"),
             )
             return trial_results
 
