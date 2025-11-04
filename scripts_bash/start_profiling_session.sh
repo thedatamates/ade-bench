@@ -7,11 +7,10 @@ mkdir -p "profiling/summaries/${DATETIME}"
 
 OTHER_ARGS="$@"
 
-sudo -E env "PATH=$PATH" "HOME=$HOME" \
-  py-spy record \
+py-spy record \
   -o "profiling/summaries/${DATETIME}/flamegraph.svg" \
   --subprocesses \
-  -- sudo uv run scripts_python/run_harness.py \
+  -- uv run scripts_python/run_harness.py \
   --with-profiling \
   --run-id "${DATETIME}" \
   ${OTHER_ARGS}
