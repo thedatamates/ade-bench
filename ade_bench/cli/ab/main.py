@@ -116,11 +116,6 @@ def run(
         "--log-level",
         help="Set the logging level"
     ),
-    use_mcp: bool = typer.Option(
-        False,
-        "--use-mcp",
-        help="Enable MCP (Model Context Protocol) for the agent"
-    ),
     with_profiling: bool = typer.Option(
         False,
         "--with-profiling",
@@ -196,7 +191,6 @@ def run(
         db_type=db,
         project_type=project_type,
         keep_alive=persist,
-        use_mcp=use_mcp,
         with_profiling=with_profiling,
         enabled_plugins=enabled_plugins,
     )
