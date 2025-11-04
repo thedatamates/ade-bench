@@ -10,7 +10,7 @@ OTHER_ARGS="$@"
 py-spy record \
   -o "profiling/summaries/${DATETIME}/flamegraph.svg" \
   --subprocesses \
-  -- uv run scripts_python/run_harness.py \
+  -- ade run \
   --with-profiling \
   --run-id "${DATETIME}" \
   ${OTHER_ARGS}
