@@ -5,12 +5,14 @@ from typing import List, Set
 from ade_bench.plugins.base_plugin import BasePlugin, PluginContext
 from ade_bench.plugins.superpowers import SuperpowersPlugin
 from ade_bench.plugins.dbt_mcp import DbtMcpPlugin
+from ade_bench.plugins.dbt_artifacts import DbtArtifactsPlugin
 
 
 # Static list of available plugins
 AVAILABLE_PLUGINS: List[type[BasePlugin]] = [
     SuperpowersPlugin,
     DbtMcpPlugin,
+    DbtArtifactsPlugin,
 ]
 
 
