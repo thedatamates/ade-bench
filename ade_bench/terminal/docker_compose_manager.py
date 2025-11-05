@@ -45,6 +45,7 @@ class DockerComposeManager:
         build_context_dir: Path | None = None,
         agent_dir: str | None = None,
         agent_type: type | None = None,
+        db_flavor: str | None = None,
     ):
         try:
             self._client = docker.from_env()
@@ -67,6 +68,7 @@ class DockerComposeManager:
         self._build_context_dir = build_context_dir
         self._agent_dir = agent_dir
         self._agent_type = agent_type
+        self._db_flavor = db_flavor
         self._logger = logger.getChild(__name__)
 
     def _select_docker_compose_file(self) -> Path:
@@ -98,11 +100,9 @@ class DockerComposeManager:
         env_vars = {}
 
         if self._agent_type and issubclass(self._agent_type, AbstractInstalledAgent):
-            # Extract db flavor from image name
-            # Expected format: ade-bench-{db-flavor}:latest
-            if self._client_image_name:
-                db_flavor = self._client_image_name.replace("ade-bench-", "").replace(":latest", "")
-                env_vars["T_BENCH_DB_FLAVOR"] = db_flavor
+            # Use db_flavor directly from constructor
+            if self._db_flavor:
+                env_vars["T_BENCH_DB_FLAVOR"] = self._db_flavor
 
             # Set agent directory name
             if self._agent_dir:

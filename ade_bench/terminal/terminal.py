@@ -21,6 +21,7 @@ class Terminal:
         build_context_dir: Path | None = None,
         agent_dir: str | None = None,
         agent_type: type | None = None,
+        db_flavor: str | None = None,
     ):
         self._client_container_name = client_container_name
         self._docker_name_prefix = docker_name_prefix
@@ -43,6 +44,7 @@ class Terminal:
             build_context_dir=build_context_dir,
             agent_dir=agent_dir,
             agent_type=agent_type,
+            db_flavor=db_flavor,
         )
 
         self.container = None
@@ -118,6 +120,7 @@ def spin_up_terminal(
     keep_alive: bool = False,
     agent_dir: str | None = None,
     agent_type: type | None = None,
+    db_flavor: str | None = None,
 ) -> Generator[Terminal, None, None]:
     terminal = Terminal(
         client_container_name=client_container_name,
@@ -131,6 +134,7 @@ def spin_up_terminal(
         build_context_dir=build_context_dir,
         agent_dir=agent_dir,
         agent_type=agent_type,
+        db_flavor=db_flavor,
     )
 
     try:

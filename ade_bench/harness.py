@@ -580,6 +580,7 @@ class Harness:
 
         agent_dir = None
         agent_type = None
+        db_flavor = None
         if isinstance(task_agent, AbstractInstalledAgent):
             # Extract agent directory name from the agent's module path
             # e.g., ade_bench.agents.installed_agents.claude_code.claude_code_agent -> claude_code
@@ -587,6 +588,13 @@ class Harness:
             agent_dir = agent_module.split('.')[-2]  # Get second-to-last component
             agent_type = type(task_agent)
             self._logger.debug(f"Detected installed agent directory: {agent_dir}")
+
+            # Construct db_flavor for docker image selection
+            db_type = config.get("db_type")
+            project_type = config.get("project_type")
+            if db_type and project_type:
+                db_flavor = f"{db_type}-{project_type}"
+                self._logger.debug(f"Constructed db_flavor: {db_flavor}")
 
         with spin_up_terminal(
             client_container_name=trial_handler.client_container_name,
@@ -601,6 +609,7 @@ class Harness:
             keep_alive=self._keep_alive,
             agent_dir=agent_dir,
             agent_type=agent_type,
+            db_flavor=db_flavor,
         ) as terminal:
             gitignore_path = Path(__file__).parent.parent / "shared" / "defaults" / ".gitignore"
             if gitignore_path.exists():
