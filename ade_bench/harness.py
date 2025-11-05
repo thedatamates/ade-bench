@@ -572,6 +572,22 @@ class Harness:
             used_mcp=self._use_mcp,
         )
 
+        # Create agent to determine type
+        task_agent = self._create_agent_for_task(trial_handler.task_id)
+
+        # Detect agent info for docker image selection
+        from ade_bench.agents.installed_agents.abstract_installed_agent import AbstractInstalledAgent
+
+        agent_dir = None
+        agent_type = None
+        if isinstance(task_agent, AbstractInstalledAgent):
+            # Extract agent directory name from the agent's module path
+            # e.g., ade_bench.agents.installed_agents.claude_code.claude_code_agent -> claude_code
+            agent_module = type(task_agent).__module__
+            agent_dir = agent_module.split('.')[-2]  # Get second-to-last component
+            agent_type = type(task_agent)
+            self._logger.debug(f"Detected installed agent directory: {agent_dir}")
+
         with spin_up_terminal(
             client_container_name=trial_handler.client_container_name,
             client_image_name=trial_handler.client_image_name,
@@ -583,6 +599,8 @@ class Harness:
             cleanup=self._cleanup,
             build_context_dir=trial_handler.input_path,
             keep_alive=self._keep_alive,
+            agent_dir=agent_dir,
+            agent_type=agent_type,
         ) as terminal:
             gitignore_path = Path(__file__).parent.parent / "shared" / "defaults" / ".gitignore"
             if gitignore_path.exists():
@@ -643,9 +661,6 @@ class Harness:
 
             # Inject delimiter to mark the end of pre-agent phase
             session.send_keys(["echo '=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ==='", "Enter"])
-
-            # Create a fresh agent for this task
-            task_agent = self._create_agent_for_task(trial_handler.task_id)
 
             # Set variant configuration for oracle agent
             if hasattr(task_agent, 'set_variant_config'):
