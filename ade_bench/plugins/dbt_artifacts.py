@@ -2,8 +2,7 @@
 # ABOUTME: Creates artifacts in target-base directory before agent execution
 
 import logging
-import tarfile
-import io
+import subprocess
 from pathlib import Path
 from ade_bench.plugins.base_plugin import BasePlugin, PluginContext
 
@@ -105,24 +104,17 @@ class DbtArtifactsPlugin(BasePlugin):
         logger.info(f"[DbtArtifactsPlugin] Artifact archival complete")
 
     def _copy_from_container(self, container, container_path: str, local_path: Path) -> None:
-        """Copy a file from container to local filesystem"""
+        """Copy a file from container to local filesystem using docker cp"""
         try:
-            # Get tar archive from container
-            bits, stat = container.get_archive(container_path)
-
-            # Extract file from tar archive
-            tar_stream = io.BytesIO()
-            for chunk in bits:
-                tar_stream.write(chunk)
-            tar_stream.seek(0)
-
-            # Extract to local path
-            with tarfile.open(fileobj=tar_stream) as tar:
-                # Get the file from tar (strip leading path)
-                member = tar.getmembers()[0]
-                file_obj = tar.extractfile(member)
-                if file_obj:
-                    local_path.write_bytes(file_obj.read())
-                    logger.info(f"[DbtArtifactsPlugin] Copied {container_path} to {local_path}")
+            # Use docker cp command
+            container_name = container.name
+            subprocess.run(
+                ["docker", "cp", f"{container_name}:{container_path}", str(local_path)],
+                check=True,
+                capture_output=True
+            )
+            logger.info(f"[DbtArtifactsPlugin] Copied {container_path} to {local_path}")
+        except subprocess.CalledProcessError as e:
+            logger.warning(f"[DbtArtifactsPlugin] Failed to copy {container_path}: {e.stderr.decode()}")
         except Exception as e:
             logger.warning(f"[DbtArtifactsPlugin] Failed to copy {container_path}: {e}")
