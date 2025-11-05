@@ -16,6 +16,12 @@ cd /app
 # Create target-base directory if it doesn't exist
 mkdir -p target-base
 
+# Install dbt dependencies if needed
+if [ -f "packages.yml" ] || [ -f "dependencies.yml" ]; then
+    echo "Installing dbt dependencies..."
+    dbt deps
+fi
+
 # Generate manifest.json via compile
 echo "Running dbt compile to generate manifest.json..."
 dbt compile --target-path target-base
