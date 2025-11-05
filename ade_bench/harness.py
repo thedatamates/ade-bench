@@ -109,6 +109,7 @@ class Harness:
         self._project_type_filter = project_type
         self._keep_alive = keep_alive
         self._with_profiling = with_profiling
+        self._enabled_plugins = enabled_plugins
 
         # Initialize setup orchestrator for variant-specific setup
         self._setup_orchestrator = SetupOrchestrator(enabled_plugins=enabled_plugins)
@@ -522,7 +523,8 @@ class Harness:
                 terminal=terminal,
                 session=session,
                 file_diff_handler=file_diff_handler,
-                trial_handler=trial_handler
+                trial_handler=trial_handler,
+                enabled_plugins=self._enabled_plugins
             )
 
             # Run setup with timeout using asyncio
