@@ -66,7 +66,7 @@ class DbtArtifactsPlugin(BasePlugin):
         logger.info(f"[DbtArtifactsPlugin] Final dbt artifacts generated in /app/target/")
 
         # Archive artifacts to experiments folder
-        trial_dir = context.trial_handler.trial_dir
+        trial_dir = context.trial_handler._task_output_path
         artifacts_dir = trial_dir / "dbt_artifacts"
         artifacts_dir.mkdir(exist_ok=True)
 
