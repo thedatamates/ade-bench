@@ -2,6 +2,8 @@
 # ABOUTME: Creates artifacts in target-base directory before agent execution
 
 import logging
+import tarfile
+import io
 from pathlib import Path
 from ade_bench.plugins.base_plugin import BasePlugin, PluginContext
 
@@ -47,3 +49,80 @@ class DbtArtifactsPlugin(BasePlugin):
             max_timeout_sec=300
         )
         logger.info(f"[DbtArtifactsPlugin] Baseline dbt artifacts generated successfully")
+
+    def post_trial(self, context: PluginContext) -> None:
+        """Generate final artifacts and archive both baseline and final to experiments folder"""
+        logger.info(f"[DbtArtifactsPlugin] Generating final dbt artifacts after agent execution")
+
+        # Generate final artifacts in /app/target/
+        context.session.send_keys(
+            [
+                "cd /app && dbt docs generate",
+                "Enter",
+            ],
+            block=True,
+            max_timeout_sec=300
+        )
+        logger.info(f"[DbtArtifactsPlugin] Final dbt artifacts generated in /app/target/")
+
+        # Archive artifacts to experiments folder
+        trial_dir = context.trial_handler.trial_dir
+        artifacts_dir = trial_dir / "dbt_artifacts"
+        artifacts_dir.mkdir(exist_ok=True)
+
+        logger.info(f"[DbtArtifactsPlugin] Archiving artifacts to {artifacts_dir}")
+
+        # Copy baseline artifacts (target-base)
+        baseline_dir = artifacts_dir / "baseline"
+        baseline_dir.mkdir(exist_ok=True)
+        self._copy_from_container(
+            context.session.container,
+            "/app/target-base/manifest.json",
+            baseline_dir / "manifest.json"
+        )
+        self._copy_from_container(
+            context.session.container,
+            "/app/target-base/catalog.json",
+            baseline_dir / "catalog.json"
+        )
+        logger.info(f"[DbtArtifactsPlugin] Baseline artifacts archived to {baseline_dir}")
+
+        # Copy final artifacts (target)
+        final_dir = artifacts_dir / "final"
+        final_dir.mkdir(exist_ok=True)
+        self._copy_from_container(
+            context.session.container,
+            "/app/target/manifest.json",
+            final_dir / "manifest.json"
+        )
+        self._copy_from_container(
+            context.session.container,
+            "/app/target/catalog.json",
+            final_dir / "catalog.json"
+        )
+        logger.info(f"[DbtArtifactsPlugin] Final artifacts archived to {final_dir}")
+
+        logger.info(f"[DbtArtifactsPlugin] Artifact archival complete")
+
+    def _copy_from_container(self, container, container_path: str, local_path: Path) -> None:
+        """Copy a file from container to local filesystem"""
+        try:
+            # Get tar archive from container
+            bits, stat = container.get_archive(container_path)
+
+            # Extract file from tar archive
+            tar_stream = io.BytesIO()
+            for chunk in bits:
+                tar_stream.write(chunk)
+            tar_stream.seek(0)
+
+            # Extract to local path
+            with tarfile.open(fileobj=tar_stream) as tar:
+                # Get the file from tar (strip leading path)
+                member = tar.getmembers()[0]
+                file_obj = tar.extractfile(member)
+                if file_obj:
+                    local_path.write_bytes(file_obj.read())
+                    logger.info(f"[DbtArtifactsPlugin] Copied {container_path} to {local_path}")
+        except Exception as e:
+            logger.warning(f"[DbtArtifactsPlugin] Failed to copy {container_path}: {e}")
