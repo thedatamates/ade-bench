@@ -70,15 +70,20 @@ class AbstractInstalledAgent(BaseAgent, ABC):
         logging_dir: Path | None = None,
         task_name: str | None = None,
     ) -> AgentResult:
-        # Agent setup phase - catch timeouts here and return with AGENT_SETUP_TIMEOUT
-        try:
-            session.copy_to_container(
-                self._install_agent_script,
-                container_dir="/installed-agent",
-                container_filename="install-agent.sh",
-            )
+        """
+        Execute the agent task. Agent must be pre-installed in Docker image.
 
-            # Execute outside the session to avoid exposing the env variables.
+        Args:
+            task_prompt: The task prompt to send to the agent
+            session: The tmux session to use for execution
+            logging_dir: Optional directory for agent logs
+            task_name: Optional task name for logging
+
+        Returns:
+            AgentResult with metrics and any failure mode
+        """
+        # Setup env vars (API keys, etc) - still needed at runtime
+        try:
             env_setup_content = self._create_env_setup_file()
             session.container.exec_run(
                 [
@@ -97,16 +102,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                     "Enter",
                 ],
                 block=True,
-                max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
-            )
-
-            session.send_keys(
-                [
-                    "source /installed-agent/install-agent.sh",
-                    "Enter",
-                ],
-                block=True,
-                max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for installation
+                max_timeout_sec=config.setup_timeout_sec,
             )
 
             # Optionally setup dbt MCP server
@@ -135,7 +131,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 logger,
                 task_name,
                 "agent",
-                f"Agent setup timed out after {config.setup_timeout_sec}s during setup and installation phase"
+                f"Agent env setup timed out after {config.setup_timeout_sec}s"
             )
             return AgentResult(
                 input_tokens=0,
@@ -146,6 +142,8 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 cost_usd=0.0,
                 failure_mode=FailureMode.AGENT_SETUP_TIMEOUT,
             )
+
+        # Agent is pre-installed in Docker image - no installation needed here
 
         # Create a log file for agent output
         agent_output_file = "/tmp/agent_output.log"
