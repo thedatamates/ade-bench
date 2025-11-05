@@ -17,8 +17,8 @@ class DbtArtifactsPlugin(BasePlugin):
         is_dbt = context.project_type in ["dbt", "dbt-fusion"]
         return is_dbt
 
-    def post_setup(self, context: PluginContext) -> None:
-        """Generate dbt artifacts after setup completes"""
+    def pre_setup(self, context: PluginContext) -> None:
+        """Generate dbt artifacts before setup runs"""
         script_path = context.trial_handler._shared_path / "plugins/dbt-artifacts/generate-artifacts.sh"
 
         logger.info(f"[DbtArtifactsPlugin] Preparing to generate baseline dbt artifacts")
