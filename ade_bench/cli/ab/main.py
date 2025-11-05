@@ -125,6 +125,10 @@ def run(
         False,
         "--with-profiling",
         help="Run the harness with a python profiler",
+    plugins: str = typer.Option(
+        "",
+        "--plugins",
+        help="Comma-separated list of plugins to enable (e.g., 'superpowers,dbt-mcp')"
     )
 ):
     """
@@ -167,6 +171,9 @@ def run(
     elif agent_args:
         agent_kwargs["additional_args"] = agent_args
 
+    # Parse plugins
+    enabled_plugins = [p.strip() for p in plugins.split(",") if p.strip()]
+
     # Create and run the harness
     harness = Harness(
         dataset_path=dataset_path,
@@ -190,7 +197,8 @@ def run(
         project_type=project_type,
         keep_alive=persist,
         use_mcp=use_mcp,
-        with_profiling=with_profiling
+        with_profiling=with_profiling,
+        enabled_plugins=enabled_plugins,
     )
 
     results = harness.run()
