@@ -5,7 +5,6 @@ ABOUTME: Validates file snapshot capture and path exclusion behavior
 
 import tempfile
 from pathlib import Path
-from datetime import datetime
 
 import docker
 import pytest
