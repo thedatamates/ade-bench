@@ -1,8 +1,10 @@
 """File diffing handler for tracking file changes during test execution."""
 
 import hashlib
+import io
 import json
 import subprocess
+import tarfile
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -209,37 +211,50 @@ class FileDiffHandler:
         return False
 
     def capture_snapshot(self, container, directory: str = "/app") -> Optional[FileSnapshot]:
-        """Capture a snapshot of files in the container directory."""
+        """Capture a snapshot of files in the container directory using tar archive."""
         if not self.enabled:
             return None
 
         try:
-            # Get list of files in the directory
-            result = container.exec_run([
-                "find", directory, "-type", "f", "-not", "-path", "*/.*"
-            ])
+            # Get directory contents as tar archive (single API call)
+            stream, stat = container.get_archive(directory)
 
-            if result.exit_code != 0:
-                self._logger.warning(f"Failed to list files in {directory}: {result.output.decode()}")
-                return None
+            # Read tar archive into memory
+            tar_data = io.BytesIO()
+            for chunk in stream:
+                tar_data.write(chunk)
+            tar_data.seek(0)
 
-            file_paths = [line.strip() for line in result.output.decode().split('\n') if line.strip()]
-
-            # Read contents of each file (excluding specified paths)
+            # Extract files from tar archive
             files = {}
-            for file_path in file_paths:
-                if self._should_exclude_path(file_path):
-                    self._logger.debug(f"Excluding file from diff: {file_path}")
-                    continue
+            with tarfile.open(fileobj=tar_data, mode='r') as tar:
+                for member in tar.getmembers():
+                    # Skip directories
+                    if not member.isfile():
+                        continue
 
-                try:
-                    file_result = container.exec_run(["cat", file_path])
-                    if file_result.exit_code == 0:
-                        files[file_path] = file_result.output.decode()
-                    else:
-                        self._logger.debug(f"Could not read file {file_path}: {file_result.output.decode()}")
-                except Exception as e:
-                    self._logger.debug(f"Error reading file {file_path}: {e}")
+                    # Get full path (tar includes directory name in path)
+                    file_path = f"/{member.name}"
+
+                    # Skip hidden files (files starting with .)
+                    # This matches the behavior of: find directory -type f -not -path "*/.*"
+                    path_parts = member.name.split('/')
+                    if any(part.startswith('.') for part in path_parts):
+                        continue
+
+                    # Apply exclusion filters
+                    if self._should_exclude_path(file_path):
+                        self._logger.debug(f"Excluding file from diff: {file_path}")
+                        continue
+
+                    # Extract file content
+                    try:
+                        file_obj = tar.extractfile(member)
+                        if file_obj:
+                            content = file_obj.read().decode('utf-8')
+                            files[file_path] = content
+                    except Exception as e:
+                        self._logger.debug(f"Could not read file {file_path}: {e}")
 
             snapshot = FileSnapshot(
                 timestamp=datetime.now(),
