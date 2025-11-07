@@ -1,5 +1,6 @@
 """Commands for managing ADE-bench runs."""
 
+import builtins
 import typer
 from pathlib import Path
 from typing import Optional, List
@@ -52,11 +53,11 @@ def list(
         if results_file.exists() and metadata_file.exists():
             import json
             try:
-                with open(results_file, "r") as f:
+                with builtins.open(results_file, "r") as f:
                     results = json.load(f)
                     accuracy = results.get("accuracy", "N/A")
                     
-                with open(metadata_file, "r") as f:
+                with builtins.open(metadata_file, "r") as f:
                     metadata = json.load(f)
                     agent = metadata.get("agent_name", "N/A")
                     db_type = metadata.get("db_type", "N/A")
