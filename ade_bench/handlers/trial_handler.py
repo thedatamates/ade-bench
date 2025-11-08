@@ -416,8 +416,8 @@ class TrialHandler:
 
     @property
     def shared_duckdb_path(self) -> Path:
-        """Path to the shared DuckDB databases directory."""
-        return self.shared_databases_path / "duckdb"
+        """Path to the shared DuckDB databases directory in the main repository."""
+        return self.shared_databases_root_path / "duckdb"
 
     @property
     def shared_snowflake_path(self) -> Path:

@@ -195,3 +195,52 @@ difficulty: easy
     assert ".worktrees" not in str(db_path)
     assert db_path.name == "databases"
     assert db_path.parent.name == "shared"
+
+
+def test_shared_duckdb_path_in_worktree_finds_main_repo_file(tmp_path):
+    """Test that shared_duckdb_path finds database files in main ade-bench repo from worktree.
+
+    This test verifies that when running from a worktree (like agent-install-phase),
+    shared_duckdb_path correctly resolves to the main ade-bench repo's DuckDB directory
+    where actual database files exist, not the worktree's empty copy.
+    """
+    # Create a task in a temporary directory
+    task_dir = tmp_path / "tasks" / "test_task"
+    task_dir.mkdir(parents=True)
+    (task_dir / "task.yaml").write_text("""
+prompts:
+  - key: base
+    prompt: "test"
+author_name: test
+author_email: test@test.com
+difficulty: easy
+""")
+
+    handler = TrialHandler(
+        trial_name="test",
+        input_path=task_dir,
+        task_key="base"
+    )
+
+    # Should point to ade-bench's duckdb dir (where database files actually exist)
+    duckdb_path = handler.shared_duckdb_path
+    assert duckdb_path.exists()
+
+    # Check if we're in a worktree by looking at _shared_path
+    from importlib.resources import files
+    from pathlib import Path as P
+    shared_path = P(str(files('ade_bench'))) / '..' / 'shared'
+    is_worktree = '.worktrees' in str(shared_path.resolve())
+
+    if is_worktree:
+        # If we're in a worktree, the path should point to main repo (no .worktrees)
+        assert ".worktrees" not in str(duckdb_path), \
+            f"shared_duckdb_path should point to main repo, not worktree: {duckdb_path}"
+        # And it should have actual database files (main repo has databases)
+        db_files = list(duckdb_path.glob("*.duckdb"))
+        assert len(db_files) > 0, \
+            f"shared_duckdb_path should have database files from main repo, found: {db_files}"
+
+    assert duckdb_path.name == "duckdb"
+    assert duckdb_path.parent.name == "databases"
+    assert duckdb_path.parent.parent.name == "shared"
