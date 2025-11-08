@@ -97,3 +97,101 @@ difficulty: easy
     # If we're running from agent-install-phase worktree, it should find main ade-bench
     # The root should NOT contain ".worktrees" in its path
     assert ".worktrees" not in str(root)
+
+
+def test_shared_databases_root_path_in_main_repo(tmp_path):
+    """Test that shared_databases_root_path points to ade-bench repo databases.
+
+    This test verifies that shared_databases_root_path returns the ade-bench
+    repository's shared/databases directory, not the task's temporary directory.
+    The property looks at where the code is running from (trial_handler.py location),
+    not where the task is located.
+    """
+    # Setup: Create a git repo for the task (but handler will find ade-bench repo)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
+
+    # Create a task
+    task_dir = repo / "tasks" / "test_task"
+    task_dir.mkdir(parents=True)
+    (task_dir / "task.yaml").write_text("""
+prompts:
+  - key: base
+    prompt: "test"
+author_name: test
+author_email: test@test.com
+difficulty: easy
+""")
+
+    handler = TrialHandler(
+        trial_name="test",
+        input_path=task_dir,
+        task_key="base"
+    )
+
+    # Should point to ade-bench's shared/databases, not the temp repo
+    db_path = handler.shared_databases_root_path
+    assert db_path.exists()
+    # Verify it's pointing to ade-bench or agent-install-phase (worktree)
+    assert "ade-bench" in str(db_path) or "agent-install-phase" in str(db_path)
+    assert db_path.name == "databases"
+    assert db_path.parent.name == "shared"
+
+
+def test_shared_databases_root_path_in_worktree(tmp_path):
+    """Test that shared_databases_root_path points to main ade-bench repo.
+
+    This verifies that when code runs from a worktree (agent-install-phase),
+    shared_databases_root_path correctly finds the main ade-bench repository's
+    databases, not the worktree location. This test creates a temporary task but
+    verifies the handler finds the actual ade-bench repo databases.
+    """
+    # Setup: Create a git repo with worktree for the task
+    # (but handler will find ade-bench repo, not this temp repo)
+    main_repo = tmp_path / "main"
+    main_repo.mkdir()
+    subprocess.run(["git", "init"], cwd=main_repo, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=main_repo, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=main_repo, check=True)
+
+    # Create initial commit
+    (main_repo / "test.txt").write_text("test")
+    subprocess.run(["git", "add", "."], cwd=main_repo, check=True)
+    subprocess.run(["git", "commit", "-m", "initial"], cwd=main_repo, check=True)
+
+    # Create worktree
+    worktree = tmp_path / "worktree"
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree), "-b", "feature"],
+        cwd=main_repo,
+        check=True,
+        capture_output=True
+    )
+
+    # Create task in worktree
+    task_dir = worktree / "tasks" / "test_task"
+    task_dir.mkdir(parents=True)
+    (task_dir / "task.yaml").write_text("""
+prompts:
+  - key: base
+    prompt: "test"
+author_name: test
+author_email: test@test.com
+difficulty: easy
+""")
+
+    handler = TrialHandler(
+        trial_name="test",
+        input_path=task_dir,
+        task_key="base"
+    )
+
+    # Should point to ade-bench's databases (where code lives)
+    # If we're running from agent-install-phase worktree, it should find main ade-bench
+    db_path = handler.shared_databases_root_path
+    assert db_path.exists()
+    # The path should NOT contain ".worktrees" in it (should be main repo)
+    assert ".worktrees" not in str(db_path)
+    assert db_path.name == "databases"
+    assert db_path.parent.name == "shared"

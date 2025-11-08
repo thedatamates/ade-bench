@@ -400,6 +400,16 @@ class TrialHandler:
         return self.input_path / "setup"
 
     @property
+    def shared_databases_root_path(self) -> Path:
+        """Path to the shared databases directory in the main repository root.
+
+        This always points to the main repo's databases, even when running
+        from a worktree. Database files are gitignored and should only exist
+        in the main repository to avoid duplication.
+        """
+        return self._get_repo_root() / "shared" / "databases"
+
+    @property
     def shared_databases_path(self) -> Path:
         """Path to the shared databases directory."""
         return self._shared_path / "databases"
