@@ -286,3 +286,63 @@ difficulty: easy
 
     # Both should have the same parent
     assert handler.shared_snowflake_path.parent == handler.shared_duckdb_path.parent
+
+
+def test_shared_databases_path_is_worktree_aware(tmp_path):
+    """Test that shared_databases_path can be worktree-specific (for future use).
+
+    This property uses _shared_path which is worktree-aware. This allows
+    for potential future features where non-gitignored database configs
+    might be modified per worktree.
+    """
+    # Setup worktree
+    main_repo = tmp_path / "main"
+    main_repo.mkdir()
+    subprocess.run(["git", "init"], cwd=main_repo, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=main_repo, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=main_repo, check=True)
+
+    # Create initial commit
+    (main_repo / "test.txt").write_text("test")
+    subprocess.run(["git", "add", "."], cwd=main_repo, check=True)
+    subprocess.run(["git", "commit", "-m", "initial"], cwd=main_repo, check=True)
+
+    # Create worktree
+    worktree = tmp_path / "worktree"
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree), "-b", "feature"],
+        cwd=main_repo,
+        check=True,
+        capture_output=True
+    )
+
+    # Create databases dir in worktree
+    worktree_db_dir = worktree / "shared" / "databases"
+    worktree_db_dir.mkdir(parents=True)
+
+    # Create task in worktree
+    task_dir = worktree / "tasks" / "test_task"
+    task_dir.mkdir(parents=True)
+    (task_dir / "task.yaml").write_text("""
+prompts:
+  - key: base
+    prompt: "test"
+author_name: test
+author_email: test@test.com
+difficulty: easy
+""")
+
+    handler = TrialHandler(
+        trial_name="test",
+        input_path=task_dir,
+        task_key="base"
+    )
+
+    # shared_databases_path should be worktree-specific
+    # This test creates a task in a temporary worktree, but the handler
+    # will use the actual code location (from ade_bench package)
+    # So we can only verify that the two properties are different
+    assert handler.shared_databases_path != handler.shared_databases_root_path
+
+    # shared_databases_root_path should NOT have .worktrees in it
+    assert ".worktrees" not in str(handler.shared_databases_root_path)
