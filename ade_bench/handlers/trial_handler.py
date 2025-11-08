@@ -421,8 +421,8 @@ class TrialHandler:
 
     @property
     def shared_snowflake_path(self) -> Path:
-        """Path to the shared Snowflake databases directory."""
-        return self.shared_databases_path / "snowflake"
+        """Path to the shared Snowflake databases directory in the main repository."""
+        return self.shared_databases_root_path / "snowflake"
 
     @property
     def shared_projects_path(self) -> Path:

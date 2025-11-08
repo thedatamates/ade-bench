@@ -244,3 +244,45 @@ difficulty: easy
     assert duckdb_path.name == "duckdb"
     assert duckdb_path.parent.name == "databases"
     assert duckdb_path.parent.parent.name == "shared"
+
+
+def test_shared_snowflake_path_uses_root_path(tmp_path):
+    """Test that shared_snowflake_path uses shared_databases_root_path.
+
+    This ensures shared_snowflake_path behaves consistently with shared_duckdb_path
+    by using shared_databases_root_path instead of shared_databases_path. This makes
+    database resolution work correctly in both regular repos and worktrees.
+    """
+    # Create a task in a temporary directory
+    task_dir = tmp_path / "tasks" / "test_task"
+    task_dir.mkdir(parents=True)
+    (task_dir / "task.yaml").write_text("""
+prompts:
+  - key: base
+    prompt: "test"
+author_name: test
+author_email: test@test.com
+difficulty: easy
+""")
+
+    handler = TrialHandler(
+        trial_name="test",
+        input_path=task_dir,
+        task_key="base"
+    )
+
+    # shared_snowflake_path should use shared_databases_root_path (like duckdb does)
+    # not shared_databases_path (which is worktree-aware)
+    expected_path = handler.shared_databases_root_path / "snowflake"
+
+    assert handler.shared_snowflake_path == expected_path, \
+        f"shared_snowflake_path should equal shared_databases_root_path/snowflake\n" \
+        f"  Expected: {expected_path}\n" \
+        f"  Got: {handler.shared_snowflake_path}"
+
+    # Verify it matches the pattern of shared_duckdb_path
+    assert handler.shared_duckdb_path == handler.shared_databases_root_path / "duckdb"
+    assert handler.shared_snowflake_path == handler.shared_databases_root_path / "snowflake"
+
+    # Both should have the same parent
+    assert handler.shared_snowflake_path.parent == handler.shared_duckdb_path.parent
