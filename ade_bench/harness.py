@@ -28,6 +28,7 @@ from ade_bench.harness_models import (
     TrialResults,
 )
 from ade_bench.setup.setup_orchestrator import SetupOrchestrator
+from ade_bench.plugins.base_plugin import PluginContext
 from ade_bench.llms.base_llm import ContextLengthExceededError, ParseError
 from ade_bench.parsers.base_parser import UnitTestStatus, ParserResult
 from ade_bench.terminal.docker_compose_manager import DockerComposeManager
@@ -64,8 +65,8 @@ class Harness:
         db_type: str | None = None,
         project_type: str | None = None,
         keep_alive: bool = False,
-        use_mcp: bool = False,
         with_profiling: bool = False,
+        enabled_plugins: list[str] | None = None,
     ):
         """
         Runs the Terminal-Bench harness.
@@ -93,8 +94,8 @@ class Harness:
             db_type: Database type to filter variants (e.g., duckdb, postgres, sqlite, snowflake).
             project_type: Project type to filter variants (e.g., dbt, other).
             keep_alive: If True, keep containers alive when tasks fail for debugging.
-            use_mcp: If True, start a dbt MCP server after setup completes.
             with_profiling: If True, will enable the cProfiler.
+            enabled_plugins: List of plugin names to enable (from CLI --plugins).
         """
         self._run_uuid = None
         self._start_time = datetime.now(timezone.utc).isoformat()
@@ -107,11 +108,14 @@ class Harness:
         self._db_filter = db_type
         self._project_type_filter = project_type
         self._keep_alive = keep_alive
-        self._use_mcp = use_mcp
         self._with_profiling = with_profiling
+        self._enabled_plugins = enabled_plugins
 
         # Initialize setup orchestrator for variant-specific setup
-        self._setup_orchestrator = SetupOrchestrator()
+        self._setup_orchestrator = SetupOrchestrator(enabled_plugins=enabled_plugins)
+
+        # Keep reference to registry for pre-agent/post-trial hooks
+        self.plugin_registry = self._setup_orchestrator.plugin_registry
 
         self._output_path = output_path
         self._agent_name = agent_name
@@ -179,9 +183,6 @@ class Harness:
         # Pass model_name to agents (if provided)
         if self._model_name:
             agent_kwargs["model_name"] = self._model_name
-
-        # Pass use_mcp flag to installed agents
-        agent_kwargs["use_mcp"] = self._use_mcp
 
         return AgentFactory.get_agent(self._agent_name, **agent_kwargs)
 
@@ -522,7 +523,8 @@ class Harness:
                 terminal=terminal,
                 session=session,
                 file_diff_handler=file_diff_handler,
-                trial_handler=trial_handler
+                trial_handler=trial_handler,
+                enabled_plugins=self._enabled_plugins
             )
 
             # Run setup with timeout using asyncio
@@ -569,7 +571,7 @@ class Harness:
             model_name=self._model_name,
             db_type=config.get("db_type"),
             project_type=config.get("project_type"),
-            used_mcp=self._use_mcp,
+            used_mcp=self.plugin_registry.did_plugin_run("dbt-mcp"),
         )
 
         with spin_up_terminal(
@@ -651,6 +653,21 @@ class Harness:
             if hasattr(task_agent, 'set_variant_config'):
                 task_agent.set_variant_config(config)
 
+            # Build context for agent-phase hooks
+            context = PluginContext(
+                terminal=terminal,
+                session=session,
+                trial_handler=trial_handler,
+                task_id=trial_handler.task_id,
+                variant=config,
+                agent_name=task_agent.NAME,
+                db_type=config.get("database", {}).get("type") if config.get("database") else config.get("db_type"),
+                project_type=config.get("project_type"),
+            )
+
+            # PRE-AGENT HOOKS
+            self.plugin_registry.run_hooks("pre_agent", context)
+
             log_harness_info(self._logger, trial_handler.task_id, "agent", f"Starting agent...")
             try:
                 agent_result, agent_failure_mode = self._run_agent(
@@ -715,6 +732,9 @@ class Harness:
                 results.num_turns = agent_result.num_turns
                 results.runtime_ms = agent_result.runtime_ms
                 results.cost_usd = agent_result.cost_usd
+
+            # POST-TRIAL HOOKS
+            self.plugin_registry.run_hooks("post_trial", context)
 
             # Always kill the agent session to ensure cleanup, regardless of success/failure
             try:
@@ -1138,7 +1158,7 @@ class Harness:
                 model_name=self._model_name,
                 db_type=config.get("db_type"),
                 project_type=config.get("project_type"),
-                used_mcp=self._use_mcp,
+                used_mcp=self.plugin_registry.did_plugin_run("dbt-mcp"),
             )
             return trial_results
 
