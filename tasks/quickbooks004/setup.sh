@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Fix the data type issue. 
+## Fix the data type issue.
 if [[ "$OSTYPE" == "darwin"* ]]; then
   SED_CMD=(sed -i '')
 else
@@ -24,5 +24,4 @@ r2="cast( {{ dbt.date_trunc('day', 'cast(transaction_date as date)') }} as date)
 
 
 # Run dbt to create the models
-dbt deps
 dbt run

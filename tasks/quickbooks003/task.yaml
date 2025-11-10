@@ -29,7 +29,9 @@ test_setup: |-
 solution_seeds:
   - table_name: int_quickbooks__refund_receipt_transactions
   - table_name: int_quickbooks__sales_receipt_transactions
-  - table_name: int_quickbooks__invoice_double_entry
+  - table_name: int_quickbooks__invoice_join
+    exclude_columns:
+    - source_relation
   - table_name: int_quickbooks__expenses_union
   - table_name: int_quickbooks__sales_union
   - table_name: quickbooks__ap_ar_enhanced

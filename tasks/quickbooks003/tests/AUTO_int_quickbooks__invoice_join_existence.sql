@@ -1,4 +1,4 @@
-{% set table_name = 'int_quickbooks__invoice_double_entry' %}
+{% set table_name = 'int_quickbooks__invoice_join' %}
 
 
 

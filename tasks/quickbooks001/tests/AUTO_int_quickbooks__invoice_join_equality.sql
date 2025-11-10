@@ -1,12 +1,12 @@
 -- Define columns to compare
-{% set table_name = 'int_quickbooks__invoice_double_entry' %}
+{% set table_name = 'int_quickbooks__invoice_join' %}
 
 {% set cols_to_include = [
     
 ] %}
 
 {% set cols_to_exclude = [
-    
+    'source_relation'
 ] %}
 
 

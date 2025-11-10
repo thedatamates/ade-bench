@@ -46,21 +46,29 @@ seeds:
         converted_amount: integer
         total_amount: integer
         total_converted_amount: integer
-    solution__int_quickbooks__invoice_double_entry:
+    solution__int_quickbooks__invoice_join:
       +column_types:
+        transaction_type: varchar
         transaction_id: varchar
         source_relation: varchar
-        index: integer
-        transaction_date: date
-        customer_id: varchar
-        vendor_id: varchar
-        amount: double
-        converted_amount: double
-        account_id: varchar
-        class_id: varchar
+        doc_number: varchar
+        estimate_id: varchar
         department_id: varchar
-        transaction_type: varchar
-        transaction_source: varchar
+        customer_id: varchar
+        billing_address_id: varchar
+        shipping_address_id: integer
+        delivery_type: varchar
+        total_amount: integer
+        total_converted_amount: integer
+        current_balance: integer
+        estimate_total_amount: double
+        estimate_total_converted_amount: double
+        estimate_status: varchar
+        due_date: date
+        initial_payment_date: date
+        recent_payment_date: date
+        total_current_payment: double
+        total_current_converted_payment: double
     solution__int_quickbooks__expenses_union:
       +column_types:
         transaction_source: varchar

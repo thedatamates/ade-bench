@@ -26,7 +26,9 @@ test_setup: |-
 solution_seeds:
   - table_name: int_quickbooks__refund_receipt_transactions
   - table_name: int_quickbooks__sales_receipt_transactions
-  - table_name: int_quickbooks__invoice_double_entry
+  - table_name: int_quickbooks__invoice_join
+    exclude_columns:
+    - source_relation
 
 # Variants for different database and project combinations
 variants:
