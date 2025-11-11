@@ -76,12 +76,30 @@ uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
    - Register in `AgentFactory`
    - Implement `run()` method
 
+4. **Installed Agents** (agents pre-installed in Docker images):
+   - Extend `AbstractInstalledAgent` class
+   - Create agent directory in `ade_bench/agents/installed_agents/`
+   - Add `{agent-dir}-setup.sh` script for installation
+   - Agent is built into Docker image during build phase
+   - Only environment setup (API keys) happens at runtime
+   - Enables Docker image caching for faster task execution
+
 ## Docker Setup
 
 Base images provided:
 - `Dockerfile.duckdb-dbt`: For DuckDB-based tasks
 - `Dockerfile.snowflake-dbt`: For Snowflake-based tasks
 - `Dockerfile.snowflake-dbtf`: For Snowflake-based tasks
+
+Agent images:
+- `docker/agents/Dockerfile`: Generic parameterized Dockerfile for all agents
+  - Takes `BASE_IMAGE` and `AGENT_DIR` as build args
+  - Copies agent setup script from `ade_bench/agents/installed_agents/{AGENT_DIR}/`
+  - Runs installation during Docker build (not at runtime)
+- `shared/defaults/docker-compose-agent.yaml`: Parameterized compose file for agent images
+  - Uses `T_BENCH_DB_FLAVOR` env var (e.g., "duckdb-dbt")
+  - Uses `T_BENCH_AGENT_DIR` env var (e.g., "claude_code")
+  - Builds both base and agent images in sequence
 
 Default docker-compose files handle:
 - Container networking

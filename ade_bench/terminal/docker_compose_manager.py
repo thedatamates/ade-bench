@@ -43,6 +43,9 @@ class DockerComposeManager:
         cleanup: bool = False,
         logs_path: Path | None = None,
         build_context_dir: Path | None = None,
+        agent_dir: str | None = None,
+        agent_type: type | None = None,
+        db_flavor: str | None = None,
     ):
         try:
             self._client = docker.from_env()
@@ -63,12 +66,59 @@ class DockerComposeManager:
         self._client_container: Container | None = None
         self._logs_path = logs_path
         self._build_context_dir = build_context_dir
+        self._agent_dir = agent_dir
+        self._agent_type = agent_type
+        self._db_flavor = db_flavor
         self._logger = logger.getChild(__name__)
+
+    def _select_docker_compose_file(self) -> Path:
+        """Select appropriate docker-compose file based on agent type.
+
+        Returns:
+            Path to docker-compose file to use for building/running
+        """
+        from ade_bench.agents.installed_agents.abstract_installed_agent import AbstractInstalledAgent
+
+        if self._agent_type and issubclass(self._agent_type, AbstractInstalledAgent):
+            # Use agent docker-compose (builds agent image)
+            agent_compose_path = Path(__file__).parent.parent.parent / "shared" / "defaults" / "docker-compose-agent.yaml"
+            self._logger.debug(f"Using agent docker-compose: {agent_compose_path}")
+            return agent_compose_path
+        else:
+            # Use existing base docker-compose files
+            self._logger.debug(f"Using base docker-compose: {self._docker_compose_path}")
+            return self._docker_compose_path
+
+    def _get_agent_build_env_vars(self) -> dict[str, str]:
+        """Get environment variables for agent image building.
+
+        Returns:
+            Dictionary of env vars for docker-compose
+        """
+        from ade_bench.agents.installed_agents.abstract_installed_agent import AbstractInstalledAgent
+
+        env_vars = {}
+
+        if self._agent_type and issubclass(self._agent_type, AbstractInstalledAgent):
+            # Use db_flavor directly from constructor
+            if self._db_flavor:
+                env_vars["T_BENCH_DB_FLAVOR"] = self._db_flavor
+
+            # Set agent directory name
+            if self._agent_dir:
+                env_vars["T_BENCH_AGENT_DIR"] = self._agent_dir
+
+            self._logger.debug(f"Agent build env vars: {env_vars}")
+
+        return env_vars
 
     def _run_docker_compose_command(
         self, command: list[str]
     ) -> subprocess.CompletedProcess:
         """Run a docker-compose command with the appropriate environment variables."""
+        # Select the appropriate docker-compose file
+        compose_file = self._select_docker_compose_file()
+
         env = DockerComposeEnvVars(
             task_docker_client_image_name=self._client_image_name,
             task_docker_client_container_name=self._client_container_name,
@@ -85,13 +135,17 @@ class DockerComposeManager:
             ),
         ).to_env_dict(include_os_env=True)
 
+        # Add agent-specific env vars if needed
+        agent_env_vars = self._get_agent_build_env_vars()
+        env.update(agent_env_vars)
+
         full_command = [
             "docker",
             "compose",
             "-p",
             self._client_container_name,
             "-f",
-            str(self._docker_compose_path.resolve().absolute()),
+            str(compose_file.resolve().absolute()),
             *command,
         ]
         self._logger.debug(f"Running docker compose command: {' '.join(full_command)}")
