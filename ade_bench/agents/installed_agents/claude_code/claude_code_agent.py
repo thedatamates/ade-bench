@@ -14,7 +14,7 @@ from ade_bench.config import config
 
 class ClaudeCodeAgent(AbstractInstalledAgent):
     NAME = AgentName.CLAUDE_CODE
-    ALLOWED_TOOLS = ["Bash", "Edit", "Write", "NotebookEdit", "WebFetch", "mcp__dbt"]
+    ALLOWED_TOOLS = ["Bash", "Edit", "Glob", "Grep", "Write", "NotebookEdit", "WebFetch", "Skill", "mcp__dbt"]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
