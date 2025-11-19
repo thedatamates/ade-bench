@@ -76,6 +76,18 @@ uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
    - Register in `AgentFactory`
    - Implement `run()` method
 
+## Git Worktrees
+
+This project supports git worktrees for parallel development:
+
+```bash
+git worktree add .worktrees/feature-name -b feature/feature-name
+```
+
+**Database files:** Large database files (`.duckdb`, `.parquet`) are gitignored and only exist in the main repository at `shared/databases/`. The code automatically resolves these from the main repo even when running in a worktree.
+
+**Other shared resources:** Config files (`shared/config/`), scripts (`shared/scripts/`), migrations (`shared/migrations/`), and projects (`shared/projects/`) are worktree-aware and can be modified per worktree.
+
 ## Docker Setup
 
 Base images provided:
