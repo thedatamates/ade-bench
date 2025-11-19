@@ -1,0 +1,23 @@
+services:
+  base:
+    build:
+      context: ${T_BENCH_TASK_BUILD_CONTEXT_DIR}/../..
+      dockerfile: docker/base/Dockerfile.${T_BENCH_DB_FLAVOR}
+    image: ade-bench-${T_BENCH_DB_FLAVOR}:latest
+
+  agent:
+    build:
+      context: ${T_BENCH_TASK_BUILD_CONTEXT_DIR}/../..
+      dockerfile: docker/agents/Dockerfile
+      args:
+        BASE_IMAGE: ade-bench-${T_BENCH_DB_FLAVOR}:latest
+        AGENT_DIR: ${T_BENCH_AGENT_DIR}
+    image: ade-bench-${T_BENCH_DB_FLAVOR}:${T_BENCH_AGENT_DIR}
+    container_name: ${T_BENCH_TASK_DOCKER_CLIENT_CONTAINER_NAME}
+    command: [ "sh", "-c", "sleep infinity" ]
+    environment:
+      - TEST_DIR=${T_BENCH_TEST_DIR}
+    volumes:
+      - ${T_BENCH_TASK_LOGS_PATH}:${T_BENCH_CONTAINER_LOGS_PATH}
+    depends_on:
+      - base
