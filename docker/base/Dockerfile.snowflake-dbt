@@ -23,6 +23,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 # Set up workspace
 
+copy shared/agents /shared/agents
 RUN mkdir -p /installed-agent /scripts /oracle/solutions /oracle /app /app/setup /app/migrations /seeds /solutions /logs /tests
 WORKDIR /app
 
