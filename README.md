@@ -228,7 +228,7 @@ SNOWFLAKE_WAREHOUSE=[the warehouse you want this user and all ade-bench agents t
 
 _Snowflake is deprecating password-based authentication, which makes this very annoying. For now, you can get around this by making this user `LEGACY_SERVICE` user, though that will eventually go away. A problem for our future selves, who might be able to solve it with the help of these [dbt](https://docs.getdbt.com/docs/cloud/connect-data-platform/connect-snowflake) and [Snowflake](https://docs.snowflake.com/en/user-guide/security-mfa-rollout#deprecation-timeline) docs._
 
-**Second,** add data to your Snowflake database. If a task is configured to run against a Snowflake database, the name of that database should match the name of a database (i.e., [a collection of schemas](https://docs.snowflake.com/en/sql-reference/ddl-database)) in your Snowflake account. For help adding data to your Snowflake account, see "Adding data to Snowflake."
+**Second,** add data to your Snowflake database. If a task is configured to run against a Snowflake database, the name of that database should match the name of a database (i.e., [a collection of schemas](https://docs.snowflake.com/en/sql-reference/ddl-database)) in your Snowflake account. To migrate DuckDB databases to Snowflake, use the migration script (see "Migrating DuckDB databases into Snowflake" below).
 
 **Third,** when ADE-bench runs a task, three DDL scripts (found in `/ade_bench/setup/snowflake_setup.py`) are executed via the admin user above:
 
