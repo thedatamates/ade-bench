@@ -28,12 +28,12 @@ Each task represents a request that might be made to an agent. Though each task 
 When ADE-bench is asked to solve a task, here is what happens:
 
 1. **Copy the project into a sandbox.** ADE-bench creates a sandbox environment (i.e., a Docker container) for the task. It loads the corresponding project into the container, and creates a sandbox environment for the corresponding database (see "How databases work" below).
-2. **Take a first snapshot.** One the project is set up, ADE-bench takes a snapshot of all the files in the project. This allows it to log the changes made by additional setup tasks and by the agent.
-3. **Run task-specific setup script.** After taking a snapshot, ADE-bench runs any of the tasks additonal setup scripts. These might make changes to the project, update the data in the database, or make changes to the project so that it can be run a against a different type of databases (see "Sharing projects across databases.")
+2. **Take a first snapshot.** Once the project is set up, ADE-bench takes a snapshot of all the files in the project. This allows it to log the changes made by additional setup tasks and by the agent.
+3. **Run task-specific setup script.** After taking a snapshot, ADE-bench runs any of the tasks additional setup scripts. These might make changes to the project, update the data in the database, or make changes to the project so that it can be run against a different type of databases (see "Sharing projects across databases.")
 4. **Take another snapshot.** ADE-bench takes another snapshot to log what changes made in the step above.
 5. **Ask the agent to do stuff.** The environment is handed to the agent, which then tries to resolve the task.
 6. **Take a final snapshot.** Once the agent declares itself done, ADE-bench takes a third snapshot.
-7. **Evalute the result.** The changes are evaluted against the tests specified in the task. If all the tests pass, the task passes. **Note:** ADE-bench includes automatic ways to compare tables to one another. For example, if you want to evaluate a task by seeing if the agent created the correct `dim_users` table, you can define this table in the task configuration, and the comparison test is generated automatically.
+7. **Evaluate the result.** The changes are evaluated against the tests specified in the task. If all the tests pass, the task passes. **Note:** ADE-bench includes automatic ways to compare tables to one another. For example, if you want to evaluate a task by seeing if the agent created the correct `dim_users` table, you can define this table in the task configuration, and the comparison test is generated automatically.
 8. **Clean up the sandbox.** Once the task has recorded its results, ADE-bench deletes the container.
 
 ## Task Configuration
@@ -47,7 +47,7 @@ Each task folder contains a handful of files:
 - `setup/` – (Optional) A directory containing files that the setup script can use. For example, suppose you want to replace `a_good_working_file.sql` with `one_with_a_bug.sql`. Put the one with a bug here and use `setup.sh` to replace it. This lets you modify the project for the specific task, without having to make changes to the shared project.
 - `solution.sh` – A script that solves the task. The oracle agent is a agent that just runs this script. See "The oracle agent" below for more.
 - `solutions/` – (Optional) Files that are available to the solution script. This is exactly analogous to the `/setup` directory for the setup script.
-- `tests/` - dbt tests that are used to evaluate the trial. For a trial to pass, all the tests in this directory must pass. You can add manual tests, and if you include `solution_seeds` in the task configuration, tests will get added here automatically when a task is run. Automatically generated tests are appened with the name `AUTO_`. See "How trials are evaluated" below for more.
+- `tests/` - dbt tests that are used to evaluate the trial. For a trial to pass, all the tests in this directory must pass. You can add manual tests, and if you include `solution_seeds` in the task configuration, tests will get added here automatically when a task is run. Automatically generated tests are appended with the name `AUTO_`. See "How trials are evaluated" below for more.
 - `seeds/` - CSVs that are used to evaluate the automatically generated solution_seed tests. These are **NOT** created on every run; they are only updated when ADE-bench is run with the `--seed` flag. See "Solution seeds" below for more.
 
 The task is defined in the `task.yaml` file:
@@ -101,7 +101,7 @@ solution_seeds:
   - table_name: dim_products
 
   - table_name: fct_sales
-    inclulde_columns:
+    include_columns:
     - id
     - item_name_displayed
     - item_name_actual
@@ -216,10 +216,10 @@ DuckDB databases should be stored in `shared/databases/duckdb`. When a task is r
 
 Snowflake is more complicated:
 
-**First,** add your Snowflake credentials to the `.env` file. **IMPORTANT:** This should be an adminstrative user that will create test environments within your Snowflake account. This is **NOT** the user the agent will control. Those users are created on demand for each trial. For more on what permissions this user needs, see the Installation section below.
+**First,** add your Snowflake credentials to the `.env` file. **IMPORTANT:** This should be an administrative user that will create test environments within your Snowflake account. This is **NOT** the user the agent will control. Those users are created on demand for each trial. For more on what permissions this user needs, see the Installation section below.
 
 ```
-SNOWFLAKE_ACCOUNT=[foo1234.us-east-1.snowflakecomputing.com / only the "foo1234" is necesary]
+SNOWFLAKE_ACCOUNT=[foo1234.us-east-1.snowflakecomputing.com / only the "foo1234" is necessary]
 SNOWFLAKE_USER=[the user]
 SNOWFLAKE_ROLE=[role name (see "What Snowflake role should I use?" below)]
 SNOWFLAKE_PASSWORD=[the user's password]
@@ -292,7 +292,7 @@ gemini --output-format json --yolo --prompt {task_prompt} \
   --allowed-tools Bash Edit Write NotebookEdit WebFetch
 ```
 
-Configurations filies for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
+Configuration files for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
 
 ### MCP
 
@@ -387,7 +387,7 @@ Many tasks have `solution_seeds` defined in their `task.yaml` file. These are ta
 
 As described in `task.yaml` description above, there are several additional configuration options when setting up solution seeds:
 
-- You can exclude columns from being part of the table equality comparision.
+- You can exclude columns from being part of the table equality comparison.
 - You can select specific columns to only include.
 - You can disable the automatic generation of either the equality or existence test.
 - You can specify alternate solution seeds for tasks that have multiple valid answers.
@@ -407,7 +407,7 @@ solution_seeds:
 When alternates are specified, ADE-bench will compare the table defined by `table_name` to solution seeds of that table _and_ of any alternatives. So, in the example above, `the_best_answer` will get compared to `solution__the_best_answer`, `solution__another_good_answer`, and `solution__not_as_good_but_still_counts`. If `table_name` matches any of those three, the test will pass.
 
 1. **During --seed mode**: All tables (the main one and alternates) will be extracted as CSV files with the `solution__` prefix. For example, running the task above will extract `solution__table_name.csv` from `table_name`, `solution__another_good_answer.csv` from `another_good_answer`, and so on.
-2. **During test runs**: All seeds will be loaded into the database, and the equality test will pass if the agent's answer matches ANY of the solution seeds. In the exapmle above, the agent would be expected to create a table called `table_name` (and just that table), and for that table to one of the three seeds.
+2. **During test runs**: All seeds will be loaded into the database, and the equality test will pass if the agent's answer matches ANY of the solution seeds. In the example above, the agent would be expected to create a table called `table_name` (and just that table), and for that table to match one of the three seeds.
 
 ### Sharing projects across databases and project types
 
@@ -433,7 +433,7 @@ variants:
 
 2. Create a migration script. In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project *and the contents of the folder in `shared\migrations\foo__duckdb_to_snowflake`. It will then run the `migration.sh` script (prior to running the task `setup.sh` script). Note that this migration script has access to any other files in that migration directory, so if you want to fully update some files in the dbt project, you can include the new files in the migration directory.
 
-3. When the `solution.sh` script runs, ADE-bench passes the corresponding database and project type into the script as an argument. So if different updates are needed to solve the trial depending on the database, these can configured follwing patterns like the example below:
+3. When the `solution.sh` script runs, ADE-bench passes the corresponding database and project type into the script as an argument. So if different updates are needed to solve the trial depending on the database, these can be configured following patterns like the example below:
 
 ```bash
 ## This updates the schema config in the solution files, and then moves the files to the appropriate place
@@ -522,7 +522,7 @@ GRANT MANAGE GRANTS ON ACCOUNT TO ROLE <ade_bench_admin_role>;
 
 GRANT CREATE USER ON ACCOUNT TO ROLE <ade_bench_admin_role>;
 GRANT CREATE ROLE ON ACCOUNT TO ROLE <ade_bench_admin_role>;
--- Alteratively:
+-- Alternatively:
 GRANT ROLE useradmin TO ROLE <ade_bench_admin_role>;
 ```
 
@@ -590,7 +590,8 @@ LOG_LEVEL=INFO
 
 To develop a new task, there are a few things that can be useful:
 
-### Creating a local sanbox
+### Creating a local sandbox
+
 You can create a local sandbox in a `/dev/sandbox` directory, which you can `cd` into and play around directly. This is especially helpful if you're developing on a DuckDB trial. To create that sandbox, run:
 ```
 uv run scripts_python/create_sandbox.py --task [task_to_copy] --db [duckdb] --project-type [dbt]
@@ -617,11 +618,11 @@ The final seed flag will export the CSVs from final project in the task's `/seed
 
 #### Debugging
 
-Stuff goes wrong. It's really finicky sometimes. To debug, it's often useful to use the sanbox, but the most helpful thing is running the trial with the `--persist` flag, which keeps your Docker container alive after the task is complete. Then, you can log into the container—either directly, or via the Docker desktop app[^3], and both look at the files in the container and run commands in a terminal.
+Stuff goes wrong. It's really finicky sometimes. To debug, it's often useful to use the sandbox, but the most helpful thing is running the trial with the `--persist` flag, which keeps your Docker container alive after the task is complete. Then, you can log into the container—either directly, or via the Docker desktop app[^3], and both look at the files in the container and run commands in a terminal.
 
 Moreover, if you're working with Snowflake, the task will create task databases within your account. You can also query these directly.
 
-Finally, if you want to stop the harness at any point throughout the trial, you can insert a breakpoint function into the harness. To do this, find the point within the script that you want to halt the run (you have to read the code; it's messy; I might make this an easier config at somet point). Then, in the code, add:
+Finally, if you want to stop the harness at any point throughout the trial, you can insert a breakpoint function into the harness. To do this, find the point within the script that you want to halt the run (you have to read the code; it's messy; I might make this an easier config at some point). Then, in the code, add:
 
 ```python
 from ade_bench.utils.debug_breakpoint import breakpoint
@@ -665,7 +666,7 @@ $ sand # Navigate into sandbox
 $ mg # If Snowflake, run the migration scripts
 $ st # Run the setup scripts
 $ sl # Run the solution scripts
-$ dbt seed # Add the soltuion seeds
+$ dbt seed # Add the solution seeds
 $ ts # Run the tests
 $ ddb # If DuckDB, open the DuckDB UI
 
