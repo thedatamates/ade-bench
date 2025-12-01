@@ -1,0 +1,8 @@
+retailer,plan_name,rate_name,start_hour,end_hour,applies_weekday,applies_weekend,price_per_kwh,daily_charge
+Sunstream,Anytime,All Day Everyday,0,23,true,true,22.87,226.19
+Bluepeak,Flexi,Peak Morning,7,10,true,false,31.2,287.2
+Bluepeak,Flexi,Peak Evening,17,20,true,false,31.2,287.2
+Bluepeak,Flexi,Off-Peak Weekend Day,7,20,false,true,24.3,287.2
+Bluepeak,Flexi,Off-Peak Weekday Midday,11,16,true,false,24.3,287.2
+Bluepeak,Flexi,Night Late,21,23,true,true,15.6,287.2
+Bluepeak,Flexi,Night Early,0,6,true,true,15.6,287.2

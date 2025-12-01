@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: raw
+    tables:
+      - name: usage_2025_08_21__2025_11_26
+

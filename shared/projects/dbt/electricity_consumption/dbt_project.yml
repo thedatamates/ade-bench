@@ -1,0 +1,11 @@
+name: 'electricity_consumption'
+version: '1.0.0'
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'electricity_consumption-duckdb'
+
+model-paths: ["models"]
+
+models:
+  +materialized: table
+
