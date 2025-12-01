@@ -1,0 +1,45 @@
+task_id: electricity_consumption001
+status: dev
+description: Create a model that produces hourly rates for each retailer and plan combination
+prompts:
+  - key: base
+    prompt: |-
+      Create a new dbt model called `hourly_rates` that produces a table with the rate for each hour and day for each retailer + plan combination.
+      
+      The model should use the rate_plans seed data and expand it to show:
+      - retailer
+      - plan_name
+      - day_of_week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      - hour (0-23)
+      - price_per_kwh
+      - daily_charge
+      
+      Each row should represent one hour of one day for one retailer/plan combo. The model should respect the start_hour, end_hour, applies_weekday, and applies_weekend columns from the rate_plans seed.
+author_name: Joel
+author_email: joel@example.com
+difficulty: medium
+tags:
+  - dbt
+  - data-transformation
+  - seed-data
+  - cross-join
+
+test_setup: |-
+  dbt seed
+  dbt run --select hourly_rates
+
+solution_seeds:
+  - table_name: hourly_rates
+
+variants:
+- db_type: duckdb
+  db_name: electricity_consumption
+  project_type: dbt
+  project_name: electricity_consumption
+
+- db_type: snowflake
+  db_name: electricity_consumption
+  project_type: dbt
+  project_name: electricity_consumption
+  migration_directory: electricity_consumption__duckdb_to_snowflake
+
