@@ -97,6 +97,32 @@
             font-weight: bold;
         }
 
+        /* Tooltip styling for task IDs */
+        table tbody td:first-child span[title] {
+            cursor: help;
+            position: relative;
+        }
+
+        table tbody td:first-child span[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            margin-top: 5px;
+            padding: 8px 12px;
+            background-color: #2d2d30;
+            color: #d4d4d4;
+            border: 1px solid #569cd6;
+            border-radius: 4px;
+            white-space: normal;
+            max-width: 400px;
+            width: max-content;
+            z-index: 1000;
+            font-size: 12px;
+            font-weight: normal;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
         /* Style for status column (second column) */
         table tbody td:nth-child(2) {
             padding: 4px 8px;

@@ -45,6 +45,10 @@ class Task(BaseModel):
     prompts: list[TaskPrompt]
 
     # Metadata
+    description: str = Field(
+        default="",
+        description="A brief description of what the task does"
+    )
     author_name: str
     author_email: str
     difficulty: TaskDifficulty

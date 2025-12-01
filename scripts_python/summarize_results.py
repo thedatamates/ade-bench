@@ -47,6 +47,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
 
         table_data.append({
             'task_id': calc['task_id'],
+            'task_description': result.task_description or "",
             'result': result_status,
             'failure_type': failure_type,
             'status_class': calc['status_class'],
@@ -154,7 +155,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
     # Add task rows with unique placeholders
     for i, task in enumerate(summary['tasks']):
         row = [
-            task['task_id'],
+            f"__TASK_ID_{i}__",  # Unique placeholder for task ID with tooltip
             task['result'],
             task['failure_type'],
             task['tests'],
@@ -192,8 +193,13 @@ def generate_html_table(results: BenchmarkResults) -> str:
     # Generate the base table
     html_table = tabulate(table_data, headers=headers, tablefmt="html")
 
-    # Now replace the placeholders with actual action links
+    # Now replace the placeholders with actual content
     for i, task in enumerate(summary['tasks']):
+        # Replace task ID placeholder with task ID and tooltip
+        task_id_html = f'<span title="{task["task_description"]}">{task["task_id"]}</span>'
+        html_table = html_table.replace(f"__TASK_ID_{i}__", task_id_html)
+        
+        # Replace action links placeholder
         action_links = f'<div class="links"><a href="{task["task_id"]}/results.html" class="link results">Results</a> <a href="{task["task_id"]}/panes.html" class="link panes">Panes</a> <a href="{task["task_id"]}/diffs.html" class="link diffs">Diffs</a></div>'
         html_table = html_table.replace(f"__ACTION_LINKS_{i}__", action_links)
 
