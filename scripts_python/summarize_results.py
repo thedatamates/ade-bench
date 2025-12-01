@@ -195,8 +195,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
 
     # Now replace the placeholders with actual content
     for i, task in enumerate(summary['tasks']):
-        # Replace task ID placeholder with task ID and tooltip
-        task_id_html = f'<span title="{task["task_description"]}">{task["task_id"]}</span>'
+        task_id_html = f'<span data-description="{task["task_description"]}">{task["task_id"]}</span>'
         html_table = html_table.replace(f"__TASK_ID_{i}__", task_id_html)
         
         # Replace action links placeholder

@@ -98,13 +98,13 @@
         }
 
         /* Tooltip styling for task IDs */
-        table tbody td:first-child span[title] {
+        table tbody td:first-child span[data-description] {
             cursor: help;
             position: relative;
         }
 
-        table tbody td:first-child span[title]:hover::after {
-            content: attr(title);
+        table tbody td:first-child span[data-description]:hover::after {
+            content: attr(data-description);
             position: absolute;
             left: 0;
             top: 100%;
