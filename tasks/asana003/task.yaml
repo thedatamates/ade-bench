@@ -1,6 +1,6 @@
 task_id: asana003
 status: ready
-description: Fix our data to match new Fivetran package.
+description: Fix a data problem by updating the underlying data.
 notes: |-
   This is from a mismatch in the Fivetran Asana package, where the underlying data no longer matches the current package.
 prompts:
