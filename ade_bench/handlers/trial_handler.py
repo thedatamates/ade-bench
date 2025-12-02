@@ -65,7 +65,7 @@ class Task(BaseModel):
         description="Maximum timeout in seconds for each individual test"
     )
     test_scripts: list[str] = Field(
-        default=["setup-dbt-test.sh", "run-dbt-test.sh", "seed-schema.sh", "merge_yaml.py"],
+        default=["setup-dbt-test.sh", "run-dbt-test.sh", "seed-schema.sh", "merge_yaml.py", "run_sql.py", "run_sql.sh"],
         description="List of test scripts to use for the task",
     )
     run_tests_in_same_shell: bool = Field(
@@ -438,6 +438,16 @@ class TrialHandler:
     def shared_config_path(self) -> Path:
         """Path to the shared config directory."""
         return self._shared_path / "config"
+
+    @property
+    def run_sql_py_path(self) -> Path:
+        """Path to the run_sql.py utility script."""
+        return self._shared_path / "scripts" / "run_sql.py"
+
+    @property
+    def run_sql_sh_path(self) -> Path:
+        """Path to the run_sql.sh utility script."""
+        return self._shared_path / "scripts" / "run_sql.sh"
 
     def get_duckdb_file_path(self, db_name: str) -> Path:
         """Get the path to a specific DuckDB database file."""
