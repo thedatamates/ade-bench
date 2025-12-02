@@ -29,7 +29,7 @@ When ADE-bench is asked to solve a task, here is what happens:
 
 1. **Copy the project into a sandbox.** ADE-bench creates a sandbox environment (i.e., a Docker container) for the task. It loads the corresponding project into the container, and creates a sandbox environment for the corresponding database (see "How databases work" below).
 2. **Take a first snapshot.** Once the project is set up, ADE-bench takes a snapshot of all the files in the project. This allows it to log the changes made by additional setup tasks and by the agent.
-3. **Run task-specific setup script.** After taking a snapshot, ADE-bench runs any of the tasks additional setup scripts. These might make changes to the project, update the data in the database, or make changes to the project so that it can be run against a different type of databases (see "Sharing projects across databases.")
+3. **Run task-specific setup script.** After taking a snapshot, ADE-bench runs any of the task's additional setup scripts. These might make changes to the project, update the data in the database, or make changes to the project so that it can be run against a different type of databases (see "Sharing projects across databases.")
 4. **Take another snapshot.** ADE-bench takes another snapshot to log what changes made in the step above.
 5. **Ask the agent to do stuff.** The environment is handed to the agent, which then tries to resolve the task.
 6. **Take a final snapshot.** Once the agent declares itself done, ADE-bench takes a third snapshot.
