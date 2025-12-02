@@ -7,4 +7,4 @@ SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
 cp $SOLUTIONS_DIR/hourly_rates.sql models/hourly_rates.sql
 
 dbt run --select hourly_rates
-
+dbt deps
