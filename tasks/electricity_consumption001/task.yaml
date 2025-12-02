@@ -34,6 +34,14 @@ test_setup: |-
 
 solution_seeds:
   - table_name: hourly_rates
+    include_columns:
+      - retailer
+      - plan_name
+      - day_name
+      - day_number
+      - hour
+      - price_per_kwh
+      - daily_charge
 
 variants:
 - db_type: duckdb
