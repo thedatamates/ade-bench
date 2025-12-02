@@ -1,5 +1,5 @@
 with days as (
-    select unnest([0, 1, 2, 3, 4, 5, 6]) as day_of_week
+    select unnest(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']) as day_of_week
 ),
 
 hours as (
@@ -53,8 +53,8 @@ filtered as (
         and hour <= end_hour
         -- Day type must match
         and (
-            (day_of_week in (1, 2, 3, 4, 5) and applies_weekday)
-            or (day_of_week in (0, 6) and applies_weekend)
+            (day_of_week in ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') and applies_weekday)
+            or (day_of_week in ('Saturday', 'Sunday') and applies_weekend)
         )
 )
 
@@ -66,5 +66,5 @@ select
     price_per_kwh,
     daily_charge
 from filtered
-order by retailer, plan_name, day_of_week, hour
+order by retailer, plan_name
 

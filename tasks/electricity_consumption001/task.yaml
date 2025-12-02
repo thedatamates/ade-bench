@@ -4,21 +4,21 @@ description: Create a model that produces hourly rates for each retailer and pla
 prompts:
   - key: base
     prompt: |-
-      Create a new dbt model called `hourly_rates` with the rate for each hour and day for each retailer + plan combination.
+      Create a new dbt model on top of the rate_plans seed called `hourly_rates`. It needs the rate for each hour and day of the week for each retailer + plan combination.
 
-      The model should use the rate_plans seed data and expand it to show:
+      Make sure it includes the following columns:
       - retailer
       - plan_name
-      - day_of_week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      - day_of_week
       - hour (0-23)
       - price_per_kwh
       - daily_charge
       
-      Each row should represent one hour of one day for one retailer/plan combo. The model should respect the start_hour, end_hour, applies_weekday, and applies_weekend columns from the rate_plans seed.
+      Each row should represent one hour of one day for one retailer/plan combo. The model should respect the start_hour, end_hour, applies_weekday, and applies_weekend columns.
 
   - key: minimal_instructions
     prompt: |-
-      Create a new dbt model called `hourly_rates` with the rate for each hour and day for each retailer + plan combination.
+      Create a new dbt model on top of the rate_plans seed called `hourly_rates`. It needs the rate for each hour and day of the week for each retailer + plan combination.
       
 author_name: Joel Labes
 author_email: joel@example.com

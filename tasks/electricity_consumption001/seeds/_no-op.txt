@@ -6,7 +6,7 @@ seeds:
       +column_types:
         retailer: varchar
         plan_name: varchar
-        day_of_week: integer
+        day_of_week: varchar
         hour: bigint
         price_per_kwh: double
         daily_charge: double
