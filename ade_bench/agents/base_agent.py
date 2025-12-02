@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 from pydantic import BaseModel, Field
 
@@ -67,6 +67,23 @@ class BaseAgent(ABC, metaclass=RequireNameMeta):
 
     def _get_network_name(self, container_name: str) -> str:
         return f"{container_name}__mcp-network"
+
+    def format_agent_log(self, log_path: Path, output_path: Path) -> bool:
+        """
+        Format the agent's log file into a human-readable format.
+        
+        This method can be overridden by subclasses to provide agent-specific
+        log formatting. The default implementation returns False, indicating
+        that no formatting is available.
+        
+        Args:
+            log_path: Path to the raw agent log file
+            output_path: Path where the formatted log should be written
+            
+        Returns:
+            True if formatting succeeded, False if not available or failed
+        """
+        return False
 
     @abstractmethod
     def perform_task(

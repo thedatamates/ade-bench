@@ -7,6 +7,7 @@ from ade_bench.agents.agent_name import AgentName
 from ade_bench.agents.installed_agents.abstract_installed_agent import (
     AbstractInstalledAgent,
 )
+from ade_bench.agents.installed_agents.claude_code.log_formatter import ClaudeCodeLogFormatter
 from ade_bench.harness_models import TerminalCommand
 from ade_bench.parsers.claude_parser import ClaudeParser
 from ade_bench.config import config
@@ -19,6 +20,7 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._claude_parser = ClaudeParser()
+        self._log_formatter = ClaudeCodeLogFormatter()
 
     @property
     def _env(self) -> dict[str, str]:
@@ -55,3 +57,16 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
         # The output should now be cleaner since we're using capture_entire=False
         # But let's still try to extract just the JSON part if there's any extra content
         return self._claude_parser.parse(output)
+
+    def format_agent_log(self, log_path: Path, output_path: Path) -> bool:
+        """
+        Format the Claude Code agent's log file into a human-readable format.
+        
+        Args:
+            log_path: Path to the raw agent.log file (JSON-lines format)
+            output_path: Path where the formatted log should be written
+            
+        Returns:
+            True if formatting succeeded, False otherwise
+        """
+        return self._log_formatter.format_log(log_path, output_path)
