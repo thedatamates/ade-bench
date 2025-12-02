@@ -461,6 +461,34 @@ for file in "${files[@]}"; do
     cp $SOLUTIONS_DIR/$file models/$file
 done
 ```
+### Running arbitrary SQL queries
+
+ADE-bench provides a utility script (`run_sql.sh`) that allows you to run arbitrary SQL queries against the database from within `setup.sh` or `solution.sh` scripts. This can be useful when you need to modify the database schema or data directly.
+
+**Usage:**
+
+```bash
+# In setup.sh or solution.sh, you can use run_sql.sh like this:
+/scripts/run_sql.sh "$@" << SQL
+-- Your SQL queries here
+CREATE OR REPLACE TABLE foo_temp AS
+  SELECT * REPLACE revenue * 10 as revenue
+  FROM foo;
+
+DROP TABLE foo;
+ALTER TABLE foo_temp RENAME TO foo;
+SQL
+```
+
+The script automatically:
+- Extracts `--db-type` and `--project-type` from the arguments passed to your script
+- Reads database connection details from `/app/profiles.yml`
+- Detects the correct profile name based on the project and database type
+- Executes the SQL against the appropriate database (DuckDB or Snowflake)
+- Handles multiple SQL statements separated by semicolons
+
+**Note:** In some instances, the text of the query may need to be modified depending on the database; you can use the if statements just above (i.e., `if [[ "$*" == *"--db-type=duckdb"* ]]...`) to modify the query based on the database type.
+
 #### Migrating DuckDB databases into Snowflake
 
 ADE-bench includes a simple command for uploading DuckDB databases to Snowflake. This script will migrate all of the DuckDB files in `/shared/databases/duckdb` into their own databases (matching the name of the DuckDB database) in the Snowflake account in your `.env` file.
