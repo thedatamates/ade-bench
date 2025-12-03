@@ -64,6 +64,7 @@ package-lock.yml
 /shared/databases/postgres/images/*.tar
 /shared/databases/postgres/seeds/*.tgz
 /shared/databases/snowflake/**/*.parquet
+/shared/databases/snowflake/**/load.sql
 
 # Temporary and dev files
 dev/
