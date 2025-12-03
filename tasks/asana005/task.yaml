@@ -2,7 +2,7 @@ task_id: asana005
 status: ready
 description: Break a model into a new intermediate model, and fix the data error in asana001.
 notes: |-
-  This inclues the error from asana001. One task tells the agent to fix this. The hard one does not.
+  This inclues the data error from asana001. One task tells the agent to fix this. The hard one does not.
 prompts:
   - key: base
     prompt: |-
@@ -36,6 +36,7 @@ tags:
 
 # Test setup script to run before dbt tests
 test_setup: |-
+  dbt deps
   dbt run
 
 # Tables to compare for solution

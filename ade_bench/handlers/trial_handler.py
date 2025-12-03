@@ -1,4 +1,5 @@
 import json
+import subprocess
 from enum import Enum
 from importlib.resources import files
 from pathlib import Path
@@ -64,7 +65,7 @@ class Task(BaseModel):
         description="Maximum timeout in seconds for each individual test"
     )
     test_scripts: list[str] = Field(
-        default=["setup-dbt-test.sh", "run-dbt-test.sh", "seed-schema.sh", "merge_yaml.py"],
+        default=["setup-dbt-test.sh", "run-dbt-test.sh", "seed-schema.sh", "merge_yaml.py", "run_sql.py", "run_sql.sh"],
         description="List of test scripts to use for the task",
     )
     run_tests_in_same_shell: bool = Field(
@@ -215,6 +216,45 @@ class TrialHandler:
     def client_image_name(self) -> str:
         return f"{self.docker_image_prefix}__client"
 
+    def _get_repo_root(self) -> Path:
+        """Get the git repository root directory.
+
+        This handles both regular repos and worktrees by finding the actual
+        repository root, not the worktree location.
+        """
+        try:
+            # Try to find the git directory first
+            result = subprocess.run(
+                ["git", "rev-parse", "--git-dir"],
+                cwd=Path(__file__).parent,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            git_dir = Path(result.stdout.strip())
+
+            # If git_dir is relative, make it absolute
+            if not git_dir.is_absolute():
+                git_dir = (Path(__file__).parent / git_dir).resolve()
+
+            # For worktrees, .git is a file pointing to the actual git dir
+            # The main repo's .git directory is at <main-repo>/.git
+            # For worktrees, git dir is <main-repo>/.git/worktrees/<name>
+            if git_dir.name == "worktrees" or "worktrees" in git_dir.parts:
+                # This is a worktree, find the main git dir
+                # Go up from .git/worktrees/<name> to .git
+                while git_dir.name != ".git" and git_dir.parent != git_dir:
+                    git_dir = git_dir.parent
+                # Now git_dir is the main .git directory
+                return git_dir.parent
+            else:
+                # Regular repo, git_dir is .git directory
+                return git_dir.parent
+
+        except subprocess.CalledProcessError:
+            # Fallback to package location if not in a git repo
+            return Path(str(files("ade_bench"))) / ".."
+
     @property
     def _shared_path(self) -> Path:
         return Path(str(files("ade_bench"))) / "../shared"
@@ -360,19 +400,29 @@ class TrialHandler:
         return self.input_path / "setup"
 
     @property
+    def shared_databases_root_path(self) -> Path:
+        """Path to the shared databases directory in the main repository root.
+
+        This always points to the main repo's databases, even when running
+        from a worktree. Database files are gitignored and should only exist
+        in the main repository to avoid duplication.
+        """
+        return self._get_repo_root() / "shared" / "databases"
+
+    @property
     def shared_databases_path(self) -> Path:
         """Path to the shared databases directory."""
         return self._shared_path / "databases"
 
     @property
     def shared_duckdb_path(self) -> Path:
-        """Path to the shared DuckDB databases directory."""
-        return self.shared_databases_path / "duckdb"
+        """Path to the shared DuckDB databases directory in the main repository."""
+        return self.shared_databases_root_path / "duckdb"
 
     @property
     def shared_snowflake_path(self) -> Path:
-        """Path to the shared Snowflake databases directory."""
-        return self.shared_databases_path / "snowflake"
+        """Path to the shared Snowflake databases directory in the main repository."""
+        return self.shared_databases_root_path / "snowflake"
 
     @property
     def shared_projects_path(self) -> Path:
@@ -388,6 +438,16 @@ class TrialHandler:
     def shared_config_path(self) -> Path:
         """Path to the shared config directory."""
         return self._shared_path / "config"
+
+    @property
+    def run_sql_py_path(self) -> Path:
+        """Path to the run_sql.py utility script."""
+        return self._shared_path / "scripts" / "run_sql.py"
+
+    @property
+    def run_sql_sh_path(self) -> Path:
+        """Path to the run_sql.sh utility script."""
+        return self._shared_path / "scripts" / "run_sql.sh"
 
     def get_duckdb_file_path(self, db_name: str) -> Path:
         """Get the path to a specific DuckDB database file."""

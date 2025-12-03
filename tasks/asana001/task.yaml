@@ -1,15 +1,13 @@
 task_id: asana001
 status: ready
-description: Fix an error from an update to the Fivetran asana package.
-notes: |-
-  This is from a mismatch in the Fivetran Asana package, where the underlying data no longer matches the current package.
+description: Fix a data problem by updating a Fivetran package directly.
 prompts:
   - key: base
     prompt: |-
-      This project is erroring. Please fix it without modifying the underlying data.
+      We updated the Fivetran Asana package, and now the project is erroring. Fix the issue without updating the underlying data.
 author_name: test
 author_email: test
-difficulty: easy
+difficulty: medium
 tags:
   - data-hygiene
   - data-inspection

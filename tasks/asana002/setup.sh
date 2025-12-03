@@ -1,18 +1,29 @@
 #!/bin/bash
 
-## Run deps before modifying files
-dbt deps
+## Introduce an error by changing the data type of the underlying table.
 
-## Fix casting error caused by fivetran package version mismatch
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_CMD=(sed -i '')
+## Get the schema based on the database type.
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema='main'
+    due_at='due_at'
 else
-  SED_CMD=(sed -i)
+    schema='public'
+    due_at='null'
 fi
 
-find="cast(coalesce(due_on, due_at) as {{ dbt.type_timestamp() }}) as due_date,"
-replace="cast(coalesce(cast(due_on as {{ dbt.type_timestamp() }}), cast(due_at as {{ dbt.type_timestamp() }})) as {{ dbt.type_timestamp() }}) as due_date,"
+# Execute SQL using the run_sql utility.
+/scripts/run_sql.sh "$@" << SQL
+-- Update the id field to be a string.
+create or replace table ${schema}.task_data_temp as
+  select
+    * replace (${due_at}::integer as due_at)
+  from ${schema}.task_data;
 
-"${SED_CMD[@]}" "s/${find}/${replace}/g" dbt_packages/asana_source/models/stg_asana__task.sql
+-- Rename the table to the original name.
+drop table ${schema}.task_data;
+alter table ${schema}.task_data_temp rename to task_data;
+SQL
 
+## Run the dbt project.
+dbt deps
 dbt run

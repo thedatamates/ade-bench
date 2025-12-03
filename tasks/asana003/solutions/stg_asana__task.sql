@@ -1,21 +1,21 @@
 
 with base as (
 
-    select * 
+    select *
     from {{ source('asana', 'task') }}
 
 ),
 
 final as (
-    
-    select 
+
+    select
         id as task_id,
         assignee_id as assignee_user_id,
         completed as is_completed,
         cast(completed_at as {{ dbt.type_timestamp() }}) as completed_at,
         completed_by_id as completed_by_user_id,
         cast(created_at as {{ dbt.type_timestamp() }}) as created_at,
-        cast(coalesce(cast(due_on as {{ dbt.type_timestamp() }}), cast(due_at as {{ dbt.type_timestamp() }})) as {{ dbt.type_timestamp() }}) as due_date,
+        cast(coalesce(due_on, due_at) as {{ dbt.type_timestamp() }}) as due_date,
         cast(modified_at as {{ dbt.type_timestamp() }}) as modified_at,
         name as task_name,
         parent_id as parent_task_id,
@@ -27,5 +27,5 @@ final as (
     from base
 )
 
-select * 
+select *
 from final

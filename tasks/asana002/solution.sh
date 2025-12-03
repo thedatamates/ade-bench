@@ -1,37 +1,23 @@
 #!/bin/bash
-## Remove tmp models
-rm -rf dbt_packages/asana_source/models/tmp
 
-## Remove project variables
-cat > dbt_packages/asana_source/dbt_project.yml << 'EOF'
-config-version: 2
-name: 'asana_source'
-version: 0.8.0
-require-dbt-version: [">=1.3.0", "<2.0.0"]
-models:
-  asana_source:
-    +schema: stg_asana
-    materialized: table
-EOF
+## Fix the error by changing the data type of the underlying table.
 
-## Copy new files
-files=(
-  "stg_asana__project_task.sql"
-  "stg_asana__project.sql"
-  "stg_asana__section.sql"
-  "stg_asana__story.sql"
-  "stg_asana__tag.sql"
-  "stg_asana__task_follower.sql"
-  "stg_asana__task_section.sql"
-  "stg_asana__task_tag.sql"
-  "stg_asana__task.sql"
-  "stg_asana__team.sql"
-  "stg_asana__user.sql"
-)
+## Get the schema based on the database type.
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema='main'
+else
+    schema='public'
+fi
 
-SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
+# Execute SQL using the run_sql utility.
+/scripts/run_sql.sh "$@" << SQL
+-- Update the id field to be a string.
+create or replace table ${schema}.task_data_temp as
+  select
+    * replace (due_at::timestamp as due_at)
+  from ${schema}.task_data;
 
-for file in "${files[@]}"; do
-  cp $SOLUTIONS_DIR/$file dbt_packages/asana_source/models/$file
-  cat dbt_packages/asana_source/models/$file
-done
+-- Rename the table to the original name.
+drop table ${schema}.task_data;
+alter table ${schema}.task_data_temp rename to task_data;
+SQL

@@ -67,7 +67,6 @@ package-lock.yml
 
 # Temporary and dev files
 dev/
-tmp/
 temp/
 .tmp/
 
