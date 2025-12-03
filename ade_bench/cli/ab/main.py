@@ -13,9 +13,40 @@ from ade_bench import Harness
 from ade_bench.agents import AgentName
 from scripts_python.summarize_results import display_detailed_results
 
-from ade_bench.cli.ab import runs, migrate, tasks
+from ade_bench.cli.ab import migrate, tasks, view, save, interact as interact_module
+import click
+from typer import rich_utils
 
-app = typer.Typer(help="ADE-bench: Analytics and Data Engineering Benchmark")
+# Store the original error formatter
+_original_rich_format_error = rich_utils.rich_format_error
+
+
+def _custom_rich_format_error(self: click.ClickException) -> None:
+    """Custom error formatter that adds a blank line before the error output."""
+    from typer.rich_utils import _get_rich_console
+
+    console = _get_rich_console(stderr=True)
+    console.print()  # Add blank line before error output
+    _original_rich_format_error(self)
+
+
+# Override typer's error formatter
+rich_utils.rich_format_error = _custom_rich_format_error
+
+app = typer.Typer(
+    help="ADE-bench: Analytics and Data Engineering Benchmark",
+    invoke_without_command=True,
+    no_args_is_help=False,
+)
+
+
+@app.callback()
+def main(ctx: typer.Context):
+    """ADE-bench: Analytics and Data Engineering Benchmark"""
+    if ctx.invoked_subcommand is None:
+        raise click.UsageError(
+            "Missing command.\n\nTo get help, run:\n\n  ade --help\n  ade <command> --help"
+        )
 
 
 @app.command()
@@ -198,20 +229,84 @@ def run(
 
 
 @app.command()
-def view():
+def interact(
+    task_id: str = typer.Option(
+        ...,
+        "-t", "--task-id",
+        help="The ID of the task to launch."
+    ),
+    db: str = typer.Option(
+        ...,
+        "--db",
+        help="Database type to use (e.g., duckdb, snowflake)"
+    ),
+    project_type: str = typer.Option(
+        ...,
+        "--project-type",
+        help="Project type to use (e.g., dbt)"
+    ),
+    agent: str = typer.Option(
+        None,
+        "--agent",
+        help="Agent to set up (optional)",
+    ),
+    step: str = typer.Option(
+        "post-setup",
+        "--step",
+        help="Point in workflow to start interactive session (post-setup, post-agent, post-eval)",
+        case_sensitive=False
+    ),
+    tasks_dir: Path = typer.Option(
+        Path("tasks"),
+        "--tasks-dir",
+        help="The path to the tasks directory."
+    ),
+    include_all: bool = typer.Option(
+        False,
+        "-a", "--include-all",
+        help="Copy test scripts and solution script to container",
+    ),
+    rebuild: bool = typer.Option(
+        True,
+        "--rebuild/--no-rebuild",
+        help="Whether to rebuild the client container."
+    ),
+    run_id: str = typer.Option(
+        None,
+        "--run-id",
+        help="Optional run ID for output directory"
+    ),
+):
     """
-    View the results of previous benchmark runs.
+    Launch an interactive shell into a task environment.
 
-    Opens the results HTML viewer in your default browser.
+    This command sets up the task environment exactly like the harness would,
+    then drops you into an interactive shell for debugging.
+
+    The --step option allows controlling how far into the process to run before
+    launching the interactive session:
+    - post-setup: Start after environment setup (default)
+    - post-agent: Start after the agent has run on the task
+    - post-eval: Start after tests have been run to evaluate the agent
     """
-    from scripts_python.view_results import main as view_results_main
-    view_results_main()
+    # Delegate to the interact module
+    interact_module.interact(
+        task_id=task_id,
+        db=db,
+        project_type=project_type,
+        agent=agent,
+        step=step,
+        tasks_dir=tasks_dir,
+        include_all=include_all,
+        rebuild=rebuild,
+        run_id=run_id,
+    )
 
 
 if __name__ == "__main__":
     app()
 
 # Add sub-commands
-app.add_typer(runs.app, name="runs")
 app.add_typer(migrate.app, name="migrate")
-app.add_typer(tasks.tasks_app, name="tasks", help="Manage ADE-bench tasks")
+app.add_typer(view.app, name="view")
+app.add_typer(save.app, name="save")
