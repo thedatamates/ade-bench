@@ -54,40 +54,40 @@ View the results of your benchmark runs:
 ade view
 
 # List recent runs
-ade runs list
+ade view runs
 
-# Open a specific run
-ade runs open 2025-10-07__11-45-04
+# View a specific run
+ade view run 2025-10-07__11-45-04
+
+# List all available tasks with their prompts
+ade view tasks
+
+# Copy task details as TSV to clipboard
+ade view tasks --copy
 ```
 
-### Task Management
+### Interactive Mode
 
-Interact with individual tasks:
+Launch an interactive shell into a task environment:
 
 ```bash
-# List all available tasks with their prompts
-ade tasks list
-
-# Get tasks list with details and copy to clipboard in TSV format
-ade tasks list --copy
-
 # Launch an interactive shell into a task
-ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt
+ade interact --task-id airbnb001 --db duckdb --project-type dbt
 
 # Include solution and test files in the interactive environment
-ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --include-all
+ade interact --task-id airbnb001 --db duckdb --project-type dbt --include-all
 
 # Set up a specific agent for testing (in a tmux session)
-ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude
+ade interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude
 
 # Run the agent on a task and then drop into interactive mode
-ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude --step post-agent
+ade interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude --step post-agent
 
 # Run the agent, evaluate the results, and then drop into interactive mode
-ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude --step post-eval
+ade interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude --step post-eval
 
 # Specify a run ID for the output directory
-ade tasks interact --task-id airbnb001 --db duckdb --project-type dbt --run-id debug-session
+ade interact --task-id airbnb001 --db duckdb --project-type dbt --run-id debug-session
 ```
 
 ### Database Migration
@@ -115,6 +115,7 @@ For detailed help on any command, use the `--help` flag:
 ```bash
 ade --help
 ade run --help
-ade runs --help
+ade view --help
+ade interact --help
 ade migrate --help
 ```
