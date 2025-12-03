@@ -14,8 +14,39 @@ from ade_bench.agents import AgentName
 from scripts_python.summarize_results import display_detailed_results
 
 from ade_bench.cli.ab import runs, migrate, tasks
+import click
+from typer import rich_utils
 
-app = typer.Typer(help="ADE-bench: Analytics and Data Engineering Benchmark")
+# Store the original error formatter
+_original_rich_format_error = rich_utils.rich_format_error
+
+
+def _custom_rich_format_error(self: click.ClickException) -> None:
+    """Custom error formatter that adds a blank line before the error output."""
+    from typer.rich_utils import _get_rich_console
+
+    console = _get_rich_console(stderr=True)
+    console.print()  # Add blank line before error output
+    _original_rich_format_error(self)
+
+
+# Override typer's error formatter
+rich_utils.rich_format_error = _custom_rich_format_error
+
+app = typer.Typer(
+    help="ADE-bench: Analytics and Data Engineering Benchmark",
+    invoke_without_command=True,
+    no_args_is_help=False,
+)
+
+
+@app.callback()
+def main(ctx: typer.Context):
+    """ADE-bench: Analytics and Data Engineering Benchmark"""
+    if ctx.invoked_subcommand is None:
+        raise click.UsageError(
+            "Missing command.\n\nTo get help, run:\n\n  ade --help\n  ade <command> --help"
+        )
 
 
 @app.command()
