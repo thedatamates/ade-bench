@@ -1,53 +1,40 @@
 #!/bin/bash
 
-# Create a SQL file to create duplicates in the inventory table. 
-cat > create_duplicates.sql << 'EOF'
-insert into main.inventory_transactions
-    select * 
-    from main.inventory_transactions 
+## Create duplicates in the inventory table
+## Get the schema based on the database type.
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema='main'
+else
+    schema='public'
+fi
+
+## Run the query to duplicate rows
+/scripts/run_sql.sh "$@" << SQL
+insert into ${schema}.inventory_transactions
+    select *
+    from ${schema}.inventory_transactions
     where mod(product_id,2) = 0;
-EOF
+SQL
 
-# Execute the SQL file using Python and DuckDB
-python3 -c "
-import duckdb
-conn = duckdb.connect('analytics_engineering.duckdb')
-with open('create_duplicates.sql', 'r') as f:
-    sql = f.read()
-conn.execute(sql)
-conn.close()
-print('Duplicates created successfully')
-"
-# Clean up the SQL file
-rm create_duplicates.sql
 
-# Remove the dedupe function from the fact_inventory model
-cat > models/warehouse/fact_inventory.sql << 'EOF'
-{{ config(
-    partition_by={
-        "field": "transaction_created_date",
-        "data_type": "date"
-    }
-) }}
+## Copy the new fact_inventory model that doesn't handle duplicates
+file="fact_inventory.sql"
 
-WITH source AS (
-    SELECT
-        id AS inventory_id,
-        transaction_type,
-        CAST(STRPTIME(transaction_created_date, '%m/%d/%Y %H:%M:%S') AS DATE) AS transaction_created_date,
-        transaction_modified_date,
-        product_id,
-        quantity,
-        purchase_order_id,
-        customer_order_id,
-        comments,
-        get_current_timestamp() AS insertion_timestamp
-    FROM {{ ref('stg_inventory_transactions') }}
-)
+SETUP_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/setup"
 
-SELECT *
-FROM source
-EOF
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  SED_CMD=(sed -i '')
+else
+  SED_CMD=(sed -i)
+fi
+
+if [[ "$*" != *"--db-type=duckdb"* ]]; then
+    find="CAST(STRPTIME(transaction_created_date, '%m/%d/%Y %H:%M:%S') AS DATE)"
+    replace="TO_DATE(TO_TIMESTAMP(transaction_created_date, 'MM/DD/YYYY HH24:MI:SS'))"
+    "${SED_CMD[@]}" "s|${find}|${replace}|g" $SETUP_DIR/$file
+fi
+
+cp $SETUP_DIR/$file models/warehouse/$file
 
 dbt deps
 dbt run
