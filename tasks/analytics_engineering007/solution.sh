@@ -12,7 +12,7 @@ if [[ "$*" != *"--db-type=duckdb"* ]]; then
     sed -i "s|${f1}|${r1}|g" $SOLUTIONS_DIR/$s1
 
     f2="CAST(STRPTIME(o.order_date, '%m/%d/%Y %H:%M:%S') AS DATE)"
-    r2="TO_DATE(TO_TIMESTAMP(transaction_created_date, 'MM/DD/YYYY HH24:MI:SS'))"
+    r2="TO_DATE(TO_TIMESTAMP(o.order_date, 'MM/DD/YYYY HH24:MI:SS'))"
     sed -i "s|${f2}|${r2}|g" $SOLUTIONS_DIR/$s2
 fi
 

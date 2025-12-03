@@ -36,3 +36,15 @@ variants:
   db_name: analytics_engineering
   project_type: dbt
   project_name: analytics_engineering
+
+- db_type: snowflake
+  db_name: analytics_engineering
+  project_type: dbt
+  project_name: analytics_engineering
+  migration_directory: analytics_engineering__duckdb_to_snowflake
+
+- db_type: snowflake
+  db_name: analytics_engineering
+  project_type: dbt-fusion
+  project_name: analytics_engineering
+  migration_directory: analytics_engineering__duckdb_to_snowflake
