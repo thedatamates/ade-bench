@@ -90,6 +90,24 @@ ade interact --task-id airbnb001 --db duckdb --project-type dbt --agent claude -
 ade interact --task-id airbnb001 --db duckdb --project-type dbt --run-id debug-session
 ```
 
+### Save Results
+
+Save benchmark runs to the `experiments_saved` directory:
+
+```bash
+# Save the most recent run
+ade save
+
+# Same as above
+ade save run
+
+# Save a specific run
+ade save run 2025-10-07__11-45-04
+
+# Force overwrite without prompting
+ade save run --force
+```
+
 ### Database Migration
 
 Migrate DuckDB databases to Snowflake:
@@ -116,6 +134,7 @@ For detailed help on any command, use the `--help` flag:
 ade --help
 ade run --help
 ade view --help
+ade save --help
 ade interact --help
 ade migrate --help
 ```
