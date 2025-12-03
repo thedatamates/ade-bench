@@ -13,13 +13,13 @@ from ade_bench.agents.installed_agents.macro.macro_agent import (
     MacroAgent,
 )
 from ade_bench.agents.none_agent import NoneAgent
-from ade_bench.agents.oracle_agent import OracleAgent
+from ade_bench.agents.sage_agent import SageAgent
 
 
 class AgentFactory:
     AGENT_NAME_TO_CLASS = {
         NoneAgent.NAME: NoneAgent,
-        OracleAgent.NAME: OracleAgent,
+        SageAgent.NAME: SageAgent,
         ClaudeCodeAgent.NAME: ClaudeCodeAgent,
         OpenAICodexAgent.NAME: OpenAICodexAgent,
         GeminiCLIAgent.NAME: GeminiCLIAgent,

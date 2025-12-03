@@ -173,7 +173,7 @@ class Harness:
         """
         agent_kwargs = self._agent_kwargs.copy()
 
-        if self._agent_name == AgentName.ORACLE:
+        if self._agent_name == AgentName.SAGE:
             agent_kwargs["task_ids"] = [task_id]
 
         # Pass model_name to agents (if provided)
@@ -647,7 +647,7 @@ class Harness:
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
-            # Set variant configuration for oracle agent
+            # Set variant configuration for sage agent
             if hasattr(task_agent, 'set_variant_config'):
                 task_agent.set_variant_config(config)
 

@@ -45,12 +45,12 @@ uv run wizard
 
 ### Run benchmarks:
 ```bash
-# With oracle agent
-uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
+# With sage agent
+uv run scripts_python/run_harness.py --agent sage --task-ids task1 task2
 ```
 
 ### Key Parameters:
-- `--agent`: Agent type (oracle, terminus, etc.)
+- `--agent`: Agent type (sage, terminus, etc.)
 - `--model`: LLM model for AI agents
 - `--dataset-config`: YAML file defining task collection
 - `--n-concurrent-trials`: Parallel execution (default: 4)
@@ -67,7 +67,7 @@ uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
    - Define expected results in `expected/`
 
 2. **Testing**:
-   - Run with oracle agent first to validate task
+   - Run with sage agent first to validate task
    - Check logs in `experiments/[run_id]/`
    - Verify SQL test results
 

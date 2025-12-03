@@ -72,10 +72,10 @@ def run(
         help="Path to the output directory"
     ),
     agent: str = typer.Option(
-        "oracle",
+        "sage",
         "--agent",
         case_sensitive=False,
-        help="The agent to benchmark (e.g., oracle, claude, macro)"
+        help="The agent to benchmark (e.g., sage, claude, macro)"
     ),
     model_name: str = typer.Option(
         "",
@@ -162,7 +162,7 @@ def run(
     Run ADE-bench with specified tasks and configuration.
 
     Example:
-    ab run airbnb001 --db duckdb --project-type dbt --agent oracle
+    ab run airbnb001 --db duckdb --project-type dbt --agent sage
     """
     # Convert log level string to int
     log_level_int = getattr(logging, log_level.upper(), logging.INFO)
@@ -177,6 +177,12 @@ def run(
             raise typer.Exit(code=1)
 
     # Convert agent string to AgentName enum
+    # Check for renamed agent
+    if agent.lower() == "oracle":
+        typer.echo("Error: The 'oracle' agent has been renamed to 'sage'.")
+        typer.echo("Please use --agent sage instead.")
+        raise typer.Exit(code=1)
+
     try:
         agent_name = AgentName(agent.lower())
     except ValueError:
@@ -193,7 +199,7 @@ def run(
 
     agent_kwargs = {}
 
-    if agent_name == AgentName.ORACLE:
+    if agent_name == AgentName.SAGE:
         agent_kwargs["dataset_path"] = dataset_path
     elif agent_args:
         agent_kwargs["additional_args"] = agent_args
