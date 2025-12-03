@@ -68,22 +68,21 @@ class BaseAgent(ABC, metaclass=RequireNameMeta):
     def _get_network_name(self, container_name: str) -> str:
         return f"{container_name}__mcp-network"
 
-    def format_agent_log(self, log_path: Path, output_path: Path) -> bool:
+    def format_agent_log(self, log_path: Path) -> str | None:
         """
-        Format the agent's log file into a human-readable format.
+        Format the agent's log file into a human-readable string.
         
         This method can be overridden by subclasses to provide agent-specific
-        log formatting. The default implementation returns False, indicating
+        log formatting. The default implementation returns None, indicating
         that no formatting is available.
         
         Args:
             log_path: Path to the raw agent log file
-            output_path: Path where the formatted log should be written
             
         Returns:
-            True if formatting succeeded, False if not available or failed
+            Formatted log content as a string, or None if not available
         """
-        return False
+        return None
 
     @abstractmethod
     def perform_task(

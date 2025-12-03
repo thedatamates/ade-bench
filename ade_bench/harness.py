@@ -671,21 +671,21 @@ class Harness:
 
             # Try to generate a nicely formatted agent.txt from agent.log
             agent_log_path = trial_handler.sessions_path / "agent.log"
+            formatted_content = None
+
             if agent_log_path.exists():
                 try:
-                    # Use the agent's format_agent_log method if available
-                    formatted = task_agent.format_agent_log(agent_log_path, trial_handler.agent_pane_path)
-                    if formatted:
+                    # Get formatted content from agent (returns string or None)
+                    formatted_content = task_agent.format_agent_log(agent_log_path)
+                    if formatted_content:
                         self._logger.debug(f"Generated formatted agent.txt from agent.log using agent's formatter")
-                    else:
-                        # Fallback to raw pane if agent doesn't support formatting
-                        trial_handler.agent_pane_path.write_text(post_agent_pane)
                 except Exception as e:
-                    # Fallback to raw pane if formatting fails
                     self._logger.warning(f"Failed to format agent.log: {e}. Using raw pane output.")
-                    trial_handler.agent_pane_path.write_text(post_agent_pane)
+
+            # Write to file - either formatted content or fallback to raw pane
+            if formatted_content:
+                trial_handler.agent_pane_path.write_text(formatted_content)
             else:
-                # Fallback if agent.log doesn't exist
                 trial_handler.agent_pane_path.write_text(post_agent_pane)
 
             # Capture snapshot after agent and create agent diff

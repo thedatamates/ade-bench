@@ -7,6 +7,7 @@ log files (JSON-lines format).
 
 import json
 import re
+from io import StringIO
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -158,57 +159,59 @@ class ClaudeCodeLogFormatter(LogFormatter):
 
         return turns
 
-    def write_readable_log(self, turns: List[Dict[str, Any]], output_path: Path) -> None:
-        """Write the parsed turns to a readable text file."""
-        with open(output_path, 'w') as f:
-            f.write("=" * 80 + "\n")
-            f.write("CLAUDE CODE AGENT INTERACTION LOG\n")
-            f.write("=" * 80 + "\n\n")
+    def format_readable_log(self, turns: List[Dict[str, Any]]) -> str:
+        """Format the parsed turns into a readable text string."""
+        output = StringIO()
 
-            for turn in turns:
-                f.write("\n" + "=" * 80 + "\n")
-                f.write(f"TURN {turn['turn']}\n")
-                f.write("=" * 80 + "\n\n")
+        output.write("=" * 80 + "\n")
+        output.write("CLAUDE CODE AGENT INTERACTION LOG\n")
+        output.write("=" * 80 + "\n\n")
 
-                # Write thinking/messages
-                if turn['thinking']:
-                    f.write("--- ASSISTANT MESSAGE ---\n")
-                    for thought in turn['thinking']:
-                        f.write(f"{thought}\n")
-                    f.write("\n")
+        for turn in turns:
+            output.write("\n" + "=" * 80 + "\n")
+            output.write(f"TURN {turn['turn']}\n")
+            output.write("=" * 80 + "\n\n")
 
-                # Write tools used
-                if turn['tools']:
-                    f.write("--- TOOLS USED ---\n")
-                    for i, tool in enumerate(turn['tools'], 1):
-                        f.write(f"\n[{i}] {tool['name']}\n")
-                        tool_input = self.format_tool_input(tool['name'], tool['input'])
-                        if tool_input:
-                            f.write(f"{tool_input}\n")
-                    f.write("\n")
+            # Write thinking/messages
+            if turn['thinking']:
+                output.write("--- ASSISTANT MESSAGE ---\n")
+                for thought in turn['thinking']:
+                    output.write(f"{thought}\n")
+                output.write("\n")
 
-                # Write tool results
-                if turn['results']:
-                    f.write("--- TOOL RESULTS ---\n")
-                    for i, result in enumerate(turn['results'], 1):
-                        # Match tool by position if possible
-                        tool_name = turn['tools'][i-1]['name'] if i <= len(turn['tools']) else "Unknown"
+            # Write tools used
+            if turn['tools']:
+                output.write("--- TOOLS USED ---\n")
+                for i, tool in enumerate(turn['tools'], 1):
+                    output.write(f"\n[{i}] {tool['name']}\n")
+                    tool_input = self.format_tool_input(tool['name'], tool['input'])
+                    if tool_input:
+                        output.write(f"{tool_input}\n")
+                output.write("\n")
 
-                        f.write(f"\n[{i}] {tool_name} Result:\n")
+            # Write tool results
+            if turn['results']:
+                output.write("--- TOOL RESULTS ---\n")
+                for i, result in enumerate(turn['results'], 1):
+                    # Match tool by position if possible
+                    tool_name = turn['tools'][i-1]['name'] if i <= len(turn['tools']) else "Unknown"
 
-                        if result['is_error']:
-                            f.write("*** ERROR ***\n")
+                    output.write(f"\n[{i}] {tool_name} Result:\n")
 
-                        # Use detailed result if available
-                        if result['detailed_result']:
-                            formatted = self.format_tool_result(result['detailed_result'])
-                        else:
-                            formatted = self.format_tool_result(result['content'])
+                    if result['is_error']:
+                        output.write("*** ERROR ***\n")
 
-                        f.write(f"{formatted}\n")
-                    f.write("\n")
+                    # Use detailed result if available
+                    if result['detailed_result']:
+                        formatted = self.format_tool_result(result['detailed_result'])
+                    else:
+                        formatted = self.format_tool_result(result['content'])
 
-            f.write("\n" + "=" * 80 + "\n")
-            f.write("END OF LOG\n")
-            f.write("=" * 80 + "\n")
+                    output.write(f"{formatted}\n")
+                output.write("\n")
 
+        output.write("\n" + "=" * 80 + "\n")
+        output.write("END OF LOG\n")
+        output.write("=" * 80 + "\n")
+
+        return output.getvalue()

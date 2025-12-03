@@ -58,15 +58,14 @@ class ClaudeCodeAgent(AbstractInstalledAgent):
         # But let's still try to extract just the JSON part if there's any extra content
         return self._claude_parser.parse(output)
 
-    def format_agent_log(self, log_path: Path, output_path: Path) -> bool:
+    def format_agent_log(self, log_path: Path) -> str | None:
         """
-        Format the Claude Code agent's log file into a human-readable format.
+        Format the Claude Code agent's log file into a human-readable string.
         
         Args:
             log_path: Path to the raw agent.log file (JSON-lines format)
-            output_path: Path where the formatted log should be written
             
         Returns:
-            True if formatting succeeded, False otherwise
+            Formatted log content as a string, or None if formatting failed
         """
-        return self._log_formatter.format_log(log_path, output_path)
+        return self._log_formatter.format_log(log_path)

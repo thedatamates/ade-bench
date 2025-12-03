@@ -28,32 +28,32 @@ class LogFormatter(ABC):
         pass
 
     @abstractmethod
-    def write_readable_log(self, turns: List[Dict[str, Any]], output_path: Path) -> None:
+    def format_readable_log(self, turns: List[Dict[str, Any]]) -> str:
         """
-        Write the parsed turns to a readable text file.
+        Format the parsed turns into a readable text string.
         
         Args:
             turns: List of turn dictionaries from parse_log_file
-            output_path: Path where the formatted log should be written
+            
+        Returns:
+            Formatted log content as a string
         """
         pass
 
-    def format_log(self, log_path: Path, output_path: Path) -> bool:
+    def format_log(self, log_path: Path) -> str | None:
         """
         Parse and format a log file in one step.
         
         Args:
             log_path: Path to the log file to parse
-            output_path: Path where the formatted log should be written
             
         Returns:
-            True if formatting succeeded, False otherwise
+            Formatted log content as a string, or None if formatting failed
         """
         try:
             turns = self.parse_log_file(log_path)
             if not turns:
-                return False
-            self.write_readable_log(turns, output_path)
-            return True
+                return None
+            return self.format_readable_log(turns)
         except Exception:
-            return False
+            return None
