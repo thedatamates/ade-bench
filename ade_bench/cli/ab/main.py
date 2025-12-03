@@ -13,7 +13,7 @@ from ade_bench import Harness
 from ade_bench.agents import AgentName
 from scripts_python.summarize_results import display_detailed_results
 
-from ade_bench.cli.ab import migrate, tasks, view
+from ade_bench.cli.ab import migrate, tasks, view, interact as interact_module
 import click
 from typer import rich_utils
 
@@ -289,8 +289,8 @@ def interact(
     - post-agent: Start after the agent has run on the task
     - post-eval: Start after tests have been run to evaluate the agent
     """
-    # Delegate to the tasks module's interact function
-    tasks.interact(
+    # Delegate to the interact module
+    interact_module.interact(
         task_id=task_id,
         db=db,
         project_type=project_type,
