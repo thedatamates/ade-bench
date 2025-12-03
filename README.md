@@ -137,20 +137,22 @@ variants:
 
 ## Usage
 
-This command runs the benchmark. There are lots of flags for running it. Don't forget your favorites!
+ADE-bench can be run via a CLI. Installation instructions are below, and complete usage documentation is [here](CLI.md), but here is an example command for running tasks:
 
 ```bash
-uv run scripts_python/run_harness.py \
-  --tasks foo001 foo002 \ # Say `all` to run all ready tasks.
+ade run \
+  foo001 foo002 \ # The tasks to run. See the task selection list immediately below for more details.
   --db snowflake \ # Which database variant to run
   --project-type dbt \ # Which project variant to run (currently dbt or dbt-fusion)
-  --agent oracle \ # Which agent to use (e.g., `oracle`, `claude`, `macro`)
+  --agent oracle \ # Which agent to use (e.g., `oracle`, `claude`, `codex`)
 
-  --exclude_task_ids foo001 \ #Optional; if you run all tasks, you can exclude tasks with this flag
-  --n-concurrent-trials 4 \ # Optional; sets trial concurrency limit; defaults to 4.
+  --model \ # Optional; which specific model to use for different agents (e.g., claude-3-5-sonnet-20241022)
+  --exclude_task_ids foo001 \ # Optional; if you run all tasks, you can exclude tasks with this flag
+  --n-concurrent-trials 4 \ #  Optional; sets trial concurrency limit; defaults to 4.
   --n-attempts 1 \ # Optional; sets times to run each task; defaults to 1.
+  --max-episodes 50 \ # Optional; the maximum number of calls to an agent's LM; defaults to 50.
   --seed \ # Optional; flag for creating solution seed CSVs !! DESTRUCTIVE !! RUN WITH CAUTION !! SEE BELOW !!
-  --no-diffs \ # Optional; disables taking snapshots of diffs
+  --no-diffs \ # Optional; disables taking snapshots of diffs for faster performance.
   --persist \ # Optional; keeps the container alive after the trial is over or is aborted.
   --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
 ```
@@ -356,8 +358,9 @@ The "configuration" of that test is defined in a block at the top of the test:
 ### Viewing results
 
 As ADE-bench runs, it will tick through the progress of each trial. After the entire suite runs, it will print a summary of the results. To view a more detailed view of the results, run:
-```
-uv run scripts_python/view_results.py
+
+```bash
+ade view
 ```
 
 This will open a local HTML page that includes much more detail, including details for each task:
@@ -494,51 +497,49 @@ The script automatically:
 ADE-bench includes a simple command for uploading DuckDB databases to Snowflake. This script will migrate all of the DuckDB files in `/shared/databases/duckdb` into their own databases (matching the name of the DuckDB database) in the Snowflake account in your `.env` file.
 
 ```bash
-$ uv run scripts_python/migrate_duckdb_to_snowflake.py --use-database-export
+$ ade migrate duckdb-to-snowflake --use-database-export
 ```
 The  `--use-database-export` flag is not necessary, but is recommended for better performance. You can also migrate specific databases using `--include` and `--exclude` flags:
 
 ```python
 # Only foo.duckdb and bar.duckdb
-$ uv run scripts_python/migrate_duckdb_to_snowflake.py --include foo bar
+$ ade migrate duckdb-to-snowflake --include foo bar
 
 # All but bar.duckdb
-$ uv run scripts_python/migrate_duckdb_to_snowflake.py --exclude bar
+$ ade migrate duckdb-to-snowflake --exclude bar
 ```
 
 ---
 
 ## Installation
 
-Fuck if I know.
+First, install the CLI by running the following command in your root directory:
 
-You need [Docker Compose](https://docs.docker.com/compose/install/)? And [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)?
+```shell
+pip install -e .
 
-Test if each of these are installed:
+# To confirm it is installed, run:
+ade --help
+```
+
+Next, you will need [Docker Compose](https://docs.docker.com/compose/install/) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv) to run the containers. Install them following the installation instructions in the links above, and confirm they are installed by running these commands:
 
 ```shell
 uv --version
 docker compose version
+``` ```
+
+Then, download the DuckDB databases from [here](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE), and put them in the `/shared/databases/duckdb` directory. You can also install them with the following command:
+
+```shell
+uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
 ```
 
-Honestly, I'd just trying running it and seeing what happens?
+Finally, test a basic exceuction:
 
-This is probably the easiest way to do that:
-
-1. Clone the repo.
-    ```shell
-    git clone https://github.com/thedatamates/ade-bench.git
-    cd ade-bench
-    ```
-2. Download the DuckDB databases from [here](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE), and put them in the `/shared/databases/duckdb` directory.
-    ```shell
-    uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
-    ```
-3. Run a basic execution:
-    ```shell
-    uv run scripts_python/run_harness.py --tasks analytics_engineering001 --db duckdb --project-type dbt --agent oracle
-    ```
-4. See what it tells you to do? I think it'll ask if you have Docker and uv, and maybe some stuff like dbt, Snowflake CLIs, DuckDB, and Claude Code, for the agents. But that might all be handled by Dockerfile. Though, it is useful to have that stuff for dev. This section is still under development, ok?
+```bash
+ade run simple001 --db duckdb --project-type dbt --agent oracle
+```
 
 ### Snowflake setup
 
@@ -618,6 +619,10 @@ LOG_LEVEL=INFO
 
 To develop a new task, there are a few things that can be useful:
 
+### Use interactive mode
+
+You can run a task, and then launch an interactive shell into a task environment. You can also halt the task after different stages (e.g., after the setup scripts run but before the agent runs), and interact with the environment at that stage. This uses the `ade interact` command, and is documented [here](CLI.md).
+
 ### Creating a local sandbox
 
 You can create a local sandbox in a `/dev/sandbox` directory, which you can `cd` into and play around directly. This is especially helpful if you're developing on a DuckDB trial. To create that sandbox, run:
@@ -639,7 +644,7 @@ $ dbt test --select "test_type:singular" # Run the task tests
 
 When you're developing a task and ready to create CSVs for the solution seeds, run the following command:
 ```
-uv run scripts_python/run_harness.py --task [task_to_copy] --db duckdb --project-type [dbt] --agent oracle --seed
+ade run [task_to_copy] --db duckdb --project-type [dbt] --agent oracle --seed
 ```
 
 The final seed flag will export the CSVs from final project in the task's `/seeds` directory. **Read the warning in "Solution seeds" before doing this.**
@@ -663,47 +668,7 @@ This will halt the harness at that point. If you run the harness with the `--per
 ## Tips! Tricks! Other things we recommend!
 
 - **Disable diffs to speed things up.** If you trying to run a bunch of tasks, or testing something where you don't care about looking at diffs, use the `--no-diffs` flag. Diffs can be slow, and ADE-bench will run faster if they're turned off.
-- **View all the tasks.** Running `uv run scripts_python/extract_task_details.py` will print a summary table of all the tasks in ADE-bench. It will also copy a more detailed summary to your clipboard, which you can paste into a spreadsheet.
-- **Use aliases.** I've created a bunch of aliases to speed things up. These are some of the ones I use a lot:
-
-```bash
-# For running tests and viewing results
-alias ade-run='uv run scripts_python/run_harness.py'
-alias ade-log='uv run scripts_python/view_results.py'
-# Usage
-$ ade-run all --db snowflake --project-type dbt --agent oracle
-$ ade-run @coalesce --db snowflake --project-type dbt --agent oracle
-$ ade-run f1+ simple+ --db snowflake --project-type dbt --agent oracle
-$ ade-log
-
-
-# For creating a sandbox environment for testing, navigating into it, and running
-# various setup scripts, including opening it up in the DuckDB UI. You can obviously
-# run whichever scripts here you want, to get the sandbox in whatever state you want
-# to do development work in.
-alias ade-dev='uv run scripts_python/create_sandbox.py'
-alias sand='cd ~/ade-bench/dev/sandbox'
-alias mg='bash migration.sh'
-alias st='bash setup.sh'
-alias sl='bash solution.sh'
-alias ts='dbt test --select "test_type:singular"'
-alias ddb='duckdb -ui'
-# Usage:
-$ ade-dev --task foo001 --db snowflake --project-type dbt # Create sandbox
-$ sand # Navigate into sandbox
-$ mg # If Snowflake, run the migration scripts
-$ st # Run the setup scripts
-$ sl # Run the solution scripts
-$ dbt seed # Add the solution seeds
-$ ts # Run the tests
-$ ddb # If DuckDB, open the DuckDB UI
-
-
-# For viewing all the tasks
-alias ade-config='uv run scripts_python/extract_task_details.py'
-# Usage
-$ ade-config
-```
+- **View all the tasks.** Running `ade view tasks` will print a summary table of all the tasks in ADE-bench. You can also run ``ade view tasks --copy` to copy a more detailed summary of the tasks to your clipboard.
 
 ## Citations
 
