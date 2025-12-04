@@ -3,7 +3,6 @@ status: ready
 description: Add new stats models based on yml config
 notes: |-
   Driver names are excluded from comparisons because the results are limited to top 20, there are ties in the 20th position, and different drivers sometimes are chosen in the top 20.
-  Solving this issue is in f1003
 prompts:
   - key: base
     prompt: |-
