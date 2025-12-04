@@ -138,6 +138,14 @@ class ResultsHTMLGenerator:
         pattern = r'<table[^>]*>.*?</table>'
         html_content = re.sub(pattern, html_table, html_content, flags=re.DOTALL)
 
+        # Load task.yaml contents and embed as JavaScript object
+        task_yamls = self._load_task_yaml_contents(experiment_data)
+        task_yamls_js = json.dumps(task_yamls, indent=2)
+        task_yamls_script = f"<script>\n        const TASK_YAMLS = {task_yamls_js};\n    </script>"
+
+        # Insert the task yamls script before the closing </head> tag
+        html_content = html_content.replace('</head>', f'{task_yamls_script}\n</head>')
+
         # Write the HTML file
         output_path = self.html_dir / "index.html"
         with open(output_path, 'w') as f:
@@ -171,6 +179,45 @@ class ResultsHTMLGenerator:
                 f.writelines(lines[1:])
         else:
             dest_tsv_no_header.touch()
+
+    def _get_base_task_id(self, task_id: str) -> str:
+        """Extract base task ID from variant task ID.
+
+        e.g., 'foo.hard.1-of-1' -> 'foo'
+              'foo.base.2-of-3' -> 'foo'
+              'foo' -> 'foo'
+        """
+        # Task variants follow pattern: base_task_id.variant_name.n-of-m
+        # Split and check if it looks like a variant
+        parts = task_id.split('.')
+        if len(parts) >= 2:
+            # Check if last part matches n-of-m pattern
+            if len(parts) >= 2 and '-of-' in parts[-1]:
+                # Return everything except the last two parts (variant name and n-of-m)
+                return '.'.join(parts[:-2]) if len(parts) > 2 else parts[0]
+            # Check if second-to-last part is a known variant name
+            # and return the base
+            return parts[0]
+        return task_id
+
+    def _load_task_yaml_contents(self, experiment_data: Dict[str, Any]) -> Dict[str, str]:
+        """Load task.yaml contents for each task and return as a dictionary."""
+        tasks_dir = Path(__file__).parent.parent / "tasks"
+        task_yamls = {}
+
+        for task_data in experiment_data['tasks']:
+            task_id = task_data['task_id']
+            base_task_id = self._get_base_task_id(task_id)
+            source_yaml = tasks_dir / base_task_id / "task.yaml"
+
+            if source_yaml.exists():
+                with open(source_yaml, 'r') as f:
+                    task_yamls[task_id] = f.read()
+            else:
+                task_yamls[task_id] = f"# task.yaml not found for {task_id} (base: {base_task_id})"
+                print(f"Warning: task.yaml not found for {task_id} at {source_yaml}")
+
+        return task_yamls
 
     def _generate_task_detail_pages(self, task_data: Dict[str, Any]):
         """Generate detail pages for a specific task."""

@@ -147,14 +147,16 @@ def generate_html_table(results: BenchmarkResults) -> str:
     """Generate an HTML table of benchmark results with action links."""
     summary = summarize_results(results)
 
-    # Generate table with unique placeholders for action links
-    headers = summary['headers'] + ['Actions']
+    # Generate table with unique placeholders for action links and task button
+    # Insert 'Task' as second column (after 'Task' id)
+    headers = [summary['headers'][0], 'Task'] + summary['headers'][1:] + ['Actions']
     table_data = []
 
     # Add task rows with unique placeholders
     for i, task in enumerate(summary['tasks']):
         row = [
             task['task_id'],
+            f"__TASK_BUTTON_{i}__",  # Task button as second column
             task['result'],
             task['failure_type'],
             task['tests'],
@@ -166,7 +168,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
             task['output_tokens'],
             task['cache_tokens'],
             task['turns'],
-            f"__ACTION_LINKS_{i}__"  # Unique placeholder
+            f"__ACTION_LINKS_{i}__",  # Unique placeholder for action links
         ]
         table_data.append(row)
 
@@ -174,6 +176,7 @@ def generate_html_table(results: BenchmarkResults) -> str:
     total_row = summary['total_row']
     total_row_data = [
         total_row['task_id'],
+        "",   # No task button for total row
         total_row['result'],
         total_row['failure_type'],
         total_row['tests'],
@@ -185,17 +188,20 @@ def generate_html_table(results: BenchmarkResults) -> str:
         total_row['output_tokens'],
         total_row['cache_tokens'],
         total_row['turns'],
-        ""  # No action links for total row
+        "",  # No action links for total row
     ]
     table_data.append(total_row_data)
 
     # Generate the base table
     html_table = tabulate(table_data, headers=headers, tablefmt="html")
 
-    # Now replace the placeholders with actual action links
+    # Now replace the placeholders with actual action links and task buttons
     for i, task in enumerate(summary['tasks']):
         action_links = f'<div class="links"><a href="{task["task_id"]}/results.html" class="link results">Results</a> <a href="{task["task_id"]}/panes.html" class="link panes">Panes</a> <a href="{task["task_id"]}/diffs.html" class="link diffs">Diffs</a></div>'
         html_table = html_table.replace(f"__ACTION_LINKS_{i}__", action_links)
+
+        task_button = f'<button class="link task-btn" onclick="showTaskYaml(\'{task["task_id"]}\')">View</button>'
+        html_table = html_table.replace(f"__TASK_BUTTON_{i}__", task_button)
 
     return html_table
 
