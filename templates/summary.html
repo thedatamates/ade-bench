@@ -97,8 +97,8 @@
             font-weight: bold;
         }
 
-        /* Style for status column (second column) */
-        table tbody td:nth-child(2) {
+        /* Style for status column (third column - Result) */
+        table tbody td:nth-child(3) {
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: bold;
@@ -280,9 +280,9 @@
     </div>
 
     <script>
-        // Add status classes to the second column based on content
+        // Add status classes to the third column (Result) based on content
         document.addEventListener('DOMContentLoaded', function() {
-            const statusCells = document.querySelectorAll('table tbody td:nth-child(2)');
+            const statusCells = document.querySelectorAll('table tbody td:nth-child(3)');
             statusCells.forEach(cell => {
                 const text = cell.textContent.trim();
                 if (text === 'p') {
