@@ -15,6 +15,71 @@ ADE-bench[^1] is a framework for evaluating AI agents on data analyst tasks. The
 
 Today, each ADE-bench trial consists of a dbt project and a database. However, the framework could be extended to include more environments, multiple databases, and other data engineering tools that more closely resemble the real environments in which analysts and data engineers work.
 
+## Quickstart
+
+<details>
+<summary>1. Clone this repo</summary>
+
+<pre>
+git clone https://github.com/thedatamates/ade-bench.git
+cd ade-bench
+</pre>
+
+</details>
+
+<details>
+<summary>2. Install <a href="https://docs.docker.com/compose/install/">Docker Compose</a> and <a href="https://docs.astral.sh/uv/getting-started/installation/#installing-uv"><code>uv</code></a></summary>
+You might already have these, check with:
+<pre>
+uv --version
+docker compose version
+</pre>
+If you don't, install them according to the links above.
+</details>
+
+<details>
+<summary>3. Create a virtual environment and install the <code>ade</code> CLI</summary>
+Reminder: <code>cd</code> into the <code>ade-bench</code> directory first.
+<pre>
+uv venv
+source .venv/bin/activate
+uv pip install -e .
+
+# Confirm it is installed by running
+
+ade --help
+</pre>
+<a href="https://docs.astral.sh/uv/pip/environments/#creating-a-virtual-environment">Learn more about virtual environments</a>, including activation instructions for Windows.
+</details>
+
+<details>
+<summary>4. Download the <a hrefe="https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE">sample DuckDB databases</a> to <code>/shared/databases/duckdb</code></summary>
+Or run the following command:
+<pre>
+uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
+</pre>
+</details>
+
+<details>
+<summary>5. Checkpoint: try running a task without any LLMs</summary>
+<pre>
+ade run simple001 --db duckdb --project-type dbt --agent sage
+</pre>
+</details>
+
+<details>
+<summary>6. Configure one or more LLM API keys</summary>
+Make a copy of <code>.env.example</code> and rename it to <code>.env</code>, then provide your preferred API keys in the specified locations.
+</details>
+
+<details>
+<summary>7. Run all tasks</summary>
+See <a href="#agents">Agents</a> section below for current integrations
+<pre>
+ade run all --db duckdb --project-type dbt --agent claude
+</pre>
+</details>
+
 ## An introduction to how ADE-bench works
 
 ADE-bench has three primary components:
@@ -216,9 +281,36 @@ DuckDB databases should be stored in `shared/databases/duckdb`. When a task is r
 
 #### Snowflake
 
-Snowflake is more complicated:
+Snowflake is more complicated.
 
-**First,** add your Snowflake credentials to the `.env` file. **IMPORTANT:** This should be an administrative user that will create test environments within your Snowflake account. This is **NOT** the user the agent will control. Those users are created on demand for each trial. For more on what permissions this user needs, see the Installation section below.
+> [!CAUTION]
+> Do not connect ADE bench to your production Snowflake account!
+> It assumes it has free rein to create and drop objects in the database, and runs a lot of dangerous DDL statements in the process.
+> [Sign up for a trial sandbox account](https://signup.snowflake.com/) instead.
+
+After creating a trial Snowflake account, create an administrative user and role:
+
+**IMPORTANT:** This should be an administrative user that will create test environments within your Snowflake account. This is **NOT** the user the agent will control. Those users are created on demand for each trial.
+
+```sql
+-- Create role
+CREATE OR REPLACE ROLE ADE_BENCH_ADMIN_ROLE;
+
+-- Configure role
+GRANT CREATE DATABASE ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT MANAGE GRANTS ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT CREATE USER ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT CREATE ROLE ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE ADE_BENCH_ADMIN_ROLE;
+
+-- Create admin user
+CREATE OR REPLACE USER ADE_BENCH_ADMIN_USER2 PASSWORD=/*PUT PASSWORD HERE INSIDE 'SINGLE QUOTES'*/ DEFAULT_ROLE=ADE_BENCH_ADMIN_ROLE MUST_CHANGE_PASSWORD=FALSE TYPE=LEGACY_SERVICE DEFAULT_WAREHOUSE=COMPUTE_WH;
+
+-- Configure admin user
+GRANT ROLE ADE_BENCH_ADMIN_ROLE TO USER ADE_BENCH_ADMIN_USER;
+```
+
+Then add your Snowflake credentials to the `.env` file you created when specifying your API key.
 
 ```
 SNOWFLAKE_ACCOUNT=[foo1234.us-east-1.snowflakecomputing.com / only the "foo1234" is necessary]
@@ -510,50 +602,6 @@ $ ade migrate duckdb-to-snowflake --exclude bar
 ```
 
 ---
-
-## Installation
-
-First, install the CLI by running the following command in your root directory:
-
-```shell
-pip install -e .
-
-# To confirm it is installed, run:
-ade --help
-```
-
-Next, you will need [Docker Compose](https://docs.docker.com/compose/install/) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv) to run the containers. Install them following the installation instructions in the links above, and confirm they are installed by running these commands:
-
-```shell
-uv --version
-docker compose version
-``` ```
-
-Then, download the DuckDB databases from [here](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE), and put them in the `/shared/databases/duckdb` directory. You can also install them with the following command:
-
-```shell
-uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
-```
-
-Finally, test a basic exceuction:
-
-```bash
-ade run simple001 --db duckdb --project-type dbt --agent sage
-```
-
-### Snowflake setup
-
-To run ADE-bench on a Snowflake database, the administrative role needs certain permissions. These are those permissions (I think; Snowflake permissions are special circle of hell):
-
-```
-GRANT CREATE DATABASE ON ACCOUNT TO ROLE <ade_bench_admin_role>;
-GRANT MANAGE GRANTS ON ACCOUNT TO ROLE <ade_bench_admin_role>;
-
-GRANT CREATE USER ON ACCOUNT TO ROLE <ade_bench_admin_role>;
-GRANT CREATE ROLE ON ACCOUNT TO ROLE <ade_bench_admin_role>;
--- Alternatively:
-GRANT ROLE useradmin TO ROLE <ade_bench_admin_role>;
-```
 
 ### Anthropic Claude setup
 
