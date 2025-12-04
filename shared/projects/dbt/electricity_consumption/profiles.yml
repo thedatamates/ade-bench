@@ -1,0 +1,22 @@
+electricity_consumption-duckdb:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "./electricity_consumption.duckdb"
+      schema: main
+
+electricity_consumption-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>
+
