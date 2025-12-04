@@ -54,11 +54,25 @@ def _save_run(run_path: Path, saved_dir: Path, force: bool = False) -> bool:
 
 
 @app.callback()
-def save_callback(ctx: typer.Context):
+def save_callback(
+    ctx: typer.Context,
+    output_path: Path = typer.Option(
+        Path("experiments_saved"),
+        "--output-path",
+        "-o",
+        help="Path to save experiments to"
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Overwrite existing saved run without prompting"
+    ),
+):
     """Save ADE-bench results."""
     # If no subcommand, default to saving most recent run
     if ctx.invoked_subcommand is None:
-        _save_most_recent()
+        _save_most_recent(saved_path=output_path, force=force)
 
 
 def _save_most_recent(
@@ -87,15 +101,9 @@ def save_run(
         help="Run ID to save. If not provided, saves the most recent run."
     ),
     output_path: Path = typer.Option(
-        Path("experiments"),
+        Path("experiments_saved"),
         "--output-path",
         "-o",
-        help="Path to the experiments directory"
-    ),
-    saved_path: Path = typer.Option(
-        Path("experiments_saved"),
-        "--saved-path",
-        "-s",
         help="Path to save experiments to"
     ),
     force: bool = typer.Option(
@@ -110,16 +118,19 @@ def save_run(
 
     If no run_id is provided, saves the most recent run with results.
     """
+    saved_path = output_path
+    experiments_dir = Path("experiments")
+
     if run_id:
-        run_path = output_path / run_id
+        run_path = experiments_dir / run_id
         if not run_path.exists():
-            typer.echo(f"Run {run_id} not found in {output_path}.")
+            typer.echo(f"Run {run_id} not found in {experiments_dir}.")
             raise typer.Exit(code=1)
         if not (run_path / "results.json").exists():
             typer.echo(f"Run {run_id} does not have results.json.")
             raise typer.Exit(code=1)
     else:
-        run_path = _get_most_recent_run_with_results(output_path)
+        run_path = _get_most_recent_run_with_results(experiments_dir)
         if not run_path:
             typer.echo("No experiments with results found.")
             raise typer.Exit(code=1)

@@ -39,8 +39,7 @@ ENV/
 .claude
 
 # Experiments and results
-experiments/
-experiments_saved/
+experiments*/
 results/
 outputs/
 profiling/summaries
