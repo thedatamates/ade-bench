@@ -19,7 +19,7 @@ Please use the CLI instead. See the Installation section of the README for setup
     ade --help
 
 For example:
-    ade run simple001 --db duckdb --project-type dbt --agent oracle
+    ade run simple001 --db duckdb --project-type dbt --agent sage
 """
     )
     sys.exit(1)

@@ -45,7 +45,7 @@ Each task folder contains a handful of files:
 - `task.yaml` - The task's configuration. This is an important file, so all the details are below.
 - `setup.sh` – A setup script that runs before the agent is given the task, for modifying files and doing other computer stuff.
 - `setup/` – (Optional) A directory containing files that the setup script can use. For example, suppose you want to replace `a_good_working_file.sql` with `one_with_a_bug.sql`. Put the one with a bug here and use `setup.sh` to replace it. This lets you modify the project for the specific task, without having to make changes to the shared project.
-- `solution.sh` – A script that solves the task. The oracle agent is a agent that just runs this script. See "The oracle agent" below for more.
+- `solution.sh` – A script that solves the task. The sage agent is a agent that just runs this script. See "The sage agent" below for more.
 - `solutions/` – (Optional) Files that are available to the solution script. This is exactly analogous to the `/setup` directory for the setup script.
 - `tests/` - dbt tests that are used to evaluate the trial. For a trial to pass, all the tests in this directory must pass. You can add manual tests, and if you include `solution_seeds` in the task configuration, tests will get added here automatically when a task is run. Automatically generated tests are appended with the name `AUTO_`. See "How trials are evaluated" below for more.
 - `seeds/` - CSVs that are used to evaluate the automatically generated solution_seed tests. These are **NOT** created on every run; they are only updated when ADE-bench is run with the `--seed` flag. See "Solution seeds" below for more.
@@ -144,7 +144,7 @@ ade run \
   foo001 foo002 \ # The tasks to run. See the task selection list immediately below for more details.
   --db snowflake \ # Which database variant to run
   --project-type dbt \ # Which project variant to run (currently dbt or dbt-fusion)
-  --agent oracle \ # Which agent to use (e.g., `oracle`, `claude`, `codex`)
+  --agent sage \ # Which agent to use (e.g., `sage`, `claude`, `codex`)
 
   --model \ # Optional; which specific model to use for different agents (e.g., claude-3-5-sonnet-20241022)
   --exclude_task_ids foo001 \ # Optional; if you run all tasks, you can exclude tasks with this flag
@@ -369,11 +369,11 @@ This will open a local HTML page that includes much more detail, including detai
 - **Panes**: Terminal output from the setup, agent, and test phases of the trial.
 - **Diffs**: File changes during task setup and changes made by the agent. If ADE-bench is run with the `--no-diffs` flag, these will not be available.
 
-### The Oracle agent
+### The Sage agent
 
-The oracle agent is not really an agent—or, it's a very dumb agent. It's an agent that runs `$ bash solution.sh` and then shuts itself down.
+The sage agent is not really an agent—or, it's a very dumb agent. It's an agent that runs `$ bash solution.sh` and then shuts itself down.
 
-In other words, the oracle agent is the answer key to the task. When ADE-bench is run where `--agent oracle` all the tests should pass. If they don't, something is wrong with the tasks themselves. So, it's important for tasks to have a solution script to make sure that the task is correctly configured.
+In other words, the sage agent is the answer key to the task. When ADE-bench is run where `--agent sage` all the tests should pass. If they don't, something is wrong with the tasks themselves. So, it's important for tasks to have a solution script to make sure that the task is correctly configured.
 
 **Note**: The `solution.sh` script might be different for different database and project variants. More on how to handle this is discussed in "Sharing projects across databases and project types" below.
 
@@ -386,7 +386,7 @@ Many tasks have `solution_seeds` defined in their `task.yaml` file. These are ta
 - **CSVs:** Each table defined in as solution seed will get exported into the task's `\seeds` directory as `solution__[table_name].csv`.
 - **A seed config:** To ensure that the `dbt seed` command runs during the evaluation, ADE-bench will also create a schema file called `_no-op.txt`. This is utility file that is used when tables are uploaded. (Note that some shenanigans are necessary here to support cross-database compatibility. For example, DuckDB has a `hugeint` data type, whereas Snowflake does not. Why does the small database need huge integers?)
 
-**ONLY RUN `--seed` WITH THE ORACLE AGENT ON DUCKDB** Exporting seeds is not currently supported with Snowflake (TODO?), and because solution seeds are used as answer keys, they should never be created based on what an agent does.
+**ONLY RUN `--seed` WITH THE SAGE AGENT ON DUCKDB** Exporting seeds is not currently supported with Snowflake (TODO?), and because solution seeds are used as answer keys, they should never be created based on what an agent does.
 
 As described in `task.yaml` description above, there are several additional configuration options when setting up solution seeds:
 
@@ -538,7 +538,7 @@ uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8
 Finally, test a basic exceuction:
 
 ```bash
-ade run simple001 --db duckdb --project-type dbt --agent oracle
+ade run simple001 --db duckdb --project-type dbt --agent sage
 ```
 
 ### Snowflake setup
@@ -644,7 +644,7 @@ $ dbt test --select "test_type:singular" # Run the task tests
 
 When you're developing a task and ready to create CSVs for the solution seeds, run the following command:
 ```
-ade run [task_to_copy] --db duckdb --project-type [dbt] --agent oracle --seed
+ade run [task_to_copy] --db duckdb --project-type [dbt] --agent sage --seed
 ```
 
 The final seed flag will export the CSVs from final project in the task's `/seeds` directory. **Read the warning in "Solution seeds" before doing this.**

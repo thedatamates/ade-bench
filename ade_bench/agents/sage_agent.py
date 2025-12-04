@@ -23,8 +23,8 @@ class YamlSolution(TypedDict):
 SolutionDict = dict[str, ShSolution | YamlSolution]
 
 
-class OracleAgent(BaseAgent):
-    NAME = AgentName.ORACLE
+class SageAgent(BaseAgent):
+    NAME = AgentName.SAGE
 
     def __init__(
         self,
@@ -47,7 +47,7 @@ class OracleAgent(BaseAgent):
         solution_dict: SolutionDict = {}
         for task_path, task_key in self._dataset:
             trial_handler = TrialHandler(
-                trial_name="oracle",
+                trial_name="sage",
                 input_path=task_path,
                 task_key=task_key,
             )
@@ -86,16 +86,16 @@ class OracleAgent(BaseAgent):
             if solutions_path.exists():
                 session.copy_to_container(
                     solutions_path,
-                    container_dir="/oracle/solutions",
+                    container_dir="/sage/solutions",
                 )
 
             session.copy_to_container(
                 solution["path"],
-                container_dir="/oracle",
+                container_dir="/sage",
                 container_filename="solution.sh",
             )
             # Build command with optional parameters
-            command = "bash /oracle/solution.sh"
+            command = "bash /sage/solution.sh"
             if self._variant_config:
                 db_type = self._variant_config.get("db_type")
                 project_type = self._variant_config.get("project_type")

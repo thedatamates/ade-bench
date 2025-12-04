@@ -173,7 +173,7 @@ class Harness:
         """
         agent_kwargs = self._agent_kwargs.copy()
 
-        if self._agent_name == AgentName.ORACLE:
+        if self._agent_name == AgentName.SAGE:
             agent_kwargs["task_ids"] = [task_id]
 
         # Pass model_name to agents (if provided)
@@ -204,9 +204,11 @@ class Harness:
 
         self._logger = logger.getChild(__name__)
 
-    def _is_resolved(self, parser_results: dict[str, UnitTestStatus] | None) -> bool:
-        if parser_results is None:
+    def _is_resolved(self, parser_result: ParserResult | None) -> bool:
+        if parser_result is None:
             return False
+
+        parser_results = parser_result.test_results
 
         # Check if compilation failed
         if "dbt_compile" in parser_results and parser_results["dbt_compile"] == UnitTestStatus.FAILED:
@@ -220,6 +222,16 @@ class Harness:
         # Count passing tests
         passing_tests = sum(1 for result in test_results.values() if result == UnitTestStatus.PASSED)
         total_tests = len(test_results)
+
+        # Check if we have fewer parsed tests than expected
+        # This catches cases where tests crashed/panicked before producing output
+        if parser_result.expected_test_count is not None:
+            if total_tests < parser_result.expected_test_count:
+                self._logger.debug(
+                    f"Task failed: only {total_tests} test results found, "
+                    f"but {parser_result.expected_test_count} tests were expected"
+                )
+                return False
 
         # For now, require all tests to pass. This could be made configurable per task
         # if we want to allow partial success thresholds
@@ -647,7 +659,7 @@ class Harness:
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
-            # Set variant configuration for oracle agent
+            # Set variant configuration for sage agent
             if hasattr(task_agent, 'set_variant_config'):
                 task_agent.set_variant_config(config)
 
@@ -799,7 +811,7 @@ class Harness:
             return results
 
         results.parser_results = parser_result.test_results
-        results.is_resolved = self._is_resolved(parser_result.test_results)
+        results.is_resolved = self._is_resolved(parser_result)
 
         if results.is_resolved:
             self._logger.debug(f"Resolved task {trial_handler.task_id}")

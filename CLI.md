@@ -14,22 +14,22 @@ Run ADE-bench tasks with specific configurations:
 
 ```bash
 # Run a specific task
-ade run foo001 --db duckdb --project-type dbt --agent oracle
+ade run foo001 --db duckdb --project-type dbt --agent sage
 
 # Run a specific task with a specific variant
-ade run foo001.hard --db duckdb --project-type dbt --agent oracle
+ade run foo001.hard --db duckdb --project-type dbt --agent sage
 
 # Run multiple tasks
-ade run foo001 bar001 --db duckdb --project-type dbt --agent oracle
+ade run foo001 bar001 --db duckdb --project-type dbt --agent sage
 
 # Run all ready tasks
-ade run all --db duckdb --project-type dbt --agent oracle
+ade run all --db duckdb --project-type dbt --agent sage
 
 # Run an experiment set
-ade run @my_experiment_set --db duckdb --project-type dbt --agent oracle
+ade run @my_experiment_set --db duckdb --project-type dbt --agent sage
 
 # Run wildcard patterns
-ade run foo+ bar+ --db duckdb --project-type dbt --agent oracle
+ade run foo+ bar+ --db duckdb --project-type dbt --agent sage
 ```
 
 ### View Results

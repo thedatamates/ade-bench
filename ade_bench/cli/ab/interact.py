@@ -315,7 +315,7 @@ def interact(
             if trial_handler.solutions_dir.exists():
                 terminal.copy_to_container(
                     paths=[trial_handler.solutions_dir],
-                    container_dir="/oracle/solutions"
+                    container_dir="/sage/solutions"
                 )
 
             # Copy test files
@@ -332,12 +332,12 @@ def interact(
             if solution_script.exists():
                 terminal.copy_to_container(
                     paths=[solution_script],
-                    container_dir="/oracle",
+                    container_dir="/sage",
                     container_filename="solution.sh"
                 )
 
                 # Make it executable
-                container.exec_run("chmod +x /oracle/solution.sh")
+                container.exec_run("chmod +x /sage/solution.sh")
 
             # Copy seeds directory if it exists
             if trial_handler.seeds_dir.exists():
@@ -369,14 +369,14 @@ def interact(
             agent_name = AgentName(agent.lower())
             from ade_bench.harness_models import TerminalCommand
 
-            if agent_name == AgentName.ORACLE:
-                # For the oracle agent, we run the solution script in the tmux session
-                typer.echo("Running oracle agent (solution.sh)...")
+            if agent_name == AgentName.SAGE:
+                # For the sage agent, we run the solution script in the tmux session
+                typer.echo("Running sage agent (solution.sh)...")
 
                 # Use the standard TerminalCommand with config timeout
                 from ade_bench.config import config
                 session.send_command(TerminalCommand(
-                    command="/oracle/solution.sh",
+                    command="/sage/solution.sh",
                     block=True,
                     max_timeout_sec=config.default_agent_timeout_sec,
                     append_enter=True,

@@ -25,6 +25,10 @@ class DbtParser(BaseParser):
     # "Finished 'test' target 'dev' with 1 error and 2 warnings in 6s 233ms"
     DBT_FUSION_SUMMARY_PATTERN = r"Finished\s+'test'\s+target\s+'(\w+)'\s+with\s+(?:(?:(\d+)\s+errors?(?:\s+and\s+(\d+)\s+warnings?)?)|(?:(\d+)\s+warnings?))\s+in\s+(\d+)s\s+(\d+)ms"
 
+    # Pattern to match the expected test count line from run-dbt-test.sh
+    # Example: "[ade-bench] expected_test_count=2"
+    EXPECTED_TEST_COUNT_PATTERN = r"\[ade-bench\] expected_test_count=(\d+)"
+
     def __init__(self, parser_type: str = "dbt", **kwargs):
         """
         Initialize DbtParser with explicit parser type.
@@ -129,10 +133,18 @@ class DbtParser(BaseParser):
             re.search(self.DBT_FUSION_SUMMARY_PATTERN, content)
         )
 
+    def _get_expected_test_count(self, content: str) -> int | None:
+        """Get the expected test count from the '[ade-bench] expected_test_count=N' line."""
+        match = re.search(self.EXPECTED_TEST_COUNT_PATTERN, content)
+        return int(match.group(1)) if match else None
+
     def parse(self, content: str) -> ParserResult:
         # Check for compilation error - this should only happen when dbt fails to run at all
         # If we see test results, even with failures, compilation succeeded
         has_compilation_error = "Compilation Error" in content and not self._has_test_results(content)
+
+        # Get expected test count from the "[ade-bench] expected_test_count=N" line
+        expected_test_count = self._get_expected_test_count(content)
 
         # Initialize results
         results = {}
@@ -199,4 +211,8 @@ class DbtParser(BaseParser):
         # Now construct the final status message based on the parsed results
         status_message = self._create_status_message(results, summary_data, has_compilation_error)
 
-        return ParserResult(test_results=results, status_message=status_message)
+        return ParserResult(
+            test_results=results,
+            status_message=status_message,
+            expected_test_count=expected_test_count
+        )
