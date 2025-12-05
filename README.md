@@ -110,7 +110,7 @@ ade run all --db duckdb --project-type dbt --agent claude
 ### 8. Go beyond
 
 - Use the dbt Fusion engine instead of dbt Core with `--project-type dbt-fusion` ([set up Snowflake](#snowflake-setup) first)
-- Enable the dbt MCP server with the `--use-mcp` flag (requires Snowflake, see [MCP](#mcp) section)
+- Enable the dbt MCP server with the `--use-mcp` flag (requires Snowflake, see [MCP](#enabling-the-mcp-server) section)
 - [Contribute additional tasks or datasets](/CONTRIBUTING.md)
 
 ## An introduction to how ADE-bench works
@@ -136,7 +136,7 @@ When ADE-bench is asked to solve a task, here is what happens:
 
 ## Usage
 
-ADE-bench runs with the `ade` CLI command. Installation instructions are below, and [complete usage documentation is here](CLI.md), but here is an example command for running tasks:
+ADE-bench runs with the `ade` CLI command. Here is an example command for running tasks:
 
 ```bash
 ade run \
@@ -155,6 +155,8 @@ ade run \
   --persist \ # Optional; keeps the container alive after the trial is over or is aborted.
   --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
 ```
+
+See also: [complete usage documentation](CLI.md).
 
 ### Task selection
 
@@ -183,7 +185,7 @@ Each task folder contains a handful of files:
 - `solution.sh` – A script that solves the task. The sage agent is a agent that just runs this script. See "[The sage agent](#the-sage-agent)" below for more.
 - `solutions/` – (Optional) Files that are available to the solution script. This is exactly analogous to the `/setup` directory for the setup script.
 - `tests/` - dbt tests that are used to evaluate the trial. For a trial to pass, all the tests in this directory must pass. You can add manual tests, and if you include `solution_seeds` in the task configuration, tests will get added here automatically when a task is run. Automatically generated tests are appended with the name `AUTO_`. See "[How trials are evaluated](#how-trials-are-evaluated)" below for more.
-- `seeds/` - CSVs that are used to evaluate the automatically generated solution_seed tests. These are **NOT** created on every run; they are only updated when ADE-bench is run with the `--seed` flag. See "Solution seeds" below for more.
+- `seeds/` - CSVs that are used when evaluating the automatically-generated equality tests.
 
 The task is defined in the `task.yaml` file:
 
@@ -274,6 +276,16 @@ variants:
 
 We skimmed over lots of details in the section above. This next section explains the painful tedium of those details.
 
+### How trials are evaluated
+
+After the agent runs, tasks are graded via dbt tests. You can add whatever manual tests you want to this directory. Additionally, ADE-bench will automatically create tests for you based on solution seeds in your task.
+
+More specifically, when the agent completes its work, several things happen:
+
+1. If there are solution_seeds defined in the `task.yaml` file, the `\seeds` directory is copied into the sandbox. ADE-bench then runs `dbt seed` to create these tables in the database environment.
+2. The existing test directory in the sandbox is replaced with the tests in the `\tests` directory of the task folder. If a task has no solution seeds, then it will only have manual tests; if a task has solution seeds, ADE-bench will automatically generate two tests (`AUTO_{table_name}_equality.sql` and `AUTO_{table_name}_existence.sql`) and copy those. **Note:** ADE-bench automatically removes and regenerates all `AUTO_` tests prior to evaluating each trial, so if you update these files directly, your changes will probably get wiped away.
+3. The tests in that directory are run and the results are recorded. If all of them pass, the task passes. If any fail, the task fails.
+
 ### How databases work
 
 ADE-bench currently supports these database types:
@@ -345,7 +357,7 @@ This will open a local HTML page that includes much more detail, including detai
 - **Panes**: Terminal output from the setup, agent, and test phases of the trial.
 - **Diffs**: File changes during task setup and changes made by the agent. If ADE-bench is run with the `--no-diffs` flag, these will not be available.
 
-### Agents
+### Configuring agents
 
 ADE-bench currently supports the following agents:
 
@@ -372,7 +384,7 @@ gemini --output-format json --yolo --prompt {task_prompt} \
 
 Configuration files for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
 
-### MCP
+### Enabling the MCP server
 
 If run with the flag `--use-mcp`, ADE-bench will create a dbt MCP server that the agent is allowed to use. The following databases and agents are supported:
 
@@ -380,16 +392,6 @@ If run with the flag `--use-mcp`, ADE-bench will create a dbt MCP server that th
 - Agents: `claude`, `codex`, `gemini`
 
 Because the server runs locally, it only has access to the [CLI tools](https://github.com/dbt-labs/dbt-mcp#tools). The others are disabled, because they require access to the dbt platform.
-
-### How trials are evaluated
-
-After the agent runs, tasks are graded via dbt tests. You can add whatever manual tests you want to this directory. Additionally, ADE-bench will automatically create tests for you based on solution seeds in your task.
-
-More specifically, when the agent completes its work, several things happen:
-
-1. If there are solution_seeds defined in the `task.yaml` file, the `\seeds` directory is copied into the sandbox. ADE-bench then runs `dbt seed` to create these tables in the database environment.
-2. The existing test directory in the sandbox is replaced with the tests in the `\tests` directory of the task folder. If a task has no solution seeds, then it will only have manual tests; if a task has solution seeds, ADE-bench will automatically generate two tests (by default, `AUTO_{table_name}_equality.sql` and `AUTO_{table_name}_existence.sql`) and copy those. **Note:** ADE-bench automatically removes and regenerates all `AUTO_` tests prior to evaluating each trial, so if you update these files directly, your changes will probably get wiped away.
-3. The tests in that directory are run and the results are recorded. If all of them pass, the task passes. If any fail, the task fails.
 
 ### The Sage agent
 
@@ -443,6 +445,7 @@ LOG_LEVEL=INFO
 
 > [!CAUTION]
 > Do not connect ADE-bench to your production Snowflake account when using shared datasets!
+>
 > It assumes it has free rein to create and drop objects in the database, and runs a lot of dangerous DDL statements in the process.
 
 [Sign up for a trial Snowflake account](https://signup.snowflake.com/).
@@ -510,6 +513,7 @@ _Snowflake is deprecating password-based authentication, which makes this very a
 
 > [!CAUTION]
 > Do not connect ADE-bench to your production Snowflake account when using shared datasets!
+>
 > It assumes it has free rein to create and drop objects in the database, and runs a lot of dangerous DDL statements in the process.
 
 ADE-bench includes a command to migrate all of the DuckDB files in `/shared/databases/duckdb` into their own databases (matching the name of the DuckDB database) in the Snowflake account in your `.env` file.
