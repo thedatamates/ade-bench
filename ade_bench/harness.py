@@ -810,6 +810,19 @@ class Harness:
             results.failure_mode = parse_failure_mode
             return results
 
+        # Check for panic in test output (e.g., dbt-fusion panic)
+        # This is a harness failure, not a task failure
+        if "panic:" in post_agent_pane.lower():
+            test_results = {k: v for k, v in parser_result.test_results.items() if k != "dbt_compile"}
+            # Only treat as harness panic if we got no actual test results
+            if not test_results:
+                self._logger.warning(
+                    f"Panic detected in test output for task {trial_handler.task_id}. "
+                    "This is a harness failure, not a task failure."
+                )
+                results.failure_mode = FailureMode.HARNESS_PANIC
+                return results
+
         results.parser_results = parser_result.test_results
         results.expected_test_count = parser_result.expected_test_count
         results.is_resolved = self._is_resolved(parser_result)
