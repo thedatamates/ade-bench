@@ -811,6 +811,7 @@ class Harness:
             return results
 
         results.parser_results = parser_result.test_results
+        results.expected_test_count = parser_result.expected_test_count
         results.is_resolved = self._is_resolved(parser_result)
 
         if results.is_resolved:

@@ -60,6 +60,7 @@ class TrialResults(BaseModel):
     is_resolved: bool | None = None
     failure_mode: FailureMode = FailureMode.UNSET
     parser_results: dict[str, UnitTestStatus] | None = None
+    expected_test_count: int | None = None  # Expected number of tests (excluding dbt_compile)
     input_tokens: int | None = None
     output_tokens: int | None = None
     cache_tokens: int | None = None
