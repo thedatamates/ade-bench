@@ -65,6 +65,38 @@ uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8
 ade run simple001 --db duckdb --project-type dbt --agent sage
 ```
 
+<details><summary>You should see output like this:</summary>
+
+<pre>
+(ade-bench) joel@Joel-Labes ade-bench % ade run simple001 --db duckdb --project-type dbt --agent sage
+14:58:07 | system                           | START        | STARTING HARNESS RUN
+14:58:07 | system                           | START        | Run ID: 2025-12-05__14-58-07
+14:58:07 | system                           | START        | Running with duckdb + dbt. Found 1 tasks of 1 requested tasks.
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Time     ┃ Task                             ┃ Stage        ┃ Message                                                                                              ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 14:58:32 │ simple001                        │ ✓ ✓ ✓  DONE  │ PASS - dbt test results - Pass: 1, Fail: 0, Total: 1                                                 │
+│ ──────── │ ──────────────────────────────── │ ──────────── │ ──────────────────────────────────────────────────────────────────────────────────────────────────── │
+│ 14:58:32 │ SUMMARY                          │              │ Run 1 of 1 tasks, 1 successful (100.0%)                                                              │
+└──────────┴──────────────────────────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────┘
+14:58:32 | system                           | FINISH       | Generated HTML dashboard.
+14:58:32 | system                           | FINISH       | Harness run completed: 1 of 1 tasks successful
+
+======================================== RESULTS SUMMARY ========================================
+
++-------------+----------+----------------+---------+----------+------------+------------+--------+----------------+-----------------+----------------+---------+
+| Task        | Result   | Failure Type   | Tests   | Passed   | Passed %   | Time (s)   | Cost   | Input Tokens   | Output Tokens   | Cache Tokens   | Turns   |
+|-------------+----------+----------------+---------+----------+------------+------------+--------+----------------+-----------------+----------------+---------|
+| simple001   | p        |                | 2       | 2        |            | 0          | $0.00  | 0              | 0               | 0              | 0       |
+|             |          |                |         |          |            |            |        |                |                 |                |         |
+| TOTAL (n=1) | 100%     |                | 2       | 2        | 100%       | 0          | $0.00  | 0              | 0               | 0              | 0       |
++-------------+----------+----------------+---------+----------+------------+------------+--------+----------------+-----------------+----------------+---------+
+
+For more details, run the command below:
+ade view
+</pre>
+</details>
+
 ### 6. Configure one or more LLM API keys
 
 Make a copy of `.env.example` and rename it to `.env`, then provide your preferred API keys in the specified locations. See [Configuration](#configuration) for a worked example.
