@@ -527,7 +527,7 @@ Next, you will need [Docker Compose](https://docs.docker.com/compose/install/) a
 ```shell
 uv --version
 docker compose version
-``` ```
+```
 
 Then, download the DuckDB databases from [here](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE), and put them in the `/shared/databases/duckdb` directory. You can also install them with the following command:
 
