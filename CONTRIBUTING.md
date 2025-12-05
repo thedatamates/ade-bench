@@ -4,10 +4,6 @@ Contributions to the ADE-bench project are welcome.
 
 ## Contributing new datasets
 
-ADE-bench supports both dbt Core and dbt Fusion projects ([with some exceptions](https://github.com/thedatamates/ade-bench/issues/12)).
-
-In some situations, the dbt Fusion engine's SQL Comprehension capabilities can make it impossible to build a misconfigured project. Disable static analysis by setting the environment variable `DBT_STATIC_ANALYSIS=off` in your invocation. Using the environment variable instead of `--static-analysis off` flag ensures graceful degradation for dbt Core.
-
 When creating a dbt project, include the `profiles.yml` and `dbt_project.yml` file in the root directory of the project. In `profiles.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
 
 ```yaml
@@ -34,9 +30,35 @@ foo-snowflake:
       warehouse: <warehouse>
 ```
 
+In some situations, the dbt Fusion engine's SQL Comprehension capabilities can make it impossible to build a misconfigured project. Disable static analysis by setting the environment variable `DBT_STATIC_ANALYSIS=off` in your invocation.
+
+For example, this setup script alters a table to have a different data type. If static analysis is not turned off, the dbt run step will prematurely fail, preventing the setup script from completing successfully.
+
+```bash
+# Execute SQL using the run_sql utility.
+/scripts/run_sql.sh "$@" << SQL
+-- Update the due_at field to be an integer.
+create or replace table main.task_data_temp as
+  select
+    * replace (due_at::integer as due_at)
+  from main.task_data;
+-- Rename the table to the original name.
+drop table main.task_data;
+alter table main.task_data_temp rename to task_data;
+SQL
+
+## Run the dbt project.
+dbt deps
+DBT_STATIC_ANALYSIS=off dbt run
+```
+
+Using the environment variable instead of the `--static-analysis off` flag ensures graceful degradation for dbt Core.
+
 ## Contributing new tasks or tests
 
-**Project and DB specific tests:** Tests can be designated for specific environments using comment headers:
+### Environment specification
+
+Tests can be designated for specific environments using comment headers:
 
 ```sql
 -- db: duckdb          # Only runs for DuckDB
@@ -44,33 +66,17 @@ foo-snowflake:
 -- project-type: dbt   # Only runs for dbt projects
 ```
 
-Tests without environment specification run on all environments.
+Tests without an environment specification run on all environments.
 
-### Producing solution seeds
-
-**You can generate these seeds by running ADE-bench with the `--seed flag`.** When you do this, the harness runs as it normally would,[^3] except, once trial is over, it exports two things into the task directory:
-
-- **CSVs:** Each table defined in as solution seed will get exported into the task's `\seeds` directory as `solution__[table_name].csv`.
-- **A seed config:** To ensure that the `dbt seed` command runs during the evaluation, ADE-bench will also create a schema file called `_no-op.txt`. This is utility file that is used when tables are uploaded. (Note that some shenanigans are necessary here to support cross-database compatibility. For example, DuckDB has a `hugeint` data type, whereas Snowflake does not. Why does the small database need huge integers?)
-
-**ONLY RUN `--seed` WITH THE SAGE AGENT ON DUCKDB** Exporting seeds is not currently supported with Snowflake (TODO?), and because solution seeds are used as answer keys, they should never be created based on what an agent does.
-
-1. **During --seed mode**: All tables (the main one and alternates) will be extracted as CSV files with the `solution__` prefix. For example, running the task above will extract `solution__table_name.csv` from `table_name`, `solution__another_good_answer.csv` from `another_good_answer`, and so on.
-
-#### Solution seeds
+### Configuring solution seeds
 
 Many tasks have `solution_seeds` defined in their `task.yaml` file. These are tables that are used to evaluate the agent's work.
 
-As described in `task.yaml` description above, there are several additional configuration options when setting up solution seeds:
+By default, these seeds must perfectly match the agent-produced table, but you can also:
 
-- You can exclude columns from being part of the table equality comparison.
-- You can select specific columns to only include.
-- You can disable the automatic generation of either the equality or existence test.
-- You can specify alternate solution seeds for tasks that have multiple valid answers.
-
-#### Alternate solution seeds
-
-Some tasks may have multiple valid answers. For example, a query might be written in different ways that produce equally correct results. To handle this, you can specify alternate solution seeds:
+- specify a [subset of columns](https://github.com/dbt-labs/dbt-utils#equality-source) to include or exclude from the table equality comparison
+- disable the automatic generation of either the equality or existence test.
+- specify alternate solution seeds for tasks that have multiple valid answers.
 
 ```yaml
 solution_seeds:
@@ -80,11 +86,24 @@ solution_seeds:
     - not_as_good_but_still_counts
 ```
 
-When alternates are specified, ADE-bench will compare the table defined by `table_name` to solution seeds of that table _and_ of any alternatives.
-
 In the example above, the agent would be expected to create a table called `the_best_answer` (and just that table), and for that table to match one of the three seeds (`solution__the_best_answer`, `solution__another_good_answer`, and `solution__not_as_good_but_still_counts`).
 
+### Automatically producing solution seeds
 
+Instead of making a solution seed by hand, ADE-bench can output seed files based on the results of the `sage` agent:
+
+```bash
+ade run my_new_task --db duckdb --agent sage --project-type dbt --seed
+```
+
+After ADE-bench finishes running the trial, it generates the following files in the task's `seeds` directory:
+
+- One CSV file called `solution__[table_name].csv` for each table defined in the `solution_seeds` key of task.yaml
+- One schema file called `_no-op.txt` for the whole task. This is a utility file that is used when tables are uploaded to ensure schemas are created with the correct data types. (Note that some shenanigans are necessary here to support cross-database compatibility. For example, DuckDB has a `hugeint` data type, whereas Snowflake does not. Why does the small database need huge integers?)
+
+A somewhat annoying thing about this: When you run ADE-bench with the `--seed` flag, it will evaluate each trial with whatever CSVs exist in the `/seeds` directory _before_ the new ones are created, and then, _after the tests have run_, it will export the results into the directory. This means that you may need to run it twice to check that task works: Once to create the seeds, and another time (without the `--seed` flag) to see if it passes.
+
+**ONLY RUN `--seed` WITH THE SAGE AGENT ON DUCKDB**. Exporting seeds is not currently supported with Snowflake (TODO?), and because solution seeds are used as answer keys, they should never be created based on what an agent does.
 
 ### Approximate equality tests
 
@@ -116,7 +135,9 @@ Tasks can be configured with different environment variants, so that they can be
 
 There are three features to help migrate a shared dbt project between databases or dbt versions:
 
-1. Configure the variants in the task. For example, in a task called `foo001`, you might have two variants: One for DuckDB, and one for Snowflake:
+### Task variants
+
+Configure the variants in the task. For example, in a task called `foo001`, you might have two variants: One for DuckDB, and one for Snowflake:
 
 ```yaml
 variants:
@@ -132,9 +153,13 @@ variants:
   migration_directory: foo__duckdb_to_snowflake
 ```
 
-2. Create a migration script. In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project *and the contents of the folder in `shared\migrations\foo__duckdb_to_snowflake`. It will then run the `migration.sh` script (prior to running the task `setup.sh` script). Note that this migration script has access to any other files in that migration directory, so if you want to fully update some files in the dbt project, you can include the new files in the migration directory.
+### Migration scripts
 
-3. When the `solution.sh` script runs, ADE-bench passes the corresponding database and project type into the script as an argument. So if different updates are needed to solve the trial depending on the database, these can be configured following patterns like the example below:
+In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project *and the contents of the folder in `shared\migrations\foo__duckdb_to_snowflake`. It will then run the `migration.sh` script (prior to running the task `setup.sh` script). Note that this migration script has access to any other files in that migration directory, so if you want to fully update some files in the dbt project, you can include the new files in the migration directory.
+
+### Types as arguments to `solution.sh`
+
+When the `solution.sh` script runs, ADE-bench passes the corresponding database and project type into the script as an argument. So if different updates are needed to solve the trial depending on the database, these can be configured following patterns like the example below:
 
 ```bash
 ## This updates the schema config in the solution files, and then moves the files to the appropriate place
@@ -194,19 +219,19 @@ The script automatically:
 
 ---
 
-## Development
+## Development tips
 
 To develop a new task, there are a few things that can be useful:
 
 ### Use interactive mode
 
-You can run a task, and then launch an interactive shell into a task environment. You can also halt the task after different stages (e.g., after the setup scripts run but before the agent runs), and interact with the environment at that stage. This uses the `ade interact` command, and is documented [here](CLI.md).
+You can run a task, and then launch an interactive shell into a task environment. You can also halt the task after different stages (e.g., after the setup scripts run but before the agent runs), and interact with the environment at that stage. This uses the `ade interact` command, and is [documented here](CLI.md).
 
 ### Creating a local sandbox
 
 You can create a local sandbox in a `/dev/sandbox` directory, which you can `cd` into and play around directly. This is especially helpful if you're developing on a DuckDB trial. To create that sandbox, run:
 
-```
+```shell
 uv run scripts_python/create_sandbox.py --task [task_to_copy] --db [duckdb] --project-type [dbt]
 ```
 
@@ -222,19 +247,9 @@ dbt test --select "test_type:singular" # Run the task tests
 
 **Note:** This does **NOT** create a user or database in Snowflake like the task setup does. If you want to use this sandbox on Snowflake, you'll need to run the task first, which will create those resources in Snowflake.
 
-### Creating seeds
-
-When you're developing a task and ready to create CSVs for the solution seeds, run the following command:
-
-```
-ade run [task_to_copy] --db duckdb --project-type [dbt] --agent sage --seed
-```
-
-The final seed flag will export the CSVs from final project in the task's `/seeds` directory. **Read the warning in "Solution seeds" before doing this.**
-
 #### Debugging
 
-Stuff goes wrong. It's really finicky sometimes. To debug, it's often useful to use the sandbox, but the most helpful thing is running the trial with the `--persist` flag, which keeps your Docker container alive after the task is complete. Then, you can log into the container—either directly, or via the Docker desktop app[^3], and both look at the files in the container and run commands in a terminal.
+Stuff goes wrong. It's really finicky sometimes. To debug, it's often useful to use the sandbox, but the most helpful thing is running the trial with the `--persist` flag, which keeps your Docker container alive after the task is complete. Then, you can log into the container—either directly, or via the Docker desktop app, and both look at the files in the container and run commands in a terminal.
 
 Moreover, if you're working with Snowflake, the task will create task databases within your account. You can also query these directly.
 
@@ -246,5 +261,3 @@ breakpoint("optional message")
 ```
 
 This will halt the harness at that point. If you run the harness with the `--persist` flag, the container will then be kept alive, as it was when the harness was halted.
-
-[^3] A somewhat annoying thing about this: When you run ADE-bench with the `--seed` flag, it will evaluate each trial with whatever CSVs exist in the `/seeds` directory _before_ the new ones are created, and then, _after the tests have run_, it will export the results into the directory. This means that you may need to run it twice to check that task works: Once to create the seeds, and another time (without the `--seed` flag) to see if it passes.
