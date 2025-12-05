@@ -26,4 +26,4 @@ SQL
 
 ## Run the dbt project.
 dbt deps
-dbt run
+DBT_STATIC_ANALYSIS=off dbt run

@@ -6,14 +6,112 @@ _"Lord, forgive me, I've been running, running blind in truth."_
 
 ## Overview
 
-ADE-bench[^1] is a framework for evaluating AI agents on data analyst tasks. The framework has several major parts:
+ADE-bench[^1] is a framework for evaluating AI agents on data analyst tasks. Use it to create realistic testing environments with complex evaluation criteria, that can be shared as simple files and tested in production warehouses, while making it as easy as possible to create new tasks.
 
-- Isolated dbt project and database environments that can be provided to an agent.
-- Methods for updating or corrupting those environments prior to giving them to agents.
-- Sandboxes in which each task can be independently run.
-- Methods for evaluating the agent's work against expected results.
+![ADE-bench goals](img/ade-bench-goals.gif)
+[Watch an explainer video from Coalesce 2025](https://www.youtube.com/watch?v=cX2yvpqRTsA)
 
-Today, each ADE-bench trial consists of a dbt project and a database. However, the framework could be extended to include more environments, multiple databases, and other data engineering tools that more closely resemble the real environments in which analysts and data engineers work.
+It does this by running each task in a separate temporary sandbox, and then evaluating the agent's work against the expected results.
+
+## Quickstart
+
+### 1. Clone this repo
+
+```bash
+git clone https://github.com/thedatamates/ade-bench.git
+cd ade-bench
+```
+
+### 2. Install [Docker Compose](https://docs.docker.com/compose/install/) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)
+
+You might already have these, check with:
+
+```bash
+uv --version
+docker compose version
+```
+
+If you don't, install them according to the links above.
+
+### 3. Create a virtual environment and install the `ade` CLI
+
+Reminder: `cd` into the `ade-bench` directory first.
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -e .
+```
+
+Confirm it is installed by running:
+
+```bash
+ade --help
+```
+
+[Learn more about virtual environments](https://docs.astral.sh/uv/pip/environments/#creating-a-virtual-environment), including activation instructions for Windows.
+
+### 4. Download the [sample DuckDB databases](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE) to `/shared/databases/duckdb`
+
+Or run the following command:
+
+```bash
+uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
+```
+
+### 5. Checkpoint: try running a task without any LLMs
+
+```bash
+ade run simple001 --db duckdb --project-type dbt --agent sage
+```
+
+<details><summary>You should see output like this:</summary>
+
+<pre>
+$ ade run simple001 --db duckdb --project-type dbt --agent sage
+14:58:07 | system                           | START        | STARTING HARNESS RUN
+14:58:07 | system                           | START        | Run ID: 2025-12-05__14-58-07
+14:58:07 | system                           | START        | Running with duckdb + dbt. Found 1 tasks of 1 requested tasks.
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Time     ┃ Task                             ┃ Stage        ┃ Message                                                                                              ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 14:58:32 │ simple001                        │ ✓ ✓ ✓  DONE  │ PASS - dbt test results - Pass: 2, Fail: 0, Total: 2                                                 │
+│ ──────── │ ──────────────────────────────── │ ──────────── │ ──────────────────────────────────────────────────────────────────────────────────────────────────── │
+│ 14:58:32 │ SUMMARY                          │              │ Run 1 of 1 tasks, 1 successful (100.0%)                                                              │
+└──────────┴──────────────────────────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────┘
+14:58:32 | system                           | FINISH       | Generated HTML dashboard.
+14:58:32 | system                           | FINISH       | Harness run completed: 1 of 1 tasks successful
+
+======================================== RESULTS SUMMARY ========================================
+
++-------------+----------+----------------+---------+----------+------------+------------+--------+----------------+-----------------+----------------+---------+
+| Task        | Result   | Failure Type   | Tests   | Passed   | Passed %   | Time (s)   | Cost   | Input Tokens   | Output Tokens   | Cache Tokens   | Turns   |
+|-------------+----------+----------------+---------+----------+------------+------------+--------+----------------+-----------------+----------------+---------|
+| simple001   | p        |                | 2       | 2        |            | 0          | $0.00  | 0              | 0               | 0              | 0       |
+|             |          |                |         |          |            |            |        |                |                 |                |         |
+| TOTAL (n=1) | 100%     |                | 2       | 2        | 100%       | 0          | $0.00  | 0              | 0               | 0              | 0       |
++-------------+----------+----------------+---------+----------+------------+------------+--------+----------------+-----------------+----------------+---------+
+
+For more details, run the command below:
+ade view
+</pre>
+</details>
+
+### 6. Configure one or more LLM API keys
+
+Make a copy of `.env.example` and rename it to `.env`, then provide your preferred API keys in the specified locations. See [Configuration](#configuration) for a worked example.
+
+### 7. Run all tasks
+
+```bash
+ade run all --db duckdb --project-type dbt --agent claude
+```
+
+### 8. Go beyond
+
+- Use the dbt Fusion engine instead of dbt Core with `--project-type dbt-fusion` ([set up Snowflake](#snowflake-setup) first)
+- Enable the dbt MCP server with the `--use-mcp` flag (requires Snowflake, see [MCP](#enabling-the-mcp-server) section)
+- [Contribute additional tasks or datasets](/CONTRIBUTING.md)
 
 ## An introduction to how ADE-bench works
 
@@ -21,7 +119,7 @@ ADE-bench has three primary components:
 
 1. Tasks
 2. Shared databases
-3. Shared (dbt) projects
+3. Shared dbt projects
 
 Each task represents a request that might be made to an agent. Though each task can include multiple evaluation criteria (e.g., it may require multiple models to be updated, or a model to have the correct SQL query and materialization configuration), the task is the primary unit of evaluation in ADE-bench.
 
@@ -36,6 +134,45 @@ When ADE-bench is asked to solve a task, here is what happens:
 7. **Evaluate the result.** The changes are evaluated against the tests specified in the task. If all the tests pass, the task passes. **Note:** ADE-bench includes automatic ways to compare tables to one another. For example, if you want to evaluate a task by seeing if the agent created the correct `dim_users` table, you can define this table in the task configuration, and the comparison test is generated automatically.
 8. **Clean up the sandbox.** Once the task has recorded its results, ADE-bench deletes the container.
 
+## Usage
+
+ADE-bench runs with the `ade` CLI command. Here is an example command for running tasks:
+
+```bash
+ade run \
+  foo001 foo002 \ # The tasks to run. See the task selection list immediately below for more details.
+  --db snowflake \ # Which database variant to run
+  --project-type dbt \ # Which project variant to run (currently dbt or dbt-fusion)
+  --agent sage \ # Which agent to use (e.g., `sage`, `claude`, `codex`)
+
+  --model \ # Optional; which specific model to use for different agents (e.g., claude-3-5-sonnet-20241022)
+  --exclude_task_ids foo001 \ # Optional; if you run all tasks, you can exclude tasks with this flag
+  --n-concurrent-trials 4 \ #  Optional; sets trial concurrency limit; defaults to 4.
+  --n-attempts 1 \ # Optional; sets times to run each task; defaults to 1.
+  --max-episodes 50 \ # Optional; the maximum number of calls to an agent's LM; defaults to 50.
+  --seed \ # Optional; flag for creating solution seed CSVs !! DESTRUCTIVE !! RUN WITH CAUTION !! SEE BELOW !!
+  --no-diffs \ # Optional; disables taking snapshots of diffs for faster performance.
+  --persist \ # Optional; keeps the container alive after the trial is over or is aborted.
+  --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
+```
+
+See also: [complete usage documentation](CLI.md).
+
+### Task selection
+
+There are several ways to select tasks to run:
+
+```bash
+ade run airbnb001  # Run a specific task
+ade run f1006.hard  # Run a specific task with a specific variant
+ade run airbnb001 airbnb002  # Run multiple tasks
+ade run all  # Run all ready tasks
+ade run @coalesce  # Run an experiment set
+ade run f1+ simple+  # Run wildcard patterns
+```
+
+---
+
 ## Task Configuration
 
 Before getting into the details, it's useful to see how tasks are configured. This will help define the outline for how ADE-bench works, and the sections below will fill in the details.
@@ -45,17 +182,17 @@ Each task folder contains a handful of files:
 - `task.yaml` - The task's configuration. This is an important file, so all the details are below.
 - `setup.sh` – A setup script that runs before the agent is given the task, for modifying files and doing other computer stuff.
 - `setup/` – (Optional) A directory containing files that the setup script can use. For example, suppose you want to replace `a_good_working_file.sql` with `one_with_a_bug.sql`. Put the one with a bug here and use `setup.sh` to replace it. This lets you modify the project for the specific task, without having to make changes to the shared project.
-- `solution.sh` – A script that solves the task. The sage agent is a agent that just runs this script. See "The sage agent" below for more.
+- `solution.sh` – A script that solves the task. The sage agent is a agent that just runs this script. See "[The sage agent](#the-sage-agent)" below for more.
 - `solutions/` – (Optional) Files that are available to the solution script. This is exactly analogous to the `/setup` directory for the setup script.
-- `tests/` - dbt tests that are used to evaluate the trial. For a trial to pass, all the tests in this directory must pass. You can add manual tests, and if you include `solution_seeds` in the task configuration, tests will get added here automatically when a task is run. Automatically generated tests are appended with the name `AUTO_`. See "How trials are evaluated" below for more.
-- `seeds/` - CSVs that are used to evaluate the automatically generated solution_seed tests. These are **NOT** created on every run; they are only updated when ADE-bench is run with the `--seed` flag. See "Solution seeds" below for more.
+- `tests/` - dbt tests that are used to evaluate the trial. For a trial to pass, all the tests in this directory must pass. You can add manual tests, and if you include `solution_seeds` in the task configuration, tests will get added here automatically when a task is run. Automatically generated tests are appended with the name `AUTO_`. See "[How trials are evaluated](#how-trials-are-evaluated)" below for more.
+- `seeds/` - CSVs that are used when evaluating the automatically-generated equality tests.
 
 The task is defined in the `task.yaml` file:
 
 ```yaml
 # task.yaml
 task_id: The name of the task, which should match the name of the task directory.
-status: An indicator of the task's development status.
+status: An indicator of the task's development status. [ready | dev | open]
 description: A description of what the task does
 notes: |-
   Optional notes about the task, things to add to it, issues with it, etc.
@@ -135,73 +272,19 @@ variants:
   migration_directory: enron__duckdb_to_snowflake
 ```
 
-## Usage
-
-ADE-bench can be run via a CLI. Installation instructions are below, and complete usage documentation is [here](CLI.md), but here is an example command for running tasks:
-
-```bash
-ade run \
-  foo001 foo002 \ # The tasks to run. See the task selection list immediately below for more details.
-  --db snowflake \ # Which database variant to run
-  --project-type dbt \ # Which project variant to run (currently dbt or dbt-fusion)
-  --agent sage \ # Which agent to use (e.g., `sage`, `claude`, `codex`)
-
-  --model \ # Optional; which specific model to use for different agents (e.g., claude-3-5-sonnet-20241022)
-  --exclude_task_ids foo001 \ # Optional; if you run all tasks, you can exclude tasks with this flag
-  --n-concurrent-trials 4 \ #  Optional; sets trial concurrency limit; defaults to 4.
-  --n-attempts 1 \ # Optional; sets times to run each task; defaults to 1.
-  --max-episodes 50 \ # Optional; the maximum number of calls to an agent's LM; defaults to 50.
-  --seed \ # Optional; flag for creating solution seed CSVs !! DESTRUCTIVE !! RUN WITH CAUTION !! SEE BELOW !!
-  --no-diffs \ # Optional; disables taking snapshots of diffs for faster performance.
-  --persist \ # Optional; keeps the container alive after the trial is over or is aborted.
-  --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
-```
-
-### Task selection
-
-There are several ways to select tasks to run:
-
-```bash
-ade run airbnb001  # Run a specific task
-ade run f1006.hard  # Run a specific task with a specific variant
-ade run airbnb001 airbnb002  # Run multiple tasks
-ade run all  # Run all ready tasks
-ade run @coalesce  # Run an experiment set
-ade run f1+ simple+  # Run wildcard patterns
-```
----
-
 ## How it works, in detail
 
 We skimmed over lots of details in the section above. This next section explains the painful tedium of those details.
 
-### How dbt projects work
+### How trials are evaluated
 
-**ADE-bench currently supports `dbt` and `dbt-fusion`[^2] projects.** When creating a dbt project, include the `profile.yml` and `dbt_project.yml` file in the root directory of the project. In `profile.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
+After the agent runs, tasks are graded via dbt tests. You can add whatever manual tests you want to this directory. Additionally, ADE-bench will automatically create tests for you based on solution seeds in your task.
 
-```yaml
-foo-duckdb:
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: "./foo.duckdb"
-      schema: main
+More specifically, when the agent completes its work, several things happen:
 
-foo-snowflake:
-  target: dev
-  outputs:
-    dev:
-      type: snowflake
-      ## Added by when task is created
-      account: <account>
-      user: <user>
-      password: <password>
-      role: <role>
-      database: <database>
-      schema: <schema>
-      warehouse: <warehouse>
-```
+1. If there are solution_seeds defined in the `task.yaml` file, the `\seeds` directory is copied into the sandbox. ADE-bench then runs `dbt seed` to create these tables in the database environment.
+2. The existing test directory in the sandbox is replaced with the tests in the `\tests` directory of the task folder. If a task has no solution seeds, then it will only have manual tests; if a task has solution seeds, ADE-bench will automatically generate two tests (`AUTO_{table_name}_equality.sql` and `AUTO_{table_name}_existence.sql`) and copy those. **Note:** ADE-bench automatically removes and regenerates all `AUTO_` tests prior to evaluating each trial, so if you update these files directly, your changes will probably get wiped away.
+3. The tests in that directory are run and the results are recorded. If all of them pass, the task passes. If any fail, the task fails.
 
 ### How databases work
 
@@ -212,36 +295,25 @@ ADE-bench currently supports these database types:
 
 #### DuckDB
 
-DuckDB databases should be stored in `shared/databases/duckdb`. When a task is run against a duckdb database, ADE-bench simply copies the `.duckdb` file from the shared directory into the task container.
+DuckDB databases should be stored in `shared/databases/duckdb`. When a task is run against a DuckDB database, ADE-bench simply copies the `.duckdb` file from the shared directory into the task container.
 
 #### Snowflake
 
-Snowflake is more complicated:
+Snowflake is more complicated.
 
-**First,** add your Snowflake credentials to the `.env` file. **IMPORTANT:** This should be an administrative user that will create test environments within your Snowflake account. This is **NOT** the user the agent will control. Those users are created on demand for each trial. For more on what permissions this user needs, see the Installation section below.
-
-```
-SNOWFLAKE_ACCOUNT=[foo1234.us-east-1.snowflakecomputing.com / only the "foo1234" is necessary]
-SNOWFLAKE_USER=[the user]
-SNOWFLAKE_ROLE=[role name (see "What Snowflake role should I use?" below)]
-SNOWFLAKE_PASSWORD=[the user's password]
-SNOWFLAKE_WAREHOUSE=[the warehouse you want this user and all ade-bench agents to use]
-```
-
-_Snowflake is deprecating password-based authentication, which makes this very annoying. For now, you can get around this by making this user `LEGACY_SERVICE` user, though that will eventually go away. A problem for our future selves, who might be able to solve it with the help of these [dbt](https://docs.getdbt.com/docs/cloud/connect-data-platform/connect-snowflake) and [Snowflake](https://docs.snowflake.com/en/user-guide/security-mfa-rollout#deprecation-timeline) docs._
-
-**Second,** add data to your Snowflake database. If a task is configured to run against a Snowflake database, the name of that database should match the name of a database (i.e., [a collection of schemas](https://docs.snowflake.com/en/sql-reference/ddl-database)) in your Snowflake account. To migrate DuckDB databases to Snowflake, use the migration script (see "Migrating DuckDB databases into Snowflake" below).
-
-**Third,** when ADE-bench runs a task, three DDL scripts (found in `/ade_bench/setup/snowflake_setup.py`) are executed via the admin user above:
+When ADE-bench runs a task, three DDL scripts (found in `/ade_bench/setup/snowflake_setup.py`) are executed by the admin user defined in `.env` (see [Snowflake setup](#snowflake-setup)):
 
 1. Clone the original database, with the name `TEMP_ADE_[name_of_task]_DATABASE`. (If that database already exists, it is first dropped, so this will reset any prior trials of that task.)
 2. Create a new Snowflake user and role for the trial. The user is `TEMP_ADE_[name_of_task]_USER`; the role is `TEMP_ADE_[name_of_task]_ROLE`. If these already exist, they are also dropped.
 3. Grant the appropriate permissions to the user and role. Snowflake is very particular about all of this; if you want to see the specifics, go to the `.py` file above.
-4. The Snowflake credentials for this new user are added to `profiles.yml` in the dbt project. (Technically, this happens when the dbt project is set up and not after the Snowflake environment is set up, but, same same.)
 
-**Fourth,** the trial is then conducted using the user created in the step above. Once the trial is complete, the users, roles, and databases all persist in the Snowflake account. If you want to clean these up, you can run this query, which will return a list of drop statements you can run all at once in the Snowflake UI:
+The Snowflake credentials for this new user are added to `profiles.yml` in the dbt project. (Technically, this happens when the dbt project is set up and not after the Snowflake environment is set up, but, same same.)
 
-```sql
+The trial is then conducted using the user created in the step above. Once the trial is complete, the users, roles, and databases all persist in the Snowflake account. If you want to clean these up, you can run this query, which will generate a list of drop statements you can run all at once in the Snowflake UI:
+
+<details><summary>Generate drop statements</summary>
+
+<pre>
 select
   'user' as object_type,
   'drop user if exists "' || name || '";' as drop_statement
@@ -268,92 +340,8 @@ where deleted is null
   and database_name ilike 'TEMP_ADE_%'
 
 order by object_type, drop_statement;
-```
-### Agents
-
-ADE-bench currently supports the following agents:
-
-- Claude Code - `--agent claude`
-- OpenAI Codex - `--agent codex`
-- Gemini CLI - `--agent gemini`
-- Macro - `--agent macro`
-
-The following commands are run to call each agent:
-
-```
-# CLAUDE
-claude --output-format json -p {task_prompt} \
-  --allowedTools Bash Edit Write NotebookEdit WebFetch
-
-# CODEX
-printenv OPENAI_API_KEY | codex login --with-api-key && \
-codex --ask-for-approval never exec --sandbox workspace-write --skip-git-repo-check {task_prompt}
-
-# GEMINI
-gemini --output-format json --yolo --prompt {task_prompt} \
-  --allowed-tools Bash Edit Write NotebookEdit WebFetch
-```
-
-Configuration files for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
-
-### MCP
-
-If run with the flag `--use-mcp`, ADE-bench will create a dbt MCP server that the agent is allowed to use. The following databases and agents are supported:
-
-- Databases: `snowflake`
-- Agents: `claude`, `codex`, `gemini`
-
-Because the server runs locally, it only has access to the CLI tools. The others are disabled, because they require access to dbt Cloud account:
-
-```bash
-DISABLE_DBT_CLI=false
-DISABLE_SEMANTIC_LAYER=true
-DISABLE_DISCOVERY=true
-DISABLE_ADMIN_API=true
-DISABLE_SQL=true
-DISABLE_DBT_CODEGEN=true
-```
-
-### How trials are evaluated
-
-After the agent runs, tasks are graded via dbt tests. You can add whatever manual tests you want to this directory. Additionally, you include solution seeds in your task, ADE-bench will automatically create tests for you.
-
-More specifically, when the agent completes its work, several things happen:
-
-1. If there are solution_seeds defined in the `task.yaml` file, the `\seeds` directory is copied into the sandbox. ADE-bench then runs `dbt seed` to create these tables in the database environment.
-2. The existing test directory in the sandbox is replaced with the tests in the `\tests` directory of the task folder. If a task has no solution seeds, then it will only have manual tests; if a task has solution seeds, ADE-bench will automatically generate two tests (by default, `AUTO_{table_name}_equality.sql` and `AUTO_{table_name}_existence.sql`) and copy those. **Note:** ADE-bench automatically removes and regenerates all `AUTO_` tests prior to evaluating each trial, so if you update these files directly, your changes will probably get wiped away.
-3. The tests in that directory are run and the results are recorded. If all of them pass, the task passes. If any fail, the task fails.
-
-**Project and DB specific tests:** Tests can be designated for specific environments using comment headers:
-```sql
--- db: duckdb          # Only runs for DuckDB
--- db: snowflake duckdb # Runs for both Snowflake and DuckDB
--- project-type: dbt   # Only runs for dbt projects
-```
-Tests without environment specification run on all environments.
-
-#### Approximate equality tests
-
-Here's a thing: Sometimes databases give slightly different results. (For reasons, `select round(23/40,2)` is 58 in Snowflake, and 57 in DuckDB. Computers, man.) Or, the agent could write a query that returns a number rounded to a different number of decimals, and you want to be tolerant to that. Though there currently isn't a way to automatically create a test like this, `airbnb007` includes examples of `_with_tolerance` tests. This test will:
-
-- Compare the number of rows, expected an exact match
-- Compare the min and max values of date columns, expecting an exact match
-- Compare the sum and averages of numeric columns, expecting the test table to be within a specified percentage band.
-
-The "configuration" of that test is defined in a block at the top of the test:
-```sql
--- Add the table name and the solution CSV
-{% set test_and_solution_tables = ['daily_agg_nps_reviews','solution__daily_agg_nps_reviews'] %}
-
--- List date columns
-{% set date_cols = ['review_date'] %}
--- List numeric columns and the tolerances. These are percentages, so sum_tolerance of 0.01 means
--- that the sum of each numeric column needs to be between 98% and 102% of the sums of the
--- corresponding column in the solution table.
-{% set numeric_cols = ['nps_daily', 'reviews_daily', 'nps_28d', 'reviews_28d'] %}
-{% set sum_tolerance = 0.02 %}
-{% set avg_tolerance = 0.02 %}
-```
+</pre>
+</details>
 
 ### Viewing results
 
@@ -369,201 +357,49 @@ This will open a local HTML page that includes much more detail, including detai
 - **Panes**: Terminal output from the setup, agent, and test phases of the trial.
 - **Diffs**: File changes during task setup and changes made by the agent. If ADE-bench is run with the `--no-diffs` flag, these will not be available.
 
+### Configuring agents
+
+ADE-bench currently supports the following agents:
+
+- Claude Code - `--agent claude`
+- OpenAI Codex - `--agent codex`
+- Gemini CLI - `--agent gemini`
+- Macro - `--agent macro`
+
+The following commands are run to call each agent:
+
+```bash
+# CLAUDE
+claude --output-format json -p {task_prompt} \
+  --allowedTools Bash Edit Write NotebookEdit WebFetch
+
+# CODEX
+printenv OPENAI_API_KEY | codex login --with-api-key && \
+codex --ask-for-approval never exec --sandbox workspace-write --skip-git-repo-check {task_prompt}
+
+# GEMINI
+gemini --output-format json --yolo --prompt {task_prompt} \
+  --allowed-tools Bash Edit Write NotebookEdit WebFetch
+```
+
+Configuration files for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
+
+### Enabling the MCP server
+
+If run with the flag `--use-mcp`, ADE-bench will create a dbt MCP server that the agent is allowed to use. The following databases and agents are supported:
+
+- Databases: `snowflake` (duckdb doesn't support multiple simultaneous connections)
+- Agents: `claude`, `codex`, `gemini`
+
+Because the server runs locally, it only has access to the [CLI tools](https://github.com/dbt-labs/dbt-mcp#tools). The others are disabled, because they require access to the dbt platform.
+
 ### The Sage agent
 
 The sage agent is not really an agent—or, it's a very dumb agent. It's an agent that runs `$ bash solution.sh` and then shuts itself down.
 
 In other words, the sage agent is the answer key to the task. When ADE-bench is run where `--agent sage` all the tests should pass. If they don't, something is wrong with the tasks themselves. So, it's important for tasks to have a solution script to make sure that the task is correctly configured.
 
-**Note**: The `solution.sh` script might be different for different database and project variants. More on how to handle this is discussed in "Sharing projects across databases and project types" below.
-
-#### Solution seeds
-
-Many tasks have `solution_seeds` defined in their `task.yaml` file. These are tables that are used to evaluate the agent's work.
-
-**You can generate these seeds by running ADE-bench with the `--seed flag`.** When you do this, the harness runs as it normally would,[^3] except, once trial is over, it exports two things into the task directory:
-
-- **CSVs:** Each table defined in as solution seed will get exported into the task's `\seeds` directory as `solution__[table_name].csv`.
-- **A seed config:** To ensure that the `dbt seed` command runs during the evaluation, ADE-bench will also create a schema file called `_no-op.txt`. This is utility file that is used when tables are uploaded. (Note that some shenanigans are necessary here to support cross-database compatibility. For example, DuckDB has a `hugeint` data type, whereas Snowflake does not. Why does the small database need huge integers?)
-
-**ONLY RUN `--seed` WITH THE SAGE AGENT ON DUCKDB** Exporting seeds is not currently supported with Snowflake (TODO?), and because solution seeds are used as answer keys, they should never be created based on what an agent does.
-
-As described in `task.yaml` description above, there are several additional configuration options when setting up solution seeds:
-
-- You can exclude columns from being part of the table equality comparison.
-- You can select specific columns to only include.
-- You can disable the automatic generation of either the equality or existence test.
-- You can specify alternate solution seeds for tasks that have multiple valid answers.
-
-#### Alternate solution seeds
-
-Some tasks may have multiple valid answers. For example, a query might be written in different ways that produce equally correct results. To handle this, you can specify alternate solution seeds:
-
-```yaml
-solution_seeds:
-  - table_name: the_best_answer
-    alternates:
-    - another_good_answer
-    - not_as_good_but_still_counts
-```
-
-When alternates are specified, ADE-bench will compare the table defined by `table_name` to solution seeds of that table _and_ of any alternatives. So, in the example above, `the_best_answer` will get compared to `solution__the_best_answer`, `solution__another_good_answer`, and `solution__not_as_good_but_still_counts`. If `table_name` matches any of those three, the test will pass.
-
-1. **During --seed mode**: All tables (the main one and alternates) will be extracted as CSV files with the `solution__` prefix. For example, running the task above will extract `solution__table_name.csv` from `table_name`, `solution__another_good_answer.csv` from `another_good_answer`, and so on.
-2. **During test runs**: All seeds will be loaded into the database, and the equality test will pass if the agent's answer matches ANY of the solution seeds. In the example above, the agent would be expected to create a table called `table_name` (and just that table), and for that table to match one of the three seeds.
-
-### Sharing projects across databases and project types
-
-Tasks can be configured with different environment variants, so that they can be run against multiple databases or project types. Though this is useful for testing how agents perform against different types of databases, it's also very helpful for development. Because DuckDB is very easy to work with locally, it can often be easier to develop tasks against DuckDB; moreover, if outside contributors want to contribute tasks, they might want to contribute the task as a DuckDB database, since it can be contributed as a file. And in these cases, it can be very helpful to have migration paths.
-
-There are three features to help migrate a shared dbt project between databases or dbt versions:
-
-1. Configure the variants in the task. For example, in a task called `foo001`, you might have two variants: One for DuckDB, and one for Snowflake:
-
-```yaml
-variants:
-- db_type: duckdb
-  db_name: foo
-  project_type: dbt
-  project_name: foo
-
-- db_type: snowflake
-  db_name: foo
-  project_type: dbt
-  project_name: foo
-  migration_directory: foo__duckdb_to_snowflake
-```
-
-2. Create a migration script. In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project *and the contents of the folder in `shared\migrations\foo__duckdb_to_snowflake`. It will then run the `migration.sh` script (prior to running the task `setup.sh` script). Note that this migration script has access to any other files in that migration directory, so if you want to fully update some files in the dbt project, you can include the new files in the migration directory.
-
-3. When the `solution.sh` script runs, ADE-bench passes the corresponding database and project type into the script as an argument. So if different updates are needed to solve the trial depending on the database, these can be configured following patterns like the example below:
-
-```bash
-## This updates the schema config in the solution files, and then moves the files to the appropriate place
-
-# Assign the solutions directory
-SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
-
-# Assign the 'replace' value based on the database type
-if [[ "$*" == *"--db-type=duckdb"* ]]; then
-    replace='schema="main"'
-else
-    replace='schema="public"'
-fi
-
-# Loop over the files, update the value in the file, and move them
-# from the solutions directory in the project directory
-files=(
-    "foo.sql"
-    "bar.sql"
-)
-
-for file in "${files[@]}"; do
-    find='schema="main"'
-    sed -i "s/${find}/${replace}/g" $SOLUTIONS_DIR/$file
-    cp $SOLUTIONS_DIR/$file models/$file
-done
-```
-### Running arbitrary SQL queries
-
-ADE-bench provides a utility script (`run_sql.sh`) that allows you to run arbitrary SQL queries against the database from within `setup.sh` or `solution.sh` scripts. This can be useful when you need to modify the database schema or data directly.
-
-**Usage:**
-
-```bash
-# In setup.sh or solution.sh, you can use run_sql.sh like this:
-/scripts/run_sql.sh "$@" << SQL
--- Your SQL queries here
-CREATE OR REPLACE TABLE foo_temp AS
-  SELECT * REPLACE revenue * 10 as revenue
-  FROM foo;
-
-DROP TABLE foo;
-ALTER TABLE foo_temp RENAME TO foo;
-SQL
-```
-
-The script automatically:
-- Extracts `--db-type` and `--project-type` from the arguments passed to your script
-- Reads database connection details from `/app/profiles.yml`
-- Detects the correct profile name based on the project and database type
-- Executes the SQL against the appropriate database (DuckDB or Snowflake)
-- Handles multiple SQL statements separated by semicolons
-
-**Note:** In some instances, the text of the query may need to be modified depending on the database; you can use the if statements just above (i.e., `if [[ "$*" == *"--db-type=duckdb"* ]]...`) to modify the query based on the database type.
-
-#### Migrating DuckDB databases into Snowflake
-
-ADE-bench includes a simple command for uploading DuckDB databases to Snowflake. This script will migrate all of the DuckDB files in `/shared/databases/duckdb` into their own databases (matching the name of the DuckDB database) in the Snowflake account in your `.env` file.
-
-```bash
-$ ade migrate duckdb-to-snowflake --use-database-export
-```
-The  `--use-database-export` flag is not necessary, but is recommended for better performance. You can also migrate specific databases using `--include` and `--exclude` flags:
-
-```python
-# Only foo.duckdb and bar.duckdb
-$ ade migrate duckdb-to-snowflake --include foo bar
-
-# All but bar.duckdb
-$ ade migrate duckdb-to-snowflake --exclude bar
-```
-
----
-
-## Installation
-
-First, install the CLI by running the following command in your root directory:
-
-```shell
-pip install -e .
-
-# To confirm it is installed, run:
-ade --help
-```
-
-Next, you will need [Docker Compose](https://docs.docker.com/compose/install/) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv) to run the containers. Install them following the installation instructions in the links above, and confirm they are installed by running these commands:
-
-```shell
-uv --version
-docker compose version
-``` ```
-
-Then, download the DuckDB databases from [here](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE), and put them in the `/shared/databases/duckdb` directory. You can also install them with the following command:
-
-```shell
-uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
-```
-
-Finally, test a basic exceuction:
-
-```bash
-ade run simple001 --db duckdb --project-type dbt --agent sage
-```
-
-### Snowflake setup
-
-To run ADE-bench on a Snowflake database, the administrative role needs certain permissions. These are those permissions (I think; Snowflake permissions are special circle of hell):
-
-```
-GRANT CREATE DATABASE ON ACCOUNT TO ROLE <ade_bench_admin_role>;
-GRANT MANAGE GRANTS ON ACCOUNT TO ROLE <ade_bench_admin_role>;
-
-GRANT CREATE USER ON ACCOUNT TO ROLE <ade_bench_admin_role>;
-GRANT CREATE ROLE ON ACCOUNT TO ROLE <ade_bench_admin_role>;
--- Alternatively:
-GRANT ROLE useradmin TO ROLE <ade_bench_admin_role>;
-```
-
-### Anthropic Claude setup
-
-1. Login at https://platform.claude.com
-1. Go to https://platform.claude.com/settings/keys
-1. Create API key
-1. Create in Workspace: Default
-1. Name your key: whatever you want :)
-1. Save the key in a secure location
-1. Assign the key to `ANTHROPIC_API_KEY` within the `.env` file
+**Note**: The `solution.sh` script might be different for different database and project variants. More on how to handle this is discussed in [the contributing guide](/CONTRIBUTING.md#sharing-projects-across-databases-and-project-types).
 
 ---
 
@@ -571,26 +407,20 @@ GRANT ROLE useradmin TO ROLE <ade_bench_admin_role>;
 
 Configuration is all managed through the `.env` file. Create this file (if it doesn't already exist) by making a copy of `.env.example`. It's fairly self-explanatory, but for completeness, why not:
 
-```yaml
+```env
 # API Keys for LLM providers
 ANTHROPIC_API_KEY=[API key for Anthropic, if you want to run Claude Code agents]
 OPENAI_API_KEY=[API key for OpenAI, if you want to run Codex agents]
 MACRO_API_KEY=[API key for Macro, if you want to run Macro (Macro! https://getmacro.com/) agents]
 GEMINI_API_KEY=[API key for Gemini, if you want to run Gemini CLI]
-# S3 Configuration (optional)
-# This isn't used right now, so whatever, ignore it.
-S3_BUCKET_NAME=
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=
 
 # Snowflake configuration
-# This is the admin user as described in the Snowflake setup above.
-SNOWFLAKE_ACCOUNT=
-SNOWFLAKE_USER=
-SNOWFLAKE_ROLE=
-SNOWFLAKE_PASSWORD=
-SNOWFLAKE_WAREHOUSE=
+# This is the admin user as described in the Snowflake setup below.
+SNOWFLAKE_ACCOUNT=[ORGANIZATION_NAME-ACCOUNT_NAME]
+SNOWFLAKE_USER=ADE_BENCH_ADMIN_USER
+SNOWFLAKE_ROLE=ADE_BENCH_ADMIN_ROLE
+SNOWFLAKE_PASSWORD=[the user's password]
+SNOWFLAKE_WAREHOUSE=[the warehouse you want this user and all ade-bench agents to use]
 
 # Timeout Settings (in seconds)
 # These are default timeouts for each stage of the harness.
@@ -599,12 +429,7 @@ DEFAULT_AGENT_TIMEOUT_SEC=300 # How long the agent can run
 DEFAULT_TEST_TIMEOUT_SEC=180 # How long test scripts can run
 CLEANUP_TIMEOUT_SEC=60 # How long cleanup scripts can run
 
-# Database Configuration (optional, for results storage)
-# I don't know what this is? It's old.
-DATABASE_URL=postgresql://user:password@localhost:5432/ade_bench
-
 # Docker Configuration
-# WE LOVE LINUX HERE AT ADE BENCH DOT COME
 DOCKER_DEFAULT_PLATFORM=linux/amd64
 
 # Logging
@@ -613,78 +438,126 @@ USE_DYNAMIC_LOGGING=TRUE # Set to FALSE if you want normal logs and not a fancy 
 FILE_DIFF_EXCLUDE_PATHS=/tmp,/logs,/var,/target,/build,/node_modules
 LOG_LEVEL=INFO
 ```
----
 
-## Development
+## Snowflake setup
 
-To develop a new task, there are a few things that can be useful:
+### 1. Create a trial Snowflake account
 
-### Use interactive mode
+> [!CAUTION]
+> Do not connect ADE-bench to your production Snowflake account when using shared datasets!
+>
+> It assumes it has free rein to create and drop objects in the database, and runs a lot of dangerous DDL statements in the process.
 
-You can run a task, and then launch an interactive shell into a task environment. You can also halt the task after different stages (e.g., after the setup scripts run but before the agent runs), and interact with the environment at that stage. This uses the `ade interact` command, and is documented [here](CLI.md).
+[Sign up for a trial Snowflake account](https://signup.snowflake.com/).
 
-### Creating a local sandbox
+### 2. Create an administrative user and role
 
-You can create a local sandbox in a `/dev/sandbox` directory, which you can `cd` into and play around directly. This is especially helpful if you're developing on a DuckDB trial. To create that sandbox, run:
+ADE-bench will use this user to create an empty testing environment (database, user, role) at the beginning of each trial.
+
+Run the following commands:
+
+```sql
+-- Put a secure password here, inside 'single quotes'. 
+-- Make sure you keep the semicolon after the quotes.
+SET PASSWORD_VARIABLE= ;
+
+-- Create role
+CREATE OR REPLACE ROLE ADE_BENCH_ADMIN_ROLE;
+
+-- Configure role
+GRANT CREATE DATABASE ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT MANAGE GRANTS ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT CREATE USER ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT CREATE ROLE ON ACCOUNT TO ROLE ADE_BENCH_ADMIN_ROLE;
+GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE ADE_BENCH_ADMIN_ROLE;
+
+-- Create admin user
+CREATE OR REPLACE USER ADE_BENCH_ADMIN_USER
+    PASSWORD=$PASSWORD_VARIABLE
+    DEFAULT_ROLE=ADE_BENCH_ADMIN_ROLE 
+    MUST_CHANGE_PASSWORD=FALSE 
+    TYPE=LEGACY_SERVICE 
+    DEFAULT_WAREHOUSE=COMPUTE_WH;
+
+-- Configure admin user
+GRANT ROLE ADE_BENCH_ADMIN_ROLE TO USER ADE_BENCH_ADMIN_USER;
+
+
+SELECT 'SNOWFLAKE_ACCOUNT=' || CURRENT_ORGANIZATION_NAME() || '-' || CURRENT_ACCOUNT_NAME() as ".env values"
+UNION ALL 
+SELECT 'SNOWFLAKE_USER=ADE_BENCH_ADMIN_USER'
+UNION ALL 
+SELECT 'SNOWFLAKE_PASSWORD=' || $PASSWORD_VARIABLE
+UNION ALL 
+SELECT 'SNOWFLAKE_WAREHOUSE=' || CURRENT_WAREHOUSE()
+UNION ALL 
+SELECT 'SNOWFLAKE_ROLE=ADE_BENCH_ADMIN_ROLE'
+;
 ```
-uv run scripts_python/create_sandbox.py --task [task_to_copy] --db [duckdb] --project-type [dbt]
+
+### 3. Add Snowflake credentials to your `.env` file
+
+This is the same file you created when specifying your API key.
+
+```env
+SNOWFLAKE_ACCOUNT=[ORGANIZATION_NAME-ACCOUNT_NAME]
+SNOWFLAKE_USER=ADE_BENCH_ADMIN_USER
+SNOWFLAKE_ROLE=ADE_BENCH_ADMIN_ROLE
+SNOWFLAKE_PASSWORD=[the user's password]
+SNOWFLAKE_WAREHOUSE=[the warehouse you want this user and all ade-bench agents to use]
 ```
-This will move all of the relevant files into the directory above. Then, if you `cd` into that directory, you can manually execute the various steps of the task:
+
+_Snowflake is deprecating password-based authentication, which makes this very annoying. For now, you can get around this by making this user `LEGACY_SERVICE` user, though that will eventually go away. A problem for our future selves, who might be able to solve it with the help of these [dbt](https://docs.getdbt.com/docs/cloud/connect-data-platform/connect-snowflake) and [Snowflake](https://docs.snowflake.com/en/user-guide/security-mfa-rollout#deprecation-timeline) docs._
+
+### 4. Migrate DuckDB databases to Snowflake
+
+> [!CAUTION]
+> Do not connect ADE-bench to your production Snowflake account when using shared datasets!
+>
+> It assumes it has free rein to create and drop objects in the database, and runs a lot of dangerous DDL statements in the process.
+
+ADE-bench includes a command to migrate all of the DuckDB files in `/shared/databases/duckdb` into their own databases (matching the name of the DuckDB database) in the Snowflake account in your `.env` file.
 
 ```bash
-$ bash setup.sh # Run the setup script
-$ bash migration.sh # Run the migration scripts, if needed
-$ bash solution.sh # Run the solution script
-$ dbt seed # Create the seed file
-$ dbt test --select "test_type:singular" # Run the task tests
-```
-**Note:** This does **NOT** create a user or database in Snowflake like the task setup does. If you want to use this sandbox on Snowflake, you'll need to run the task first, which will create those resources in Snowflake.
-
-### Creating seeds
-
-When you're developing a task and ready to create CSVs for the solution seeds, run the following command:
-```
-ade run [task_to_copy] --db duckdb --project-type [dbt] --agent sage --seed
+ade migrate duckdb-to-snowflake --use-database-export
 ```
 
-The final seed flag will export the CSVs from final project in the task's `/seeds` directory. **Read the warning in "Solution seeds" before doing this.**
+```bash
+# Only foo.duckdb and bar.duckdb
+ade migrate duckdb-to-snowflake --include foo bar
 
-#### Debugging
-
-Stuff goes wrong. It's really finicky sometimes. To debug, it's often useful to use the sandbox, but the most helpful thing is running the trial with the `--persist` flag, which keeps your Docker container alive after the task is complete. Then, you can log into the container—either directly, or via the Docker desktop app[^3], and both look at the files in the container and run commands in a terminal.
-
-Moreover, if you're working with Snowflake, the task will create task databases within your account. You can also query these directly.
-
-Finally, if you want to stop the harness at any point throughout the trial, you can insert a breakpoint function into the harness. To do this, find the point within the script that you want to halt the run (you have to read the code; it's messy; I might make this an easier config at some point). Then, in the code, add:
-
-```python
-from ade_bench.utils.debug_breakpoint import breakpoint
-breakpoint("optional message")
+# All but bar.duckdb
+ade migrate duckdb-to-snowflake --exclude bar
 ```
 
-This will halt the harness at that point. If you run the harness with the `--persist` flag, the container will then be kept alive, as it was when the harness was halted.
+## Anthropic Claude setup
 
+1. Login at <https://platform.claude.com>
+1. Go to <https://platform.claude.com/settings/keys>
+1. Create API key
+1. Create in Workspace: Default
+1. Name your key: whatever you want :)
+1. Save the key in a secure location
+1. Assign the key to `ANTHROPIC_API_KEY` within the `.env` file
+
+---
 
 ## Tips! Tricks! Other things we recommend!
 
-- **Disable diffs to speed things up.** If you trying to run a bunch of tasks, or testing something where you don't care about looking at diffs, use the `--no-diffs` flag. Diffs can be slow, and ADE-bench will run faster if they're turned off.
+- **Disable diffs to speed things up.** If you're trying to run a bunch of tasks, or testing something where you don't care about looking at diffs, use the `--no-diffs` flag. Diffs can be slow, and ADE-bench will run faster if they're turned off.
 - **View all the tasks.** Running `ade view tasks` will print a summary table of all the tasks in ADE-bench. You can also run ``ade view tasks --copy` to copy a more detailed summary of the tasks to your clipboard.
 
 ## Citations
 
 ADE-Bench borrowed heavily from [Terminal-Bench](https://github.com/laude-institute/terminal-bench) and [Spider 2.0](https://github.com/xlang-ai/Spider2/), without which none of this would exist:
 
-- The Terminal-Bench Team. (Apr 2025). *Terminal-Bench: A Benchmark for AI Agents in Terminal Environments.* Available: https://github.com/laude-institute/terminal-bench
-- Fangyu Lei, Jixuan Chen, Yuxiao Ye, Ruisheng Cao, Dongchan Shin, Hongjin Su, Zhaoqing Suo, Hongcheng Gao, Wenjing Hu, Pengcheng Yin, Victor Zhong, Caiming Xiong, Ruoxi Sun, Qian Liu, Sida Wang, & Tao Yu. (2024). *Spider 2.0: Evaluating Language Models on Real-World Enterprise Text-to-SQL Workflows.*  Available: https://arxiv.org/abs/2411.07763
+- The Terminal-Bench Team. (Apr 2025). _Terminal-Bench: A Benchmark for AI Agents in Terminal Environments_. Available: <https://github.com/laude-institute/terminal-bench>
+- Fangyu Lei, Jixuan Chen, Yuxiao Ye, Ruisheng Cao, Dongchan Shin, Hongjin Su, Zhaoqing Suo, Hongcheng Gao, Wenjing Hu, Pengcheng Yin, Victor Zhong, Caiming Xiong, Ruoxi Sun, Qian Liu, Sida Wang, & Tao Yu. (2024). _Spider 2.0: Evaluating Language Models on Real-World Enterprise Text-to-SQL Workflows._  Available: <https://arxiv.org/abs/2411.07763>
 
 ## Contact?
 
-If you want to learn more or get involved, feel free to reach out to me (Benn) at benn.electronicmail@gmail.com. You can also fill out [this form](https://docs.google.com/forms/d/e/1FAIpQLSdADsmhkYXGk90FTHP9vmp6sN1ObZgRYfnbELjq_-UnBXW_0g/viewform), and we'll be about a mailing list, or Slack channel, or whatever is cool now.
+If you want to learn more or get involved, feel free to reach out to me (Benn) at <benn.electronicmail@gmail.com>. You can also fill out [this form](https://docs.google.com/forms/d/e/1FAIpQLSdADsmhkYXGk90FTHP9vmp6sN1ObZgRYfnbELjq_-UnBXW_0g/viewform), and we'll be about a mailing list, or Slack channel, or whatever is cool now.
 
 ---
 
-[^1] ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.
-
-[^2] For a full list of known issues with dbt Fusion support, see https://github.com/thedatamates/ade-bench/issues/12.
-
-[^3] A somewhat annoying thing about this: When you run ADE-bench with the `--seed` flag, it will evaluate each trial with whatever CSVs exist in the `/seeds` directory _before_ the new ones are created, and then, _after the tests have run_, it will export the results into the directory. This means that you may need to run it twice to check that task works: Once to create the seeds, and another time (without the `--seed` flag) to see if it passes.
+[^1]: ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.
