@@ -58,9 +58,18 @@ def format_trial_result(result: TrialResults) -> Dict[str, any]:
         Dictionary with formatted values and raw numeric values
     """
     # Calculate test statistics
+    # expected_test_count does NOT include dbt_compile, so add offset if dbt_compile is present
     if result.parser_results:
-        tests = len(result.parser_results)
+        tests_ran = len(result.parser_results)
         tests_passed = sum(1 for status in result.parser_results.values() if status.value == "passed")
+        # Check if dbt_compile is in results (it's added for dbt projects)
+        has_dbt_compile = "dbt_compile" in result.parser_results
+        compile_offset = 1 if has_dbt_compile else 0
+        # Use expected count (plus dbt_compile offset) if available, otherwise use actual count
+        if result.expected_test_count is not None:
+            tests = result.expected_test_count + compile_offset
+        else:
+            tests = tests_ran
         passed_percentage = (tests_passed / tests * 100) if tests > 0 else 0
     else:
         tests = 0
