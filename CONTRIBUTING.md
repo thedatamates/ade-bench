@@ -2,58 +2,6 @@
 
 Contributions to the ADE-bench project are welcome.
 
-## Contributing new datasets
-
-When creating a dbt project, include the `profiles.yml` and `dbt_project.yml` file in the root directory of the project. In `profiles.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]`. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
-
-```yaml
-foo-duckdb:
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: "./foo.duckdb"
-      schema: main
-
-foo-snowflake:
-  target: dev
-  outputs:
-    dev:
-      type: snowflake
-      ## Added by ADE-bench when task is created
-      account: <account>
-      user: <user>
-      password: <password>
-      role: <role>
-      database: <database>
-      schema: <schema>
-      warehouse: <warehouse>
-```
-
-In some situations, the dbt Fusion engine's SQL Comprehension capabilities can make it impossible to build a misconfigured project. Disable static analysis by setting the environment variable `DBT_STATIC_ANALYSIS=off` in your invocation.
-
-For example, this setup script alters a table to have a different data type. If static analysis is not turned off, the dbt run step will prematurely fail, preventing the setup script from completing successfully.
-
-```bash
-# Execute SQL using the run_sql utility.
-/scripts/run_sql.sh "$@" << SQL
--- Update the due_at field to be an integer.
-create or replace table main.task_data_temp as
-  select
-    * replace (due_at::integer as due_at)
-  from main.task_data;
--- Rename the table to the original name.
-drop table main.task_data;
-alter table main.task_data_temp rename to task_data;
-SQL
-
-## Run the dbt project.
-dbt deps
-DBT_STATIC_ANALYSIS=off dbt run
-```
-
-Using the environment variable instead of the `--static-analysis off` flag ensures graceful degradation for dbt Core.
-
 ## Contributing new tasks or tests
 
 ### Environment specification
@@ -216,6 +164,62 @@ The script automatically:
 - Handles multiple SQL statements separated by semicolons
 
 **Note:** In some instances, the text of the query may need to be modified depending on the database; you can use the if statements just above (i.e., `if [[ "$*" == *"--db-type=duckdb"* ]]...`) to modify the query based on the database type.
+
+## Contributing new dbt projects
+
+### Configuring `profiles.yml`
+
+When creating a dbt project, include the `profiles.yml` and `dbt_project.yml` file in the root directory of the project. In `profiles.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]`. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
+
+```yaml
+foo-duckdb:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "./foo.duckdb"
+      schema: main
+
+foo-snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      ## Added by ADE-bench when task is created
+      account: <account>
+      user: <user>
+      password: <password>
+      role: <role>
+      database: <database>
+      schema: <schema>
+      warehouse: <warehouse>
+```
+
+### Disabling static analysis
+
+In some situations, the dbt Fusion engine's SQL Comprehension capabilities can make it impossible to build a misconfigured project. Disable static analysis by setting the environment variable `DBT_STATIC_ANALYSIS=off` in your invocation.
+
+For example, this setup script alters a table to have a different data type. If static analysis is not turned off, the dbt run step will prematurely fail, preventing the setup script from completing successfully.
+
+```bash
+# Execute SQL using the run_sql utility.
+/scripts/run_sql.sh "$@" << SQL
+-- Update the due_at field to be an integer.
+create or replace table main.task_data_temp as
+  select
+    * replace (due_at::integer as due_at)
+  from main.task_data;
+-- Rename the table to the original name.
+drop table main.task_data;
+alter table main.task_data_temp rename to task_data;
+SQL
+
+## Run the dbt project.
+dbt deps
+DBT_STATIC_ANALYSIS=off dbt run
+```
+
+Using the environment variable instead of the `--static-analysis off` flag ensures graceful degradation for dbt Core.
 
 ---
 
