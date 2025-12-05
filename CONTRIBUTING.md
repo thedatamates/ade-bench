@@ -4,7 +4,7 @@ Contributions to the ADE-bench project are welcome.
 
 ## Contributing new datasets
 
-When creating a dbt project, include the `profiles.yml` and `dbt_project.yml` file in the root directory of the project. In `profiles.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
+When creating a dbt project, include the `profiles.yml` and `dbt_project.yml` file in the root directory of the project. In `profiles.yml`, include a profile for all of the supported databases, where the name is `[project_name]-[database_type]`. Do **NOT** fill in the Snowflake credentials, because these will get overwritten with the trial user:
 
 ```yaml
 foo-duckdb:
