@@ -68,14 +68,14 @@ ade run simple001 --db duckdb --project-type dbt --agent sage
 <details><summary>You should see output like this:</summary>
 
 <pre>
-(ade-bench) joel@Joel-Labes ade-bench % ade run simple001 --db duckdb --project-type dbt --agent sage
+$ ade run simple001 --db duckdb --project-type dbt --agent sage
 14:58:07 | system                           | START        | STARTING HARNESS RUN
 14:58:07 | system                           | START        | Run ID: 2025-12-05__14-58-07
 14:58:07 | system                           | START        | Running with duckdb + dbt. Found 1 tasks of 1 requested tasks.
 ┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Time     ┃ Task                             ┃ Stage        ┃ Message                                                                                              ┃
 ┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 14:58:32 │ simple001                        │ ✓ ✓ ✓  DONE  │ PASS - dbt test results - Pass: 1, Fail: 0, Total: 1                                                 │
+│ 14:58:32 │ simple001                        │ ✓ ✓ ✓  DONE  │ PASS - dbt test results - Pass: 2, Fail: 0, Total: 2                                                 │
 │ ──────── │ ──────────────────────────────── │ ──────────── │ ──────────────────────────────────────────────────────────────────────────────────────────────────── │
 │ 14:58:32 │ SUMMARY                          │              │ Run 1 of 1 tasks, 1 successful (100.0%)                                                              │
 └──────────┴──────────────────────────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -301,7 +301,7 @@ DuckDB databases should be stored in `shared/databases/duckdb`. When a task is r
 
 Snowflake is more complicated.
 
-When ADE-bench runs a task, three DDL scripts (found in `/ade_bench/setup/snowflake_setup.py`) are executed via the admin user above:
+When ADE-bench runs a task, three DDL scripts (found in `/ade_bench/setup/snowflake_setup.py`) are executed by the admin user defined in `.env` (see [Snowflake setup](#snowflake-setup)):
 
 1. Clone the original database, with the name `TEMP_ADE_[name_of_task]_DATABASE`. (If that database already exists, it is first dropped, so this will reset any prior trials of that task.)
 2. Create a new Snowflake user and role for the trial. The user is `TEMP_ADE_[name_of_task]_USER`; the role is `TEMP_ADE_[name_of_task]_ROLE`. If these already exist, they are also dropped.
