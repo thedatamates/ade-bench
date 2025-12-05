@@ -55,7 +55,7 @@ A somewhat annoying thing about this: When you run ADE-bench with the `--seed` f
 
 ### Approximate equality tests
 
-Here's a thing: Sometimes databases give slightly different results. (For reasons, `select round(23/40,2)` is 58 in Snowflake, and 57 in DuckDB. Computers, man.) Or, the agent could write a query that returns a number rounded to a different number of decimals, and you want to be tolerant to that. Though there currently isn't a way to automatically create a test like this, `airbnb007` includes examples of `_with_tolerance` tests. This test will:
+Here's a thing: Sometimes databases give slightly different results. (For reasons, `select round(23/40,2)` is 0.58 in Snowflake, and 0.57 in DuckDB. Computers, man.) Or, the agent could write a query that returns a number rounded to a different number of decimals, and you want to be tolerant to that. Though there currently isn't a way to automatically create a test like this, `airbnb007` includes examples of `_with_tolerance` tests. This test will:
 
 - Compare the number of rows, expected an exact match
 - Compare the min and max values of date columns, expecting an exact match
@@ -103,7 +103,7 @@ variants:
 
 ### Migration scripts
 
-In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project _and the contents of `shared\migrations\foo__duckdb_to_snowflake`_. It will then run the `migration.sh` script prior to running the task `setup.sh` script.
+In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project _and the contents of `shared/migrations/foo__duckdb_to_snowflake`_. It will then run the `migration.sh` script prior to running the task `setup.sh` script.
 
 Note that this migration script has access to any other files in that migration directory, so if you want to fully update some files in the dbt project, you can include the new files in the migration directory.
 

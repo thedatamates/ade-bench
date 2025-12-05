@@ -407,7 +407,7 @@ In other words, the sage agent is the answer key to the task. When ADE-bench is 
 
 Configuration is all managed through the `.env` file. Create this file (if it doesn't already exist) by making a copy of `.env.example`. It's fairly self-explanatory, but for completeness, why not:
 
-```yaml
+```env
 # API Keys for LLM providers
 ANTHROPIC_API_KEY=[API key for Anthropic, if you want to run Claude Code agents]
 OPENAI_API_KEY=[API key for OpenAI, if you want to run Codex agents]
@@ -544,7 +544,7 @@ ade migrate duckdb-to-snowflake --exclude bar
 
 ## Tips! Tricks! Other things we recommend!
 
-- **Disable diffs to speed things up.** If you trying to run a bunch of tasks, or testing something where you don't care about looking at diffs, use the `--no-diffs` flag. Diffs can be slow, and ADE-bench will run faster if they're turned off.
+- **Disable diffs to speed things up.** If you're trying to run a bunch of tasks, or testing something where you don't care about looking at diffs, use the `--no-diffs` flag. Diffs can be slow, and ADE-bench will run faster if they're turned off.
 - **View all the tasks.** Running `ade view tasks` will print a summary table of all the tasks in ADE-bench. You can also run ``ade view tasks --copy` to copy a more detailed summary of the tasks to your clipboard.
 
 ## Citations
@@ -560,4 +560,4 @@ If you want to learn more or get involved, feel free to reach out to me (Benn) a
 
 ---
 
-[^1] ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.
+[^1]: ADE-bench is short for "Analytics and data engineering benchmark," and is pronounced ~lemon~ade-bench and not AYE-DEE-EE-bench, because that is how [we should pronounce things](https://en.wikipedia.org/wiki/SQL) around here.
