@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions to the ADE-bench project are welcome.
+Contributions to the ADE-bench project are welcome. The easiest place to start is to add additional tests on top of existing datasets.
 
 ## Contributing new tasks or tests
 
@@ -103,7 +103,9 @@ variants:
 
 ### Migration scripts
 
-In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project *and the contents of the folder in `shared\migrations\foo__duckdb_to_snowflake`. It will then run the `migration.sh` script (prior to running the task `setup.sh` script). Note that this migration script has access to any other files in that migration directory, so if you want to fully update some files in the dbt project, you can include the new files in the migration directory.
+In the example above, when the task is run against DuckDB, ADE-bench will copy the shared dbt project `foo` in the trial environment. When the task is run against Snowflake, it will copy the same project _and the contents of `shared\migrations\foo__duckdb_to_snowflake`_. It will then run the `migration.sh` script prior to running the task `setup.sh` script.
+
+Note that this migration script has access to any other files in that migration directory, so if you want to fully update some files in the dbt project, you can include the new files in the migration directory.
 
 ### Types as arguments to `solution.sh`
 
