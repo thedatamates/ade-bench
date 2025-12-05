@@ -744,6 +744,12 @@ class Harness:
                 results.num_turns = agent_result.num_turns
                 results.runtime_ms = agent_result.runtime_ms
                 results.cost_usd = agent_result.cost_usd
+                # Use parsed model name if harness model_name was not explicitly specified
+                if not results.model_name and agent_result.model_name:
+                    results.model_name = agent_result.model_name
+                    self._logger.debug(
+                        f"Using model name from agent output: {agent_result.model_name}"
+                    )
 
             # Always kill the agent session to ensure cleanup, regardless of success/failure
             try:

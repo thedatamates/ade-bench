@@ -28,7 +28,8 @@ class MacroParser(BaseParser):
             "cache_tokens": 0,
             "cost_usd": 0.0,
             "num_turns": 0,
-            "success": False
+            "success": False,
+            "model_name": "default"
         }
         try:
             # Get lines and remove empty ones
@@ -86,6 +87,9 @@ class MacroParser(BaseParser):
         # Determine success
         success = data.get("is_error", True) == False
 
+        # Extract model name if available
+        model_name = data.get("model")
+
         return {
             "runtime_ms": runtime_ms,
             "input_tokens": input_tokens,
@@ -93,5 +97,6 @@ class MacroParser(BaseParser):
             "cache_tokens": cache_tokens,
             "cost_usd": cost_usd,
             "num_turns": num_turns,
-            "success": success
+            "success": success,
+            "model_name": model_name or "default"
         }

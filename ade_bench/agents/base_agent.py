@@ -43,6 +43,10 @@ class AgentResult(BaseModel):
         default=0.0,
         description="The cost of the agent execution in USD."
     )
+    model_name: str | None = Field(
+        default=None,
+        description="The model name used by the agent, extracted from agent output."
+    )
     failure_mode: FailureMode = Field(
         default=FailureMode.NONE,
         description="The failure mode of the agent's execution, if any.",

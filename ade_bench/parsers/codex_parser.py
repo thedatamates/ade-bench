@@ -30,7 +30,8 @@ class CodexParser(BaseParser):
             "cache_tokens": 0,
             "cost_usd": 0.0,
             "num_turns": 0,
-            "success": False
+            "success": False,
+            "model_name": "default"
         }
 
         try:
@@ -40,6 +41,7 @@ class CodexParser(BaseParser):
             total_input_tokens = 0
             total_output_tokens = 0
             total_cache_tokens = 0
+            cost_usd = 0.0
             num_items = 0
             success = False
 
@@ -82,7 +84,8 @@ class CodexParser(BaseParser):
                 "cache_tokens": total_cache_tokens,
                 "cost_usd": cost_usd,
                 "num_turns": num_items,
-                "success": success
+                "success": success,
+                "model_name": "default"
             }
 
         except Exception as e:

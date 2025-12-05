@@ -194,6 +194,7 @@ class AbstractInstalledAgent(BaseAgent, ABC):
             num_turns=parsed_metrics["num_turns"],
             runtime_ms=parsed_metrics["runtime_ms"],
             cost_usd=parsed_metrics["cost_usd"],
+            model_name=parsed_metrics.get("model_name"),
         )
 
     def _parse_agent_output(self, output: str) -> dict[str, Any]:
