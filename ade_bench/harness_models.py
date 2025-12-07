@@ -28,6 +28,21 @@ class FailureMode(Enum):
     CONTEXT_LENGTH_EXCEEDED = "context_length_exceeded"
     BREAKPOINT = "breakpoint"
 
+    def is_error(self) -> bool:
+        """Check if this failure mode is an infrastructure/harness error vs a task failure."""
+        return self in {
+            FailureMode.SETUP_TIMEOUT,
+            FailureMode.AGENT_SETUP_TIMEOUT,
+            FailureMode.AGENT_TIMEOUT,
+            FailureMode.TEST_TIMEOUT,
+            FailureMode.UNKNOWN_AGENT_ERROR,
+            FailureMode.UNKNOWN_HARNESS_ERROR,
+            FailureMode.HARNESS_PANIC,
+            FailureMode.PARSE_ERROR,
+            FailureMode.FATAL_LLM_PARSE_ERROR,
+            FailureMode.CONTEXT_LENGTH_EXCEEDED,
+        }
+
 class RunMetadata(BaseModel):
     run_id: str
     uuid: str = Field(default_factory=lambda: str(uuid.uuid4()))

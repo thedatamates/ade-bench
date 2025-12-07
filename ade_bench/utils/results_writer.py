@@ -7,6 +7,11 @@ from typing import Dict
 from ade_bench.harness_models import TrialResults, BenchmarkResults, FailureMode
 
 
+def is_error_result(result: TrialResults) -> bool:
+    """Check if a result is an error (infrastructure/harness issue) vs a task failure."""
+    return result.failure_mode.is_error()
+
+
 def get_failure_type(result: TrialResults) -> str:
     """
     Determine the failure type based on the result.

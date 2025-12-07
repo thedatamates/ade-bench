@@ -312,7 +312,7 @@ class Harness:
             time.sleep(2)
 
             # Log that test script is starting to run
-            log_harness_info(self._logger, trial_handler.task_id, "eval", "Executing test script")
+            log_harness_info(self._logger, trial_handler.task_id, "eval", "Executing test script...")
 
             # Build command with optional parameters
             command = f"bash {DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name}"
@@ -362,7 +362,7 @@ class Harness:
         if not trial_handler.task.solution_seeds:
             return
 
-        log_harness_info(self._logger, trial_handler.task_id, "eval", f"Generating solution tests")
+        log_harness_info(self._logger, trial_handler.task_id, "eval", f"Generating solution tests...")
 
         # Ensure test directory exists
         test_dir = trial_handler.test_dir
@@ -708,6 +708,7 @@ class Harness:
             if agent_failure_mode == FailureMode.AGENT_SETUP_TIMEOUT:
                 results.failure_mode = agent_failure_mode
                 self._logger.info(f"Task {trial_handler.task_id} halted due to agent setup or installation timeout")
+                log_harness_info(self._logger, trial_handler.task_id, "done", "TIMEOUT - agent setup timed out")
                 # Session should be killed
                 try:
                     session.kill_session()

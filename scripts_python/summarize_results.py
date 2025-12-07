@@ -1,6 +1,6 @@
 from tabulate import tabulate
 from ade_bench.harness_models import BenchmarkResults
-from ade_bench.utils.results_writer import format_trial_result, get_failure_type
+from ade_bench.utils.results_writer import format_trial_result, get_failure_type, is_error_result
 from typing import Dict, List, Any
 
 
@@ -18,25 +18,47 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
     total_cache_tokens = 0
     total_turns = 0
     resolved_count = 0
+    errored_count = 0
+    failed_count = 0
+
+    # Track first non-None model_name for inference
+    inferred_model = None
 
     for result in sorted(results.results, key=lambda x: x.task_id):
         # Use shared formatting function to get calculated values
         calc = format_trial_result(result)
 
-        # Accumulate totals
-        total_tests += calc['_tests']
-        total_tests_passed += calc['_tests_passed']
-        total_runtime += calc['_runtime_ms']
-        total_cost += calc['_cost_usd']
-        total_input_tokens += calc['_input_tokens']
-        total_output_tokens += calc['_output_tokens']
-        total_cache_tokens += calc['_cache_tokens']
-        total_turns += calc['_turns']
-        if calc['_is_resolved']:
-            resolved_count += 1
+        # Infer model from first result that has it
+        if inferred_model is None and result.model_name:
+            inferred_model = result.model_name
+
+        # Determine result status and count
+        is_error = is_error_result(result)
+        if is_error:
+            errored_count += 1
+            result_status = "ERROR"
+            status_class = 'error'
+        else:
+            # Only accumulate totals for non-error results
+            total_tests += calc['_tests']
+            total_tests_passed += calc['_tests_passed']
+            total_runtime += calc['_runtime_ms']
+            total_cost += calc['_cost_usd']
+            total_input_tokens += calc['_input_tokens']
+            total_output_tokens += calc['_output_tokens']
+            total_cache_tokens += calc['_cache_tokens']
+            total_turns += calc['_turns']
+
+            if calc['_is_resolved']:
+                resolved_count += 1
+                result_status = "p"
+                status_class = 'success'
+            else:
+                failed_count += 1
+                result_status = "FAIL"
+                status_class = 'failed'
 
         # Format values for HTML display (with commas)
-        result_status = "p" if calc['_is_resolved'] else "FAIL"
         failure_type = get_failure_type(result)
         cost_str = f"${calc['_cost_usd']:.2f}"
         input_tokens_str = f"{calc['_input_tokens']:,}"
@@ -49,7 +71,7 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
             'task_id': calc['task_id'],
             'result': result_status,
             'failure_type': failure_type,
-            'status_class': calc['status_class'],
+            'status_class': status_class,
             'tests': str(calc['_tests']),
             'passed': str(calc['_tests_passed']),
             'passed_percentage': percentage_str,
@@ -71,14 +93,15 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
             '_is_resolved': calc['_is_resolved']
         })
 
-    # Calculate totals
+    # Calculate totals - success rate excludes errors
     total_passed_percentage = (total_tests_passed / total_tests * 100) if total_tests > 0 else 0
-    overall_accuracy = (resolved_count / len(results.results) * 100) if results.results else 0
+    non_error_count = resolved_count + failed_count
+    success_rate = (resolved_count / non_error_count * 100) if non_error_count > 0 else 0
     total_runtime_seconds = total_runtime / 1000
 
     total_row = {
         'task_id': f"TOTAL (n={len(results.results)})",
-        'result': f"{overall_accuracy:.0f}%",
+        'result': f"{success_rate:.0f}%",
         'failure_type': "",
         'status_class': 'total-row',
         'tests': str(total_tests),
@@ -92,10 +115,28 @@ def summarize_results(results: BenchmarkResults) -> Dict[str, Any]:
         'turns': f"{total_turns:,}"
     }
 
+    # Get metadata from first result (should be consistent across all)
+    first_result = results.results[0] if results.results else None
+
     return {
         'headers': headers,
         'tasks': table_data,
-        'total_row': total_row
+        'total_row': total_row,
+        # Summary stats for the info panel
+        'summary': {
+            'total_tasks': len(results.results),
+            'passed_count': resolved_count,
+            'failed_count': failed_count,
+            'errored_count': errored_count,
+            'success_rate': success_rate,
+            'total_cost': total_cost,
+            'total_runtime_seconds': total_runtime_seconds,
+            'inferred_model': inferred_model,
+            'db_type': first_result.db_type if first_result else None,
+            'project_type': first_result.project_type if first_result else None,
+            'used_mcp': first_result.used_mcp if first_result else None,
+            'agent': first_result.agent if first_result else None,
+        }
     }
 
 

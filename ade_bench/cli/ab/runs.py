@@ -81,6 +81,12 @@ def open(
         "-o",
         help="Path to the output directory"
     ),
+    regenerate: bool = typer.Option(
+        False,
+        "--regenerate",
+        "-r",
+        help="Regenerate HTML dashboard even if it already exists"
+    ),
 ):
     """
     Open a specific run in your browser.
@@ -113,7 +119,8 @@ def open(
     import webbrowser
 
     html_file = run_path / "html" / "index.html"
-    if not html_file.exists():
+
+    if regenerate or not html_file.exists():
         typer.echo(f"Generating HTML dashboard for {run_path.name}...")
         generator = ResultsHTMLGenerator(run_path)
         success = generator.generate_all()

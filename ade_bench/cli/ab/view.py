@@ -27,63 +27,7 @@ def view_callback(ctx: typer.Context):
         view_results_main()
 
 
-@app.command("run")
-def view_run(
-    run_id: Optional[str] = typer.Argument(
-        None,
-        help="Run ID to view. If not provided, opens the most recent run."
-    ),
-    output_path: Path = typer.Option(
-        Path("experiments"),
-        "--output-path",
-        "-o",
-        help="Path to the output directory"
-    ),
-):
-    """
-    View a specific run's results in your browser.
-
-    If no run_id is provided, opens the most recent run.
-    """
-    # Reuse existing runs.open logic
-    runs_module.open(run_id=run_id, output_path=output_path)
-
-
-@app.command("runs")
-def view_runs(
-    limit: int = typer.Option(
-        10,
-        "--limit",
-        "-n",
-        help="Number of runs to show"
-    ),
-    output_path: Path = typer.Option(
-        Path("experiments"),
-        "--output-path",
-        "-o",
-        help="Path to the output directory"
-    ),
-):
-    """
-    List recent benchmark runs.
-    """
-    # Reuse existing runs.list logic
-    runs_module.list(limit=limit, output_path=output_path)
-
-
-@app.command("tasks")
-def view_tasks(
-    tasks_dir: Path = typer.Option(
-        Path("tasks"),
-        "--tasks-dir",
-        help="The path to the tasks directory."
-    ),
-    copy: bool = typer.Option(
-        False,
-        "--copy",
-        help="Copy task details as TSV to clipboard"
-    ),
-):
-    """List available tasks with their details and prompts."""
-    # Reuse existing tasks.list logic
-    tasks_module.list(tasks_dir=tasks_dir, copy=copy)
+# Register runs subcommands directly under view
+app.command("run")(runs_module.open)
+app.command("runs")(runs_module.list)
+app.command("tasks")(tasks_module.list)
