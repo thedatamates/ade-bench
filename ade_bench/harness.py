@@ -731,6 +731,7 @@ class Harness:
                 # Any other agent failure should also halt the task
                 results.failure_mode = agent_failure_mode
                 self._logger.warning(f"Task {trial_handler.task_id} halted due to agent failure: {agent_failure_mode}")
+                log_harness_info(self._logger, trial_handler.task_id, "done", f"ERROR - {agent_failure_mode.value}")
                 # Kill the session to ensure cleanup
                 try:
                     session.kill_session()

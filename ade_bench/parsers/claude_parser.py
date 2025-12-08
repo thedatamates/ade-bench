@@ -29,6 +29,7 @@ class ClaudeParser(BaseParser):
             "cost_usd": 0.0,
             "num_turns": 0,
             "success": False,
+            "error": None,
             "model_name": "default"
         }
         try:
@@ -122,5 +123,6 @@ class ClaudeParser(BaseParser):
             "cost_usd": cost_usd,
             "num_turns": num_turns,
             "success": success,
+            "error": None,
             "model_name": model_name or "default"
         }

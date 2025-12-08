@@ -31,6 +31,7 @@ class GeminiParser(BaseParser):
             "cost_usd": 0.0,
             "num_turns": 0,
             "success": False,
+            "error": None,
             "model_name": "default"
         }
 
@@ -147,6 +148,7 @@ class GeminiParser(BaseParser):
                 "cost_usd": total_cost_usd,
                 "num_turns": total_num_turns,
                 "success": success,
+                "error": None,
                 "model_name": primary_model_name or "default"
             }
 

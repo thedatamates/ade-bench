@@ -26,6 +26,7 @@ class FailureMode(Enum):
     PARSE_ERROR = "parse_error"
     FATAL_LLM_PARSE_ERROR = "fatal_llm_parse_error"
     CONTEXT_LENGTH_EXCEEDED = "context_length_exceeded"
+    QUOTA_EXCEEDED = "quota_exceeded"  # API quota/rate limit exceeded
     BREAKPOINT = "breakpoint"
 
     def is_error(self) -> bool:
@@ -41,6 +42,7 @@ class FailureMode(Enum):
             FailureMode.PARSE_ERROR,
             FailureMode.FATAL_LLM_PARSE_ERROR,
             FailureMode.CONTEXT_LENGTH_EXCEEDED,
+            FailureMode.QUOTA_EXCEEDED,
         }
 
 class RunMetadata(BaseModel):
