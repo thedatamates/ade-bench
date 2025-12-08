@@ -13,7 +13,7 @@ from ade_bench import Harness
 from ade_bench.agents import AgentName
 from scripts_python.summarize_results import display_detailed_results
 
-from ade_bench.cli.ab import migrate, tasks, view, save, interact as interact_module
+from ade_bench.cli.ab import migrate, check, tasks, view, save, interact as interact_module
 import click
 from typer import rich_utils
 
@@ -316,3 +316,4 @@ if __name__ == "__main__":
 app.add_typer(migrate.app, name="migrate")
 app.add_typer(view.app, name="view")
 app.add_typer(save.app, name="save")
+app.add_typer(check.app, name="check")

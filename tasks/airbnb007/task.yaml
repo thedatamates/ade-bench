@@ -15,6 +15,9 @@ tags:
   - dbt-materialization
   - dbt-project-configuration
 
+test_setup: |-
+  dbt run
+
 # Tables to compare for solution
 solution_seeds:
   - table_name: dim_hosts

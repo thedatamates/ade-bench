@@ -3,6 +3,7 @@ from typing import Dict, Any
 
 from ade_bench.parsers.base_parser import BaseParser, UnitTestStatus
 
+
 class CodexParser(BaseParser):
     """Parser for Codex agent responses to extract runtime, token usage, and cost metrics."""
 
@@ -21,6 +22,7 @@ class CodexParser(BaseParser):
         - cost_usd: Estimated from https://openai.com/api/pricing/
         - num_turns: Number of item.completed events
         - success: Whether the response completed without errors
+        - error: Error string if an error was detected (e.g. "quota_exceeded")
         """
 
         default_return = {
@@ -31,6 +33,7 @@ class CodexParser(BaseParser):
             "cost_usd": 0.0,
             "num_turns": 0,
             "success": False,
+            "error": None,
             "model_name": "default"
         }
 
@@ -44,6 +47,7 @@ class CodexParser(BaseParser):
             cost_usd = 0.0
             num_items = 0
             success = False
+            error = None
 
             for line in lines:
                 line = line.strip()
@@ -55,6 +59,19 @@ class CodexParser(BaseParser):
 
                     if data.get("type") == "item.completed":
                         num_items += 1
+
+                    # Check for errors in turn.failed events
+                    if data.get("type") == "turn.failed":
+                        error_data = data.get("error", {})
+                        error_message = error_data.get("message", "")
+                        if "Quota exceeded" in error_message or "quota" in error_message.lower():
+                            error = "quota_exceeded"
+
+                    # Also check for error type messages
+                    if data.get("type") == "error":
+                        error_message = data.get("message", "")
+                        if "Quota exceeded" in error_message or "quota" in error_message.lower():
+                            error = "quota_exceeded"
 
                     # Look for turn.completed events which contain usage data
                     if data.get("type") == "turn.completed":
@@ -85,6 +102,7 @@ class CodexParser(BaseParser):
                 "cost_usd": cost_usd,
                 "num_turns": num_items,
                 "success": success,
+                "error": error,
                 "model_name": "default"
             }
 

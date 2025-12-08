@@ -9,3 +9,5 @@ rm -r models/fact
 SETUP_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/setup"
 
 cp $SETUP_DIR/schema.yml models/schema.yml
+
+dbt deps

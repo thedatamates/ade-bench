@@ -735,6 +735,7 @@ class Harness:
                 # Any other agent failure should also halt the task
                 results.failure_mode = agent_failure_mode
                 self._logger.warning(f"Task {trial_handler.task_id} halted due to agent failure: {agent_failure_mode}")
+                log_harness_info(self._logger, trial_handler.task_id, "done", f"ERROR - {agent_failure_mode.value}")
                 # Kill the session to ensure cleanup
                 try:
                     session.kill_session()
@@ -824,15 +825,13 @@ class Harness:
         # Check for panic in test output (e.g., dbt-fusion panic)
         # This is a harness failure, not a task failure
         if "panic:" in post_agent_pane.lower():
-            test_results = {k: v for k, v in parser_result.test_results.items() if k != "dbt_compile"}
-            # Only treat as harness panic if we got no actual test results
-            if not test_results:
-                self._logger.warning(
-                    f"Panic detected in test output for task {trial_handler.task_id}. "
-                    "This is a harness failure, not a task failure."
-                )
-                results.failure_mode = FailureMode.HARNESS_PANIC
-                return results
+            self._logger.warning(
+                f"Panic detected in test output for task {trial_handler.task_id}. "
+                "This is a harness failure, not a task failure."
+            )
+            log_harness_info(self._logger, trial_handler.task_id, "done", "ERROR - harness_panic")
+            results.failure_mode = FailureMode.HARNESS_PANIC
+            return results
 
         results.parser_results = parser_result.test_results
         results.expected_test_count = parser_result.expected_test_count

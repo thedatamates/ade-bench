@@ -1,0 +1,23 @@
+# Analysis Migration Configuration
+# Define how each experiment should be migrated when merging results.
+
+# Default migration settings for experiments not explicitly configured
+defaults:
+  used_mcp: false
+  model_name: ''
+
+# Experiment-specific migrations
+# Add experiments here with their specific override settings.
+experiments:
+  # These experiments had used_mcp: True in their TSVs, force to False
+  '2025-10-13__23-26-56':
+    used_mcp: false
+
+  '2025-10-14__16-31-08':
+    used_mcp: false
+
+  '2025-10-15__08-38-38':
+    model_name: 'claude-3-5-haiku-20241022'
+
+  '2025-10-15__09-20-36':
+    model_name: 'claude-3-5-haiku-20241022'

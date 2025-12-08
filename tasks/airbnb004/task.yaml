@@ -6,7 +6,7 @@ notes: |-
 prompts:
   - key: base
     prompt: |-
-      Add a primary key to the fct_reviews table and update the model.
+      Add review_id as a primary key to the fct_reviews table and update the model.
 author_name: test
 author_email: test
 difficulty: medium
