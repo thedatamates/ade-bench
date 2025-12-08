@@ -237,7 +237,9 @@ def interact(
 
     try:
         # Run database-specific and project-specific setup
-        setup_orchestrator.setup_task(task_id, trial_handler.variant_config)
+        if not setup_orchestrator.setup_task(task_id, trial_handler.variant_config):
+            typer.echo("Setup failed. See logs for details.", err=True)
+            raise typer.Exit(1)
 
         # Set up agent if requested
         if agent:

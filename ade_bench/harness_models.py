@@ -16,6 +16,7 @@ class FailureMode(Enum):
     UNSET = "unset"
     NONE = "none"
     UNKNOWN = "unknown"
+    SETUP_FAILED = "setup_failed"
     SETUP_TIMEOUT = "setup_timeout"
     AGENT_SETUP_TIMEOUT = "agent_setup_timeout"
     AGENT_TIMEOUT = "agent_timeout"
@@ -32,6 +33,7 @@ class FailureMode(Enum):
     def is_error(self) -> bool:
         """Check if this failure mode is an infrastructure/harness error vs a task failure."""
         return self in {
+            FailureMode.SETUP_FAILED,
             FailureMode.SETUP_TIMEOUT,
             FailureMode.AGENT_SETUP_TIMEOUT,
             FailureMode.AGENT_TIMEOUT,
