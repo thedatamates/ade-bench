@@ -365,7 +365,7 @@ ADE-bench currently supports the following agents:
 - OpenAI Codex - `--agent codex`
 - Gemini CLI - `--agent gemini`
 
-Optionally, you can include a `--model {model-id}` flag to specify which model to use. For more information on models and their IDs, refer to documentation provided by [Claude](https://platform.claude.com/docs/en/about-claude/models/overview), [Codex](https://developers.openai.com/codex/models/), and [Gemini](https://geminicli.com/docs/cli/model/)
+Optionally, you can include a `--model {model-id}` flag to specify which model to use. For more information on models and their IDs, refer to documentation provided by [Claude](https://platform.claude.com/docs/en/about-claude/models/overview), [Codex](https://developers.openai.com/codex/models/), and [Gemini](https://geminicli.com/docs/cli/model/).
 
 The following commands are run to call each agent:
 
