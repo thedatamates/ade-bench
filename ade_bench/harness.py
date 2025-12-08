@@ -548,8 +548,12 @@ class Harness:
                 )
                 return await asyncio.wait_for(task, timeout=timeouts.setup)
 
-            # Run the async function
-            asyncio.run(run_setup())
+            # Run the async function and check result
+            setup_succeeded = asyncio.run(run_setup())
+            
+            if not setup_succeeded:
+                self._logger.error(f"Setup failed for task {trial_handler.task_id}")
+                return FailureMode.SETUP_FAILED
 
             return FailureMode.NONE
 

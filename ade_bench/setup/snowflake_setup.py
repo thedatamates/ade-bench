@@ -19,7 +19,12 @@ def _execute_queries(cursor, queries: str, description: str = ""):
     for query in queries.split(";"):
         query = query.strip()
         if query:  # Skip empty queries
-            cursor.execute(query)
+            try:
+                cursor.execute(query)
+            except Exception as e:
+                print(f"[Snowflake] Error executing query: {query[:100]}...")
+                print(f"[Snowflake] Error: {e}")
+                raise
 
 
 def _get_snowflake_connection():
@@ -62,6 +67,7 @@ def _clone_database(source_db: str, target_db: str) -> bool:
             source_exists = cursor.fetchone() is not None
 
             if not source_exists:
+                print(f"[Snowflake] Source database '{source_db}' does not exist. Run 'ade migrate duckdb-to-snowflake' first.")
                 return False
 
             # Drop target database if it exists
@@ -75,6 +81,7 @@ def _clone_database(source_db: str, target_db: str) -> bool:
             return True
 
     except Exception as e:
+        print(f"[Snowflake] Failed to clone database: {e}")
         return False
 
 
@@ -89,7 +96,11 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
             cursor.execute(use_db_query)
 
             # Drop and create role
-            admin_role = os.getenv('SNOWFLAKE_ROLE') # Grant task role to the admin role, so it can manage objects too.
+            admin_role = os.getenv('SNOWFLAKE_ROLE')
+            if not admin_role:
+                print("[Snowflake] SNOWFLAKE_ROLE environment variable not set")
+                return False
+            
             role_query = f"""
                 DROP ROLE IF EXISTS {creds['role']};
                 CREATE ROLE {creds['role']};
@@ -140,19 +151,26 @@ def _create_user_and_role(creds: Dict[str, str]) -> bool:
             return True
 
     except Exception as e:
+        print(f"[Snowflake] Failed to create user and role: {e}")
         return False
 
 
-def setup_snowflake(terminal, session, task_id: str, variant: Dict[str, Any], trial_handler) -> None:
-    """Setup Snowflake by cloning database and creating user/role."""
+def setup_snowflake(terminal, session, task_id: str, variant: Dict[str, Any], trial_handler) -> bool:
+    """Setup Snowflake by cloning database and creating user/role.
+    
+    Returns:
+        True if setup succeeded, False otherwise.
+    """
     creds = generate_task_snowflake_credentials(task_id)
     source_db = variant.get('db_name')
     target_db = creds['database']
 
     # Clone the database
     if not _clone_database(source_db, target_db):
-        return
+        return False
 
     # Create user and role
     if not _create_user_and_role(creds):
-        return
+        return False
+    
+    return True
