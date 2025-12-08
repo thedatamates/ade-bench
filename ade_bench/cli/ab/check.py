@@ -41,9 +41,14 @@ def print_success():
 
 def print_ade_summary():
     if container_runtime_available:
-        print(f"[bold blue]ADE is in a good state to run! Assuming API keys are correct and valid, you have access to the following agents: none, sage{", macro" if macro_available else ""}{", claude" if anthropic_available else ""}{", codex" if openai_available else ""}{", gemini" if gemini_available else ""}.[/bold blue]")
+        macro_str = ', macro' if macro_available else ''
+        claude_str = ', claude' if anthropic_available else ''
+        codex_str = ', codex' if openai_available else ''
+        gemini_str = ', gemini' if gemini_available else ''
+        print(f"[bold blue]ADE is in a good state to run! Assuming API keys are correct and valid, you have access to the following agents: none, sage{macro_str}{claude_str}{codex_str}{gemini_str}.[/bold blue]")
     else:
-        stderr.print(f"[bold red]ADE is not in a good state to run! {"" if container_runtime_available else "No container runtime to work with, currently ADE needs Docker."}[/bold red]")
+        error_msg = '' if container_runtime_available else 'No container runtime to work with, currently ADE needs Docker.'
+        stderr.print(f"[bold red]ADE is not in a good state to run! {error_msg}[/bold red]")
 
 
 app = typer.Typer(
