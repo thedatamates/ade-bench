@@ -4,6 +4,48 @@ _"Lord, forgive me, I've been running, running blind in truth."_
 
 — [Beyonce  /  "Freedom"  /  Lemonade](https://www.youtube.com/watch?v=7FWF9375hUA&t=39s)
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [ADE-bench](#ade-bench)
+  - [Overview](#overview)
+  - [Quickstart](#quickstart)
+    - [1. Clone this repo](#1-clone-this-repo)
+    - [2. Install [Docker Compose](https://docs.docker.com/compose/install/) and [`uv`](https://docs.astral.sh/uv/getting-started/installation/#installing-uv)](#2-install-docker-composehttpsdocsdockercomcomposeinstall-and-uvhttpsdocsastralshuvgetting-startedinstallationinstalling-uv)
+    - [3. Create a virtual environment and install the `ade` CLI](#3-create-a-virtual-environment-and-install-the-ade-cli)
+    - [4. Download the [sample DuckDB databases](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE) to `/shared/databases/duckdb`](#4-download-the-sample-duckdb-databaseshttpsdrivegooglecomdrivefolders1cns_8mf81to02868ha-celmcpefu4bpe-to-shareddatabasesduckdb)
+    - [5. Checkpoint: try running a task without any LLMs](#5-checkpoint-try-running-a-task-without-any-llms)
+    - [6. Configure one or more LLM API keys](#6-configure-one-or-more-llm-api-keys)
+    - [7. Run all tasks](#7-run-all-tasks)
+    - [8. Go beyond](#8-go-beyond)
+  - [An introduction to how ADE-bench works](#an-introduction-to-how-ade-bench-works)
+  - [Usage](#usage)
+    - [Task selection](#task-selection)
+  - [Task Configuration](#task-configuration)
+  - [How it works, in detail](#how-it-works-in-detail)
+    - [How trials are evaluated](#how-trials-are-evaluated)
+    - [How databases work](#how-databases-work)
+      - [DuckDB](#duckdb)
+      - [Snowflake](#snowflake)
+    - [Viewing results](#viewing-results)
+    - [Configuring agents](#configuring-agents)
+    - [Enabling the MCP server](#enabling-the-mcp-server)
+    - [The Sage agent](#the-sage-agent)
+  - [Configuration](#configuration)
+  - [Snowflake setup](#snowflake-setup)
+    - [1. Create a trial Snowflake account](#1-create-a-trial-snowflake-account)
+    - [2. Create an administrative user and role](#2-create-an-administrative-user-and-role)
+    - [3. Add Snowflake credentials to your `.env` file](#3-add-snowflake-credentials-to-your-env-file)
+    - [4. Migrate DuckDB databases to Snowflake](#4-migrate-duckdb-databases-to-snowflake)
+  - [Anthropic Claude setup](#anthropic-claude-setup)
+  - [Tips! Tricks! Other things we recommend!](#tips-tricks-other-things-we-recommend)
+  - [Citations](#citations)
+  - [Contact?](#contact)
+- [Footnotes](#footnotes)
+
+<!-- markdown-toc end -->
+
+
 ## Overview
 
 ADE-bench[^1] is a framework for evaluating AI agents on data analyst tasks. Use it to create realistic testing environments with complex evaluation criteria, that can be shared as simple files and tested in production warehouses, while making it as easy as possible to create new tasks.
