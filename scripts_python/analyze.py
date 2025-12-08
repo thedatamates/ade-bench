@@ -3,48 +3,61 @@
 Analyze and merge experiment results from saved experiments.
 
 This script:
-1. Creates an "analysis" directory in dev
+1. Creates an output directory in dev/analysis/[output-directory]
 2. Merges all .tsv files from experiments_saved into a single TSV
-3. Applies migrations to normalize column structure:
-4. Extracts task details and saves to analysis directory
+3. Applies migrations to normalize column structure (loaded from YAML)
+4. Extracts task details and saves to output directory
+
+Usage:
+    uv run scripts_python/analyze.py -o my_analysis
+    uv run scripts_python/analyze.py -o my_analysis --migration custom.yaml
 """
 
-import os
+import argparse
 import csv
 from pathlib import Path
 from typing import Dict, List, Any
 
-
-# =============================================================================
-# MIGRATION CONFIGURATION
-# =============================================================================
-# Define how each experiment should be migrated.
-# Add new experiments here with their specific settings.
-EXPERIMENT_MIGRATIONS = {
-    # These experiments had used_mcp: True in their TSVs, force to False
-    '2025-10-13__23-26-56': {
-        'used_mcp': False,
-    },
-    '2025-10-14__16-31-08': {
-        'used_mcp': False,
-    },
-    '2025-10-15__08-38-38': {
-        'model_name': 'claude-3-5-haiku-20241022',
-    },
-    '2025-10-15__09-20-36': {
-        'model_name': 'claude-3-5-haiku-20241022',
-    }
-}
-
-# Default migration settings for experiments not explicitly configured
-DEFAULT_MIGRATION = {
-    'used_mcp': False,
-    'model_name': ''
-}
-# =============================================================================
+import yaml
 
 
-def migrate_field(row: Dict[str, str], experiment_id: str, field_name: str) -> str:
+def load_migration_config(migration_file: Path | None, project_root: Path) -> tuple[Dict[str, Dict], Dict[str, Any]]:
+    """
+    Load migration configuration from a YAML file.
+
+    Args:
+        migration_file: Path to the migration YAML file (relative to migrations dir), or None for default
+        project_root: Project root directory
+
+    Returns:
+        Tuple of (experiment_migrations dict, default_migration dict)
+    """
+    migrations_dir = project_root / 'shared' / 'migrations' / 'analysis'
+
+    if migration_file is None:
+        config_path = migrations_dir / 'default.yaml'
+    else:
+        config_path = migrations_dir / migration_file
+
+    if not config_path.exists():
+        raise FileNotFoundError(f"Migration file not found: {config_path}")
+
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    experiment_migrations = config.get('experiments', {})
+    default_migration = config.get('defaults', {'used_mcp': False, 'model_name': ''})
+
+    return experiment_migrations, default_migration
+
+
+def migrate_field(
+    row: Dict[str, str],
+    experiment_id: str,
+    field_name: str,
+    experiment_migrations: Dict[str, Dict],
+    default_migration: Dict[str, Any]
+) -> str:
     """
     Apply standard migration logic for a field.
 
@@ -52,28 +65,34 @@ def migrate_field(row: Dict[str, str], experiment_id: str, field_name: str) -> s
         row: The row data
         experiment_id: The experiment ID
         field_name: The field to migrate
+        experiment_migrations: Experiment-specific migration overrides
+        default_migration: Default values for missing fields
     """
-
     if field_name not in row:
         # Set default
-        return str(DEFAULT_MIGRATION.get(field_name, ''))
-    elif experiment_id in EXPERIMENT_MIGRATIONS and field_name in EXPERIMENT_MIGRATIONS[experiment_id]:
+        return str(default_migration.get(field_name, ''))
+    elif experiment_id in experiment_migrations and field_name in experiment_migrations[experiment_id]:
         # Replace
-        return str(EXPERIMENT_MIGRATIONS[experiment_id][field_name])
+        return str(experiment_migrations[experiment_id][field_name])
     else:
         # Use existing value
         return str(row[field_name])
 
 
-def migrate_row(row: Dict[str, str], experiment_id: str) -> Dict[str, str]:
+def migrate_row(
+    row: Dict[str, str],
+    experiment_id: str,
+    experiment_migrations: Dict[str, Dict],
+    default_migration: Dict[str, Any]
+) -> Dict[str, str]:
     """
     Apply migrations to normalize a row's structure based on experiment config.
     """
     migrated_row = row.copy()
 
     # Handle field migrations using the standard function
-    migrated_row['used_mcp'] = migrate_field(row, experiment_id, 'used_mcp')
-    migrated_row['model_name'] = migrate_field(row, experiment_id, 'model_name')
+    migrated_row['used_mcp'] = migrate_field(row, experiment_id, 'used_mcp', experiment_migrations, default_migration)
+    migrated_row['model_name'] = migrate_field(row, experiment_id, 'model_name', experiment_migrations, default_migration)
 
     # Remove old columns
     if 'result_num' in migrated_row:
@@ -110,7 +129,9 @@ def get_canonical_column_order() -> List[str]:
 
 def merge_experiment_results(
     experiments_dir: Path,
-    output_file: Path
+    output_file: Path,
+    experiment_migrations: Dict[str, Dict],
+    default_migration: Dict[str, Any]
 ) -> None:
     """
     Merge all results.tsv files from saved experiments into a single TSV.
@@ -118,6 +139,8 @@ def merge_experiment_results(
     Args:
         experiments_dir: Path to the experiments_saved directory
         output_file: Path to the output merged TSV file
+        experiment_migrations: Experiment-specific migration overrides
+        default_migration: Default values for missing fields
     """
     all_rows = []
     canonical_columns = get_canonical_column_order()
@@ -145,9 +168,8 @@ def merge_experiment_results(
             print(f"  - Read {len(rows)} rows")
 
             # Apply migrations to each row with the experiment_id
-            migrated_rows = [migrate_row(row, experiment_id) for row in rows]
+            migrated_rows = [migrate_row(row, experiment_id, experiment_migrations, default_migration) for row in rows]
             all_rows.extend(migrated_rows)
-
 
     with open(output_file, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(
@@ -180,32 +202,72 @@ def extract_and_save_tasks(output_file: Path) -> None:
         print(f"Warning: Failed to extract task details: {e}")
 
 
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description='Analyze and merge experiment results from saved experiments.',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    uv run scripts_python/analyze.py -o my_analysis
+    uv run scripts_python/analyze.py -o my_analysis --migration custom.yaml
+    uv run scripts_python/analyze.py -o my_analysis -e experiments
+        """
+    )
+    parser.add_argument(
+        '-o', '--output-directory',
+        required=True,
+        help='Name of output directory (will be created in dev/analysis/)'
+    )
+    parser.add_argument(
+        '--migration',
+        default=None,
+        help='Migration YAML file name (in shared/migrations/analysis/). Defaults to default.yaml'
+    )
+    parser.add_argument(
+        '-e', '--experiment-directory',
+        default='experiments_saved',
+        help='Directory containing experiment results. Defaults to experiments_saved'
+    )
+    return parser.parse_args()
+
+
 def main():
     """Main entry point."""
+    args = parse_args()
+
     # Get project root directory (one level up from scripts_python)
     script_dir = Path(__file__).parent.resolve()
     project_root = script_dir.parent
 
     # Define paths
     dev_dir = project_root / 'dev'
-    analysis_dir = dev_dir / 'analysis'
-    experiments_saved_dir = project_root / 'experiments_saved'
-    merged_results_file = analysis_dir / 'merged_results.tsv'
-    tasks_file = analysis_dir / 'tasks.tsv'
+    output_dir = dev_dir / 'analysis' / args.output_directory
+    experiments_dir = project_root / args.experiment_directory
+    merged_results_file = output_dir / 'merged_results.tsv'
+    tasks_file = output_dir / 'tasks.tsv'
 
-    # Step 1: Create analysis directory
+    # Step 1: Load migration configuration
     print("STARTING...")
-    analysis_dir.mkdir(parents=True, exist_ok=True)
-    print(f"Created {analysis_dir}")
+    migration_file = args.migration
+    experiment_migrations, default_migration = load_migration_config(migration_file, project_root)
+    if migration_file:
+        print(f"Loaded migration config from: {migration_file}")
+    else:
+        print("Loaded migration config from: default.yaml")
 
-    # Step 2: Merge all TSV files
-    if not experiments_saved_dir.exists():
-        print(f"Error: {experiments_saved_dir} does not exist")
+    # Step 2: Create output directory
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Output directory: {output_dir}")
+
+    # Step 3: Merge all TSV files
+    if not experiments_dir.exists():
+        print(f"Error: {experiments_dir} does not exist")
         return
 
-    merge_experiment_results(experiments_saved_dir, merged_results_file)
+    merge_experiment_results(experiments_dir, merged_results_file, experiment_migrations, default_migration)
 
-    # Step 3: Extract and save task details
+    # Step 4: Extract and save task details
     extract_and_save_tasks(tasks_file)
 
     print(f"Merged results available at: {merged_results_file}")
