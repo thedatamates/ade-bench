@@ -13,7 +13,7 @@ _"Lord, forgive me, I've been running, running blind in truth."_
     - [1. Clone this repo](#1-clone-this-repo)
     - [2. Install Docker Compose and uv](#2-install-docker-compose-and-uv)
     - [3. Create a virtual environment and install the `ade` CLI](#3-create-a-virtual-environment-and-install-the-ade-cli)
-    - [4. Download the sample DuckDB databases](#4-download-the-sample-duckdb-database-to-shareddatabasesduckdb)
+    - [4. Download the sample DuckDB databases](#4-download-the-sample-duckdb-database)
     - [5. Checkpoint: try running a task without any LLMs](#5-checkpoint-try-running-a-task-without-any-llms)
     - [6. Configure one or more LLM API keys](#6-configure-one-or-more-llm-api-keys)
     - [7. Run all tasks](#7-run-all-tasks)
@@ -93,7 +93,7 @@ ade --help
 
 [Learn more about virtual environments](https://docs.astral.sh/uv/pip/environments/#creating-a-virtual-environment), including activation instructions for Windows.
 
-### 4. Download the [sample DuckDB databases](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE) to `/shared/databases/duckdb`
+### 4. Download the [sample DuckDB databases](https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE)
 
 Or run the following command:
 
