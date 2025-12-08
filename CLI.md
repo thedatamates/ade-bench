@@ -79,7 +79,7 @@ ade interact --task-id foo001 --db duckdb --project-type dbt --run-id debug-sess
 
 ### Save Results
 
-When using ADE-bench, you may create several test runs, and then larger runs you want to save as production runs. Use the commands below to copy runs in `experiments` directory into the `experiments_saved` directory:
+When using ADE-bench, you may create several test runs, and then larger runs you want to save as production runs. Use the commands below to copy runs in `experiments` directory into a new directory. By default, they will be `experiments_saved` directory, though you can choose a different one.
 
 ```bash
 # Save the most recent run
@@ -87,6 +87,9 @@ ade save
 
 # Save a specific run
 ade save run 2025-10-07__11-45-04
+
+# Save the most recent run to a specific directory
+ade save --output-path experiments_saved_my_fun_project
 ```
 
 ### Database Migration

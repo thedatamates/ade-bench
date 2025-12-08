@@ -4,6 +4,8 @@ _"Lord, forgive me, I've been running, running blind in truth."_
 
 — [Beyonce  /  "Freedom"  /  Lemonade](https://www.youtube.com/watch?v=7FWF9375hUA&t=39s)
 
+---
+
 ## Overview
 
 ADE-bench[^1] is a framework for evaluating AI agents on data analyst tasks. Use it to create realistic testing environments with complex evaluation criteria, that can be shared as simple files and tested in production warehouses, while making it as easy as possible to create new tasks.
@@ -113,6 +115,8 @@ ade run all --db duckdb --project-type dbt --agent claude
 - Enable the dbt MCP server with the `--use-mcp` flag (requires Snowflake, see [MCP](#enabling-the-mcp-server) section)
 - [Contribute additional tasks or datasets](/CONTRIBUTING.md)
 
+---
+
 ## An introduction to how ADE-bench works
 
 ADE-bench has three primary components:
@@ -133,6 +137,8 @@ When ADE-bench is asked to solve a task, here is what happens:
 6. **Take a final snapshot.** Once the agent declares itself done, ADE-bench takes a third snapshot.
 7. **Evaluate the result.** The changes are evaluated against the tests specified in the task. If all the tests pass, the task passes. **Note:** ADE-bench includes automatic ways to compare tables to one another. For example, if you want to evaluate a task by seeing if the agent created the correct `dim_users` table, you can define this table in the task configuration, and the comparison test is generated automatically.
 8. **Clean up the sandbox.** Once the task has recorded its results, ADE-bench deletes the container.
+
+---
 
 ## Usage
 
@@ -271,6 +277,8 @@ variants:
   project_name: enron
   migration_directory: enron__duckdb_to_snowflake
 ```
+
+---
 
 ## How it works, in detail
 
@@ -411,7 +419,6 @@ Configuration is all managed through the `.env` file. Create this file (if it do
 # API Keys for LLM providers
 ANTHROPIC_API_KEY=[API key for Anthropic, if you want to run Claude Code agents]
 OPENAI_API_KEY=[API key for OpenAI, if you want to run Codex agents]
-MACRO_API_KEY=[API key for Macro, if you want to run Macro (Macro! https://getmacro.com/) agents]
 GEMINI_API_KEY=[API key for Gemini, if you want to run Gemini CLI]
 
 # Snowflake configuration
@@ -439,9 +446,9 @@ FILE_DIFF_EXCLUDE_PATHS=/tmp,/logs,/var,/target,/build,/node_modules
 LOG_LEVEL=INFO
 ```
 
-## Snowflake setup
+### Snowflake setup
 
-### 1. Create a trial Snowflake account
+#### 1. Create a trial Snowflake account
 
 > [!CAUTION]
 > Do not connect ADE-bench to your production Snowflake account when using shared datasets!
@@ -450,7 +457,7 @@ LOG_LEVEL=INFO
 
 [Sign up for a trial Snowflake account](https://signup.snowflake.com/).
 
-### 2. Create an administrative user and role
+#### 2. Create an administrative user and role
 
 ADE-bench will use this user to create an empty testing environment (database, user, role) at the beginning of each trial.
 
@@ -495,7 +502,7 @@ SELECT 'SNOWFLAKE_ROLE=ADE_BENCH_ADMIN_ROLE'
 ;
 ```
 
-### 3. Add Snowflake credentials to your `.env` file
+#### 3. Add Snowflake credentials to your `.env` file
 
 This is the same file you created when specifying your API key.
 
@@ -509,7 +516,7 @@ SNOWFLAKE_WAREHOUSE=[the warehouse you want this user and all ade-bench agents t
 
 _Snowflake is deprecating password-based authentication, which makes this very annoying. For now, you can get around this by making this user `LEGACY_SERVICE` user, though that will eventually go away. A problem for our future selves, who might be able to solve it with the help of these [dbt](https://docs.getdbt.com/docs/cloud/connect-data-platform/connect-snowflake) and [Snowflake](https://docs.snowflake.com/en/user-guide/security-mfa-rollout#deprecation-timeline) docs._
 
-### 4. Migrate DuckDB databases to Snowflake
+#### 4. Migrate DuckDB databases to Snowflake
 
 > [!CAUTION]
 > Do not connect ADE-bench to your production Snowflake account when using shared datasets!
@@ -530,7 +537,7 @@ ade migrate duckdb-to-snowflake --include foo bar
 ade migrate duckdb-to-snowflake --exclude bar
 ```
 
-## Anthropic Claude setup
+### Anthropic Claude setup
 
 1. Login at <https://platform.claude.com>
 1. Go to <https://platform.claude.com/settings/keys>
@@ -547,16 +554,20 @@ ade migrate duckdb-to-snowflake --exclude bar
 - **Disable diffs to speed things up.** If you're trying to run a bunch of tasks, or testing something where you don't care about looking at diffs, use the `--no-diffs` flag. Diffs can be slow, and ADE-bench will run faster if they're turned off.
 - **View all the tasks.** Running `ade view tasks` will print a summary table of all the tasks in ADE-bench. You can also run ``ade view tasks --copy` to copy a more detailed summary of the tasks to your clipboard.
 
-## Citations
+---
 
-ADE-Bench borrowed heavily from [Terminal-Bench](https://github.com/laude-institute/terminal-bench) and [Spider 2.0](https://github.com/xlang-ai/Spider2/), without which none of this would exist:
+## Acknowledgements
+
+ADE-bench was created by [Benn Stancil](https://benn.website/) with support from [dbt Labs](https://www.getdbt.com/) and [Macro](https://getmacro.com/). Their contributions to this project are what made it possible; you can thank both by checking out their other work.
+
+ADE-bench also borrowed heavily from [Terminal-Bench](https://github.com/laude-institute/terminal-bench) and [Spider 2.0](https://github.com/xlang-ai/Spider2/), without which none of this would exist:
 
 - The Terminal-Bench Team. (Apr 2025). _Terminal-Bench: A Benchmark for AI Agents in Terminal Environments_. Available: <https://github.com/laude-institute/terminal-bench>
 - Fangyu Lei, Jixuan Chen, Yuxiao Ye, Ruisheng Cao, Dongchan Shin, Hongjin Su, Zhaoqing Suo, Hongcheng Gao, Wenjing Hu, Pengcheng Yin, Victor Zhong, Caiming Xiong, Ruoxi Sun, Qian Liu, Sida Wang, & Tao Yu. (2024). _Spider 2.0: Evaluating Language Models on Real-World Enterprise Text-to-SQL Workflows._  Available: <https://arxiv.org/abs/2411.07763>
 
 ## Contact?
 
-If you want to learn more or get involved, feel free to reach out to me (Benn) at <benn.electronicmail@gmail.com>. You can also fill out [this form](https://docs.google.com/forms/d/e/1FAIpQLSdADsmhkYXGk90FTHP9vmp6sN1ObZgRYfnbELjq_-UnBXW_0g/viewform), and we'll be about a mailing list, or Slack channel, or whatever is cool now.
+If you want to learn more or get involved, you can find us in #tools-ade-bench in the [dbt Labs community Slack](https://www.getdbt.com/community/join-the-community). Also, feel free to reach out to Benn at <benn.electronicmail@gmail.com>.
 
 ---
 
