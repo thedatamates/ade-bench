@@ -8,11 +8,37 @@ defaults:
 
 # Experiment-specific migrations
 # Add experiments here with their specific override settings.
+# Use nested 'tasks' key to override specific tasks within an experiment.
 experiments:
-  # These experiments had used_mcp: True in their TSVs, force to False
   '2025-12-05__18-43-13':
     model_name: 'gpt-5-codex'
+
   '2025-12-05__19-15-12':
     model_name: 'gpt-5-codex'
+
+  '2025-12-05__23-54-44':
+    tasks:
+      airbnb007:
+        failure_type: 'harness_panic'
+        result: ""
+
+  '2025-12-07__17-22-09':
+    tasks:
+      airbnb007:
+        failure_type: 'harness_panic'
+        result: ""
+
+  '2025-12-07__21-58-12':
+    tasks:
+      analytics_engineering006:
+        failure_type: 'harness_panic'
+        result: ""
+      airbnb005:
+        failure_type: 'harness_panic'
+        result: ""
+      airbnb007:
+        failure_type: 'harness_panic'
+        result: ""
+
   '2025-12-08__11-05-15':
     model_name: 'gemini-2.5-pro'

@@ -21,7 +21,7 @@ from typing import Dict, List, Any
 import yaml
 
 
-def load_migration_config(migration_file: Path | None, project_root: Path) -> tuple[Dict[str, Dict], Dict[str, Any]]:
+def load_migration_config(migration_file: Path | None, project_root: Path) -> tuple[Dict[str, Dict], Dict[str, Dict[str, Dict]], Dict[str, Any]]:
     """
     Load migration configuration from a YAML file.
 
@@ -30,7 +30,10 @@ def load_migration_config(migration_file: Path | None, project_root: Path) -> tu
         project_root: Project root directory
 
     Returns:
-        Tuple of (experiment_migrations dict, default_migration dict)
+        Tuple of (experiment_migrations dict, task_migrations dict, default_migration dict)
+        - experiment_migrations: {experiment_id: {field: value}}
+        - task_migrations: {experiment_id: {task_id: {field: value}}}
+        - default_migration: {field: value}
     """
     migrations_dir = project_root / 'shared' / 'migrations' / 'analysis'
 
@@ -45,54 +48,104 @@ def load_migration_config(migration_file: Path | None, project_root: Path) -> tu
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
 
-    experiment_migrations = config.get('experiments', {})
-    default_migration = config.get('defaults', {'used_mcp': False, 'model_name': ''})
+    default_migration = config.get('defaults', {})
 
-    return experiment_migrations, default_migration
+    # Parse experiments - extract task migrations from nested 'tasks' key
+    experiment_migrations = {}
+    task_migrations = {}
+
+    for exp_id, exp_config in config.get('experiments', {}).items():
+        if exp_config is None:
+            continue
+
+        # Extract task-specific migrations
+        if 'tasks' in exp_config:
+            task_migrations[exp_id] = exp_config['tasks']
+
+        # Everything else is experiment-level migration
+        experiment_migrations[exp_id] = {k: v for k, v in exp_config.items() if k != 'tasks'}
+
+    return experiment_migrations, task_migrations, default_migration
 
 
 def migrate_field(
     row: Dict[str, str],
     experiment_id: str,
+    task_id: str,
     field_name: str,
     experiment_migrations: Dict[str, Dict],
+    task_migrations: Dict[str, Dict[str, Dict]],
     default_migration: Dict[str, Any]
 ) -> str:
     """
     Apply standard migration logic for a field.
 
+    Priority order (highest to lowest):
+    1. Task-specific migration (experiment + task)
+    2. Experiment-specific migration
+    3. Existing value in row
+    4. Default value
+
     Args:
         row: The row data
         experiment_id: The experiment ID
+        task_id: The task ID
         field_name: The field to migrate
         experiment_migrations: Experiment-specific migration overrides
+        task_migrations: Task-specific migration overrides {experiment_id: {task_id: {field: value}}}
         default_migration: Default values for missing fields
     """
-    if field_name not in row:
-        # Set default
-        return str(default_migration.get(field_name, ''))
-    elif experiment_id in experiment_migrations and field_name in experiment_migrations[experiment_id]:
-        # Replace
+    # Check for task-specific migration first (highest priority)
+    if experiment_id in task_migrations:
+        if task_id in task_migrations[experiment_id]:
+            if field_name in task_migrations[experiment_id][task_id]:
+                return str(task_migrations[experiment_id][task_id][field_name])
+
+    # Check for experiment-specific migration
+    if experiment_id in experiment_migrations and field_name in experiment_migrations[experiment_id]:
         return str(experiment_migrations[experiment_id][field_name])
-    else:
-        # Use existing value
+
+    # Use existing value if present
+    if field_name in row:
         return str(row[field_name])
+
+    # Fall back to default
+    return str(default_migration.get(field_name, ''))
 
 
 def migrate_row(
     row: Dict[str, str],
     experiment_id: str,
     experiment_migrations: Dict[str, Dict],
+    task_migrations: Dict[str, Dict[str, Dict]],
     default_migration: Dict[str, Any]
 ) -> Dict[str, str]:
     """
-    Apply migrations to normalize a row's structure based on experiment config.
+    Apply migrations to normalize a row's structure based on experiment and task config.
     """
     migrated_row = row.copy()
+    task_id = row.get('task_id', '')
 
-    # Handle field migrations using the standard function
-    migrated_row['used_mcp'] = migrate_field(row, experiment_id, 'used_mcp', experiment_migrations, default_migration)
-    migrated_row['model_name'] = migrate_field(row, experiment_id, 'model_name', experiment_migrations, default_migration)
+    # Get list of all fields that could be migrated
+    fields_to_migrate = []
+
+    # Add any fields specified in task-specific migrations for this experiment/task
+    if experiment_id in task_migrations and task_id in task_migrations[experiment_id]:
+        fields_to_migrate.extend(task_migrations[experiment_id][task_id].keys())
+
+    # Add any fields specified in experiment-specific migrations
+    if experiment_id in experiment_migrations:
+        fields_to_migrate.extend(experiment_migrations[experiment_id].keys())
+
+    # Deduplicate
+    fields_to_migrate = list(set(fields_to_migrate))
+
+    # Apply migrations for each field
+    for field_name in fields_to_migrate:
+        migrated_row[field_name] = migrate_field(
+            row, experiment_id, task_id, field_name,
+            experiment_migrations, task_migrations, default_migration
+        )
 
     # Remove old columns
     if 'result_num' in migrated_row:
@@ -131,6 +184,7 @@ def merge_experiment_results(
     experiments_dir: Path,
     output_file: Path,
     experiment_migrations: Dict[str, Dict],
+    task_migrations: Dict[str, Dict[str, Dict]],
     default_migration: Dict[str, Any]
 ) -> None:
     """
@@ -140,6 +194,7 @@ def merge_experiment_results(
         experiments_dir: Path to the experiments_saved directory
         output_file: Path to the output merged TSV file
         experiment_migrations: Experiment-specific migration overrides
+        task_migrations: Task-specific migration overrides
         default_migration: Default values for missing fields
     """
     all_rows = []
@@ -168,7 +223,7 @@ def merge_experiment_results(
             print(f"  - Read {len(rows)} rows")
 
             # Apply migrations to each row with the experiment_id
-            migrated_rows = [migrate_row(row, experiment_id, experiment_migrations, default_migration) for row in rows]
+            migrated_rows = [migrate_row(row, experiment_id, experiment_migrations, task_migrations, default_migration) for row in rows]
             all_rows.extend(migrated_rows)
 
     with open(output_file, 'w', encoding='utf-8', newline='') as f:
@@ -250,7 +305,7 @@ def main():
     # Step 1: Load migration configuration
     print("STARTING...")
     migration_file = args.migration
-    experiment_migrations, default_migration = load_migration_config(migration_file, project_root)
+    experiment_migrations, task_migrations, default_migration = load_migration_config(migration_file, project_root)
     if migration_file:
         print(f"Loaded migration config from: {migration_file}")
     else:
@@ -265,7 +320,7 @@ def main():
         print(f"Error: {experiments_dir} does not exist")
         return
 
-    merge_experiment_results(experiments_dir, merged_results_file, experiment_migrations, default_migration)
+    merge_experiment_results(experiments_dir, merged_results_file, experiment_migrations, task_migrations, default_migration)
 
     # Step 4: Extract and save task details
     extract_and_save_tasks(tasks_file)
