@@ -558,7 +558,7 @@ ade migrate duckdb-to-snowflake --exclude bar
 
 ## Acknowledgements
 
-ADE-bench was created with support from [dbt Labs](https://www.getdbt.com/) and [Macro](https://getmacro.com/). Their contributions to this project are what made it possible; you can thank both by checking out their other work.
+ADE-bench was created by [Benn Stancil](https://benn.website/) with support from [dbt Labs](https://www.getdbt.com/) and [Macro](https://getmacro.com/). Their contributions to this project are what made it possible; you can thank both by checking out their other work.
 
 ADE-bench also borrowed heavily from [Terminal-Bench](https://github.com/laude-institute/terminal-bench) and [Spider 2.0](https://github.com/xlang-ai/Spider2/), without which none of this would exist:
 
@@ -567,7 +567,7 @@ ADE-bench also borrowed heavily from [Terminal-Bench](https://github.com/laude-i
 
 ## Contact?
 
-If you want to learn more or get involved, you can find us in #tools-ade-bench in the [dbt Labs community Slack](https://www.getdbt.com/community/join-the-community). Also, feel free to reach out to me (Benn) at <benn.electronicmail@gmail.com>.
+If you want to learn more or get involved, you can find us in #tools-ade-bench in the [dbt Labs community Slack](https://www.getdbt.com/community/join-the-community). Also, feel free to reach out to Benn at <benn.electronicmail@gmail.com>.
 
 ---
 
