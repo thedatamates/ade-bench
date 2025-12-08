@@ -145,8 +145,8 @@ ade run \
   --project-type dbt \ # Which project variant to run (currently dbt or dbt-fusion)
   --agent sage \ # Which agent to use (e.g., `sage`, `claude`, `codex`)
 
-  --model \ # Optional; which specific model to use for different agents (e.g., claude-3-5-sonnet-20241022)
-  --exclude_task_ids foo001 \ # Optional; if you run all tasks, you can exclude tasks with this flag
+  --model claude-opus-4-5-20251101 \ # Optional; which specific model to use for different agents.
+  --exclude_task_ids foo001 \ # Optional; if you run all tasks, you can exclude tasks with this flag.
   --n-concurrent-trials 4 \ #  Optional; sets trial concurrency limit; defaults to 4.
   --n-attempts 1 \ # Optional; sets times to run each task; defaults to 1.
   --max-episodes 50 \ # Optional; the maximum number of calls to an agent's LM; defaults to 50.
@@ -364,22 +364,22 @@ ADE-bench currently supports the following agents:
 - Claude Code - `--agent claude`
 - OpenAI Codex - `--agent codex`
 - Gemini CLI - `--agent gemini`
-- Macro - `--agent macro`
+
+Optionally, you can include a `--model {model-id}` flag to specify which model to use. For more information on models and their IDs, refer to documentation provided by [Claude](https://platform.claude.com/docs/en/about-claude/models/overview), [Codex](https://developers.openai.com/codex/models/), and [Gemini](https://geminicli.com/docs/cli/model/)
 
 The following commands are run to call each agent:
 
 ```bash
 # CLAUDE
-claude --output-format json -p {task_prompt} \
+claude --output-format json -p {task_prompt} --model {model-id} \
   --allowedTools Bash Edit Write NotebookEdit WebFetch
 
 # CODEX
 printenv OPENAI_API_KEY | codex login --with-api-key && \
-codex --ask-for-approval never exec --sandbox workspace-write --skip-git-repo-check {task_prompt}
+codex --ask-for-approval never --model {model-id} exec --sandbox workspace-write --skip-git-repo-check {task_prompt}
 
 # GEMINI
-gemini --output-format json --yolo --prompt {task_prompt} \
-  --allowed-tools Bash Edit Write NotebookEdit WebFetch
+gemini --output-format json --yolo --prompt {task_prompt} --model {model-id}
 ```
 
 Configuration files for each agent are found in the `/shared/config` directory. You can use `CLAUDE.md` to configure Claude Code, `AGENTS.md` to configure Codex, and `GEMINI.md` to configure Gemini.
@@ -457,7 +457,7 @@ ADE-bench will use this user to create an empty testing environment (database, u
 Run the following commands:
 
 ```sql
--- Put a secure password here, inside 'single quotes'. 
+-- Put a secure password here, inside 'single quotes'.
 -- Make sure you keep the semicolon after the quotes.
 SET PASSWORD_VARIABLE= ;
 
@@ -474,9 +474,9 @@ GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE ADE_BENCH_ADMIN_ROLE;
 -- Create admin user
 CREATE OR REPLACE USER ADE_BENCH_ADMIN_USER
     PASSWORD=$PASSWORD_VARIABLE
-    DEFAULT_ROLE=ADE_BENCH_ADMIN_ROLE 
-    MUST_CHANGE_PASSWORD=FALSE 
-    TYPE=LEGACY_SERVICE 
+    DEFAULT_ROLE=ADE_BENCH_ADMIN_ROLE
+    MUST_CHANGE_PASSWORD=FALSE
+    TYPE=LEGACY_SERVICE
     DEFAULT_WAREHOUSE=COMPUTE_WH;
 
 -- Configure admin user
@@ -484,13 +484,13 @@ GRANT ROLE ADE_BENCH_ADMIN_ROLE TO USER ADE_BENCH_ADMIN_USER;
 
 
 SELECT 'SNOWFLAKE_ACCOUNT=' || CURRENT_ORGANIZATION_NAME() || '-' || CURRENT_ACCOUNT_NAME() as ".env values"
-UNION ALL 
+UNION ALL
 SELECT 'SNOWFLAKE_USER=ADE_BENCH_ADMIN_USER'
-UNION ALL 
+UNION ALL
 SELECT 'SNOWFLAKE_PASSWORD=' || $PASSWORD_VARIABLE
-UNION ALL 
+UNION ALL
 SELECT 'SNOWFLAKE_WAREHOUSE=' || CURRENT_WAREHOUSE()
-UNION ALL 
+UNION ALL
 SELECT 'SNOWFLAKE_ROLE=ADE_BENCH_ADMIN_ROLE'
 ;
 ```
