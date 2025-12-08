@@ -36,7 +36,10 @@ except ImportError:
     SNOWFLAKE_AVAILABLE = False
     snowflake = None
 
-from duckdb_utils import DuckDBExtractor
+try:
+    from .duckdb_utils import DuckDBExtractor
+except ImportError:
+    from duckdb_utils import DuckDBExtractor
 
 # Configuration - modify these paths as needed
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -342,29 +345,37 @@ class DuckDBToSnowflakeConverter:
         return results
 
 
-def main():
-    parser = argparse.ArgumentParser(add_help=False)
+def main(include: List[str] = None, exclude: List[str] = None, use_database_export: bool = False):
+    # If called from command line with no parameters, use argparse
+    if include is None and exclude is None and use_database_export is False and len(sys.argv) > 1:
+        parser = argparse.ArgumentParser(add_help=False)
 
-    parser.add_argument(
-        "--exclude",
-        nargs="*",
-        default=[]
-    )
+        parser.add_argument(
+            "--exclude",
+            nargs="*",
+            default=[]
+        )
 
-    parser.add_argument(
-        "--include",
-        nargs="*",
-        default=[]
-    )
+        parser.add_argument(
+            "--include",
+            nargs="*",
+            default=[]
+        )
 
-    parser.add_argument(
-        "--use-database-export",
-        action="store_true",
-        help="Use DuckDB's EXPORT DATABASE command for more efficient export (default: use individual table export)"
-    )
+        parser.add_argument(
+            "--use-database-export",
+            action="store_true",
+            help="Use DuckDB's EXPORT DATABASE command for more efficient export (default: use individual table export)"
+        )
 
+        args = parser.parse_args()
+        include = args.include
+        exclude = args.exclude
+        use_database_export = args.use_database_export
 
-    args = parser.parse_args()
+    # Convert None to empty list
+    include = include or []
+    exclude = exclude or []
 
     # Check if Snowflake is available
     if not SNOWFLAKE_AVAILABLE:
@@ -376,7 +387,7 @@ def main():
 
     # Perform conversion
     try:
-        results = converter.convert_all(args.exclude, args.include, args.use_database_export)
+        results = converter.convert_all(exclude, include, use_database_export)
 
         # Print summary
         print(f"\n{'='*60}")

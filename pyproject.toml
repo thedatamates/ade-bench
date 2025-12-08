@@ -8,6 +8,7 @@ dependencies = [
     "pydantic>=2.0",
     "pyyaml>=6.0",
     "docker>=6.0",
+    "podman>=5.6",
     "libtmux>=0.23",
     "tqdm>=4.65",
     "click>=8.1",
