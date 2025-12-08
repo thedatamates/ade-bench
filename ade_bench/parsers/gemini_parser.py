@@ -36,13 +36,6 @@ class GeminiParser(BaseParser):
         }
 
         try:
-            # Check for API error before parsing stats
-            # Gemini CLI outputs: "Error when talking to Gemini API Full report available at: /tmp/gemini-client-error-..."
-            error = None
-            if "Error when talking to Gemini API" in content:
-                # This is typically a rate limit / quota error
-                error = "quota_exceeded"
-
             # Find the last JSON object in the output (the stats)
             # The JSON might have shell prompt appended, so we need to extract it carefully
 
@@ -86,7 +79,13 @@ class GeminiParser(BaseParser):
                         continue
 
             if not json_str:
-                self._logger.warning("Could not find Gemini stats JSON in output")
+                # No stats found - check for API error
+                # Gemini CLI outputs: "Error when talking to Gemini API Full report available at: /tmp/gemini-client-error-..."
+                if "Error when talking to Gemini API" in content:
+                    self._logger.warning("Gemini API error detected (quota/rate limit)")
+                    default_return["error"] = "quota_exceeded"
+                else:
+                    self._logger.warning("Could not find Gemini stats JSON in output")
                 return default_return
 
             data = json.loads(json_str)
@@ -154,8 +153,8 @@ class GeminiParser(BaseParser):
                 "cache_tokens": total_cache_tokens,
                 "cost_usd": total_cost_usd,
                 "num_turns": total_num_turns,
-                "success": success and error is None,
-                "error": error,
+                "success": success,
+                "error": None,
                 "model_name": primary_model_name or "default"
             }
 
