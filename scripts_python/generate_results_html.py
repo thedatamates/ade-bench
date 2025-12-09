@@ -3,6 +3,7 @@
 
 import json
 import sys
+import html
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -150,20 +151,20 @@ class ResultsHTMLGenerator:
         agent = experiment_data.get('agent_from_metadata') or summary['agent'] or 'Unknown'
 
         # Simple template replacement
-        html_content = template_content.replace('{{ experiment_id }}', experiment_data['experiment_id'])
-        html_content = html_content.replace('{{ start_time }}', experiment_data['start_time'])
-        html_content = html_content.replace('{{ experiment_runtime }}', experiment_data['experiment_runtime'])
-        html_content = html_content.replace('{{ total_task_runtime }}', self._format_duration_seconds(summary['total_runtime_seconds']))
-        html_content = html_content.replace('{{ total_tasks }}', str(summary['total_tasks']))
-        html_content = html_content.replace('{{ successful_tasks }}', str(summary['passed_count']))
-        html_content = html_content.replace('{{ failed_tasks }}', str(summary['failed_count']))
-        html_content = html_content.replace('{{ errored_tasks }}', str(summary['errored_count']))
-        html_content = html_content.replace('{{ success_pct }}', f"{summary['success_rate']:.1f}")
-        html_content = html_content.replace('{{ total_cost }}', f"${summary['total_cost']:.4f}")
-        html_content = html_content.replace('{{ agent }}', agent)
-        html_content = html_content.replace('{{ model }}', model)
-        html_content = html_content.replace('{{ db_type }}', summary['db_type'] or 'Unknown')
-        html_content = html_content.replace('{{ project_type }}', summary['project_type'] or 'Unknown')
+        html_content = template_content.replace('{{ experiment_id }}', html.escape(experiment_data['experiment_id']))
+        html_content = html_content.replace('{{ start_time }}', html.escape(experiment_data['start_time']))
+        html_content = html_content.replace('{{ experiment_runtime }}', html.escape(experiment_data['experiment_runtime']))
+        html_content = html_content.replace('{{ total_task_runtime }}', html.escape(self._format_duration_seconds(summary['total_runtime_seconds'])))
+        html_content = html_content.replace('{{ total_tasks }}', html.escape(str(summary['total_tasks'])))
+        html_content = html_content.replace('{{ successful_tasks }}', html.escape(str(summary['passed_count'])))
+        html_content = html_content.replace('{{ failed_tasks }}', html.escape(str(summary['failed_count'])))
+        html_content = html_content.replace('{{ errored_tasks }}', html.escape(str(summary['errored_count'])))
+        html_content = html_content.replace('{{ success_pct }}', html.escape(f"{summary['success_rate']:.1f}"))
+        html_content = html_content.replace('{{ total_cost }}', html.escape(f"${summary['total_cost']:.4f}"))
+        html_content = html_content.replace('{{ agent }}', html.escape(agent))
+        html_content = html_content.replace('{{ model }}', html.escape(model))
+        html_content = html_content.replace('{{ db_type }}', html.escape(summary['db_type'] or 'Unknown'))
+        html_content = html_content.replace('{{ project_type }}', html.escape(summary['project_type'] or 'Unknown'))
         html_content = html_content.replace('{{ used_mcp }}', 'Yes' if summary['used_mcp'] else 'No')
 
         # Replace the entire table section with the generated HTML table
@@ -378,10 +379,10 @@ class ResultsHTMLGenerator:
             template_content = f.read()
 
         # Simple template replacement
-        html_content = template_content.replace('{{ title }}', title)
-        html_content = html_content.replace('{{ task_id }}', task_id)
-        html_content = html_content.replace('{{ content }}', content)
-        html_content = html_content.replace('{{ content_type }}', content_type)
+        html_content = template_content.replace('{{ title }}', html.escape(title))
+        html_content = html_content.replace('{{ task_id }}', html.escape(task_id))
+        html_content = html_content.replace('{{ content }}', html.escape(content))
+        html_content = html_content.replace('{{ content_type }}', html.escape(content_type))
 
         with open(output_path, 'w') as f:
             f.write(html_content)
