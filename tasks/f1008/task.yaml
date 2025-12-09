@@ -13,6 +13,10 @@ tags:
   - dbt
   - model-creation
 
+# Test setup script to run before dbt tests
+test_setup: |-
+  dbt deps
+
 # Tables to compare for solution
 solution_seeds:
   - table_name: foo

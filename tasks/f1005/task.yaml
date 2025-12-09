@@ -21,6 +21,10 @@ tags:
   - debugging
   - dbt-project-configuration
 
+# Test setup script to run before dbt tests
+test_setup: |-
+  dbt deps
+
 # Tables to compare for solution
 solution_seeds:
   - table_name: constructor_points
