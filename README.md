@@ -20,7 +20,7 @@ It does this by running each task in a separate temporary sandbox, and then eval
 ### 1. Clone this repo
 
 ```bash
-git clone https://github.com/thedatamates/ade-bench.git
+git clone https://github.com/dbt-labs/ade-bench.git
 cd ade-bench
 ```
 
@@ -113,7 +113,7 @@ ade run all --db duckdb --project-type dbt --agent claude
 
 - Use the dbt Fusion engine instead of dbt Core with `--project-type dbt-fusion` ([set up Snowflake](#snowflake-setup) first)
 - Enable the dbt MCP server with the `--use-mcp` flag (requires Snowflake, see [MCP](#enabling-the-mcp-server) section)
-- [Contribute additional tasks or datasets](/CONTRIBUTING.md)
+- [Contribute additional tasks or datasets](/docs/CONTRIBUTING.md)
 
 ---
 
@@ -162,7 +162,7 @@ ade run \
   --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
 ```
 
-See also: [complete usage documentation](CLI.md).
+See also: [complete usage documentation](/docs/CLI.md).
 
 ### Task selection
 
@@ -407,7 +407,7 @@ The sage agent is not really an agent—or, it's a very dumb agent. It's an agen
 
 In other words, the sage agent is the answer key to the task. When ADE-bench is run where `--agent sage` all the tests should pass. If they don't, something is wrong with the tasks themselves. So, it's important for tasks to have a solution script to make sure that the task is correctly configured.
 
-**Note**: The `solution.sh` script might be different for different database and project variants. More on how to handle this is discussed in [the contributing guide](/CONTRIBUTING.md#sharing-projects-across-databases-and-project-types).
+**Note**: The `solution.sh` script might be different for different database and project variants. More on how to handle this is discussed in [the contributing guide](/docs/CONTRIBUTING.md#sharing-projects-across-databases-and-project-types).
 
 ---
 
