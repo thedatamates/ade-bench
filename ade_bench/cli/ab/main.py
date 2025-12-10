@@ -37,6 +37,7 @@ app = typer.Typer(
     help="ADE-bench: Analytics and Data Engineering Benchmark",
     invoke_without_command=True,
     no_args_is_help=False,
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 
