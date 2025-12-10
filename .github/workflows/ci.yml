@@ -55,8 +55,8 @@ jobs:
 
       - name: Check all tasks passed
         run: |
-          # Find the most recent results.json file
-          RESULTS_FILE=$(find experiments -name "results.json" -path "*/experiments/*/results.json" | head -1)
+          # Find the results.json file in the run directory
+          RESULTS_FILE=$(find experiments -maxdepth 2 -name "results.json" | head -1)
           
           if [ -z "$RESULTS_FILE" ]; then
             echo "Error: No results.json file found"
