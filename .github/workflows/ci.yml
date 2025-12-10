@@ -4,6 +4,15 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - 'ade_bench/**'
+      - 'tasks/**'
+      - 'shared/**'
+      - 'docker/**'
+      - 'scripts_python/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/ci.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
