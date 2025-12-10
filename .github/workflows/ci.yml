@@ -32,7 +32,7 @@ jobs:
         run: uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
 
       - name: Run benchmark
-        run: uv run ade run all --agent sage --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 1
+        run: uv run ade run airbnb001 --agent sage --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 1
         env:
           USE_DYNAMIC_LOGGING: "FALSE"
 
