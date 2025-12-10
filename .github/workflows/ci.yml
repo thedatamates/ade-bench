@@ -1,0 +1,95 @@
+name: Check Regressions
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-regressions:
+    name: Check sage agent always passes (${{ matrix.project-type == 'dbt' && 'dbt Core' || 'dbt Fusion engine' }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project-type: [dbt, dbt-fusion]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Download DuckDB databases
+        run: uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
+
+      - name: Run benchmark
+        run: uv run ade run all --agent sage --db duckdb --project-type ${{ matrix.project-type }} --no-diffs --n-concurrent-trials 1
+
+      - name: Generate HTML report
+        if: always()
+        run: |
+          RUN_DIR=$(find experiments -mindepth 1 -maxdepth 1 -type d | head -1)
+          if [ -n "$RUN_DIR" ]; then
+            echo "Generating HTML report for: $RUN_DIR"
+            uv run python -c "
+          from scripts_python.generate_results_html import ResultsHTMLGenerator
+          from pathlib import Path
+          generator = ResultsHTMLGenerator(Path('${RUN_DIR}'))
+          generator.generate_all()
+          "
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.project-type }}
+          path: experiments/
+
+      - name: Check all tasks passed
+        run: |
+          # Find the most recent results.json file
+          RESULTS_FILE=$(find experiments -name "results.json" -path "*/experiments/*/results.json" | head -1)
+          
+          if [ -z "$RESULTS_FILE" ]; then
+            echo "Error: No results.json file found"
+            exit 1
+          fi
+          
+          echo "Checking results in: $RESULTS_FILE"
+          
+          # Check that all tasks are resolved
+          python3 << EOF
+          import json
+          import sys
+          
+          with open("${RESULTS_FILE}") as f:
+              results = json.load(f)
+          
+          failed_tasks = []
+          for task in results["results"]:
+              if task.get("is_resolved") is not True:
+                  parser_results = task.get("parser_results") or {}
+                  failed_tests = [k for k, v in parser_results.items() if v != "passed"]
+                  failed_tasks.append({
+                      "task_id": task["task_id"],
+                      "failed_tests": failed_tests
+                  })
+          
+          if failed_tasks:
+              print(f"❌ {len(failed_tasks)} task(s) failed:")
+              for task in failed_tasks:
+                  print(f"  - {task['task_id']}: {task['failed_tests']}")
+              sys.exit(1)
+          else:
+              total = len(results["results"])
+              print(f"✅ All {total} task(s) passed successfully")
+          EOF
