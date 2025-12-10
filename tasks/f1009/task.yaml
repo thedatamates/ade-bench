@@ -19,6 +19,7 @@ tags:
 
 # Test setup script to run before dbt tests
 test_setup: |-
+  dbt deps
   dbt run --select analysis__drivers_current_age
 
 # Variants for different database and project combinations

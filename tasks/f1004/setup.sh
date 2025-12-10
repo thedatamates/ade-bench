@@ -29,4 +29,5 @@ r6="position_desc = 'Withdrew'"
 "${SED_CMD[@]}" "s/${f5}/${r5}/g" models/stats/finishes_by_driver.sql
 "${SED_CMD[@]}" "s/${f6}/${r6}/g" models/stats/finishes_by_driver.sql
 
+dbt deps
 dbt run

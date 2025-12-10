@@ -22,6 +22,7 @@ tags:
 
 # Test setup script to run before dbt tests
 test_setup: |-
+  dbt deps
   dbt run
 
 # Tables to compare for solution

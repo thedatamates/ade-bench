@@ -1,0 +1,11 @@
+packages:
+  - name: quickbooks_source
+    package: fivetran/quickbooks_source
+    version: 0.10.1
+  - name: fivetran_utils
+    package: fivetran/fivetran_utils
+    version: 0.4.11
+  - name: dbt_utils
+    package: dbt-labs/dbt_utils
+    version: 1.3.2
+sha1_hash: 45f856434cf0a90c226de3128710097fee6d4021

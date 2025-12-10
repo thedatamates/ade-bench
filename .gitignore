@@ -53,7 +53,7 @@ target/
 logs/
 *.log
 .user.yml
-package-lock.yml
+shared/projects/dbt/**/dbt_packages/
 
 # Databases
 *.db
