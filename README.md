@@ -20,7 +20,7 @@ It does this by running each task in a separate temporary sandbox, and then eval
 ### 1. Clone this repo
 
 ```bash
-git clone https://github.com/thedatamates/ade-bench.git
+git clone https://github.com/dbt-labs/ade-bench.git
 cd ade-bench
 ```
 
