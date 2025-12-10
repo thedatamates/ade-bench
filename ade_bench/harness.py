@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -238,47 +239,58 @@ class Harness:
         return passing_tests == total_tests
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
-        # Generate solution tests if needed
-        if trial_handler.task.solution_seeds:
-            self._generate_solution_tests(trial_handler)
+        # Create a trial-specific temp directory for tests to avoid race conditions
+        # when multiple variants of the same task run concurrently
+        with tempfile.TemporaryDirectory() as temp_test_dir:
+            temp_test_path = Path(temp_test_dir) / "tests"
+            temp_test_path.mkdir()
 
-        # Copy test-related files
-        terminal.copy_to_container(
-            paths=[
-                trial_handler.agent_pane_path,
-                trial_handler.run_tests_path,
-                trial_handler.test_dir,
-            ],
-            container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
-        )
+            # Copy existing tests from the shared test directory (excluding AUTO_* files
+            # which will be regenerated)
+            if trial_handler.test_dir.exists():
+                for test_file in trial_handler.test_dir.iterdir():
+                    if test_file.is_file() and not test_file.name.startswith("AUTO_"):
+                        shutil.copy2(test_file, temp_test_path / test_file.name)
 
-        # Copy test scripts to the scripts directory
-        for script_path in trial_handler.task.test_script_paths:
+            # Generate solution tests in the temp directory
+            if trial_handler.task.solution_seeds:
+                self._generate_solution_tests(trial_handler, temp_test_path)
+
+            # Copy test-related files from temp directory
             terminal.copy_to_container(
-                paths=[script_path],
-                container_dir=str(DockerComposeManager.CONTAINER_SCRIPTS_DIR),
-                container_filename=script_path.name
+                paths=[
+                    trial_handler.agent_pane_path,
+                    trial_handler.run_tests_path,
+                    temp_test_path,
+                ],
+                container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
             )
 
-        # Copy seeds directory if it exists
-        if trial_handler.seeds_dir.exists():
-            terminal.copy_to_container(
-                paths=[trial_handler.seeds_dir],
-                container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
-            )
+            # Copy test scripts to the scripts directory
+            for script_path in trial_handler.task.test_script_paths:
+                terminal.copy_to_container(
+                    paths=[script_path],
+                    container_dir=str(DockerComposeManager.CONTAINER_SCRIPTS_DIR),
+                    container_filename=script_path.name
+                )
 
-        # Copy solutions directory if it exists
-        if trial_handler.solutions_dir.exists():
-            terminal.copy_to_container(
-                paths=[trial_handler.solutions_dir],
-                container_dir=str(DockerComposeManager.CONTAINER_SOLUTIONS_DIR),
-            )
+            # Copy seeds directory if it exists
+            if trial_handler.seeds_dir.exists():
+                terminal.copy_to_container(
+                    paths=[trial_handler.seeds_dir],
+                    container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
+                )
 
-        # Handle test_setup script if it exists
-        if trial_handler.task.test_setup:
-            # Create a temporary directory and file
-            with tempfile.TemporaryDirectory() as temp_dir:
-                test_setup_path = Path(temp_dir) / "test-setup.sh"
+            # Copy solutions directory if it exists
+            if trial_handler.solutions_dir.exists():
+                terminal.copy_to_container(
+                    paths=[trial_handler.solutions_dir],
+                    container_dir=str(DockerComposeManager.CONTAINER_SOLUTIONS_DIR),
+                )
+
+            # Handle test_setup script if it exists
+            if trial_handler.task.test_setup:
+                test_setup_path = Path(temp_test_dir) / "test-setup.sh"
 
                 with open(test_setup_path, 'w') as f:
                     f.write("#!/bin/bash\n")
@@ -353,29 +365,25 @@ class Harness:
 
         return FailureMode.NONE
 
-    def _generate_solution_tests(self, trial_handler: TrialHandler) -> None:
+    def _generate_solution_tests(self, trial_handler: TrialHandler, target_dir: Path) -> None:
         """Generate solution tests for tables specified in solution_seeds.
 
         Args:
             trial_handler: The trial handler containing task configuration
+            target_dir: Directory to write generated tests to
         """
         if not trial_handler.task.solution_seeds:
             return
 
         log_harness_info(self._logger, trial_handler.task_id, "eval", f"Generating solution tests...")
 
-        # Ensure test directory exists
-        test_dir = trial_handler.test_dir
-        test_dir.mkdir(parents=True, exist_ok=True)
-
-        # Remove existing AUTO tests
-        for auto_test in test_dir.glob("AUTO_*.sql"):
-            auto_test.unlink()
+        # Ensure target directory exists
+        target_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate tests for each solution seed
         for config in trial_handler.task.get_solution_seed_configs():
             try:
-                generate_solution_tests(config.table_name, test_dir, config)
+                generate_solution_tests(config.table_name, target_dir, config)
             except Exception as e:
                 self._logger.error(f"Failed to generate tests for {config.table_name}: {e}")
 
