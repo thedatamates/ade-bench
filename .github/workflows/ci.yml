@@ -38,10 +38,17 @@ jobs:
       - name: Download DuckDB databases
         run: uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
 
+      # Pre-build the Docker image once to avoid race conditions when multiple
+      # concurrent trials try to build the same cached image simultaneously
+      - name: Pre-build Docker image
+        run: docker compose -f shared/defaults/docker-compose-duckdb-dbt.yaml build
+
       - name: Run benchmark
-        run: uv run ade run all --agent ${{ matrix.agent }} --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 8
+        run: uv run ade run all --agent ${{ matrix.agent }} --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 6 --no-rebuild
         env:
           USE_DYNAMIC_LOGGING: "FALSE"
+          DEFAULT_TEST_TIMEOUT_SEC: "120"
+          SETUP_TIMEOUT_SEC: "180"
 
       - name: Generate HTML report
         if: always()
