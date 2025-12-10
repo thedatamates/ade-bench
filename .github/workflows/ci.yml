@@ -1,0 +1,147 @@
+name: Check Regressions
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ade_bench/**'
+      - 'tasks/**'
+      - 'shared/**'
+      - 'docker/**'
+      - 'scripts_python/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-regressions:
+    name: ${{ matrix.agent == 'sage' && 'Sage agent always passes' || 'None agent always fails' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - agent: sage
+            expect_success: true
+          - agent: none
+            expect_success: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Download DuckDB databases
+        run: uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
+
+      # Pre-build the Docker image once to avoid race conditions when multiple
+      # concurrent trials try to build the same cached image simultaneously
+      - name: Pre-build Docker image
+        run: docker build -t ade-bench-base -f docker/base/Dockerfile.duckdb-dbt .
+
+      - name: Run benchmark
+        run: uv run ade run all --agent ${{ matrix.agent }} --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 6 --no-rebuild
+        env:
+          USE_DYNAMIC_LOGGING: "FALSE"
+          DEFAULT_TEST_TIMEOUT_SEC: "120"
+          SETUP_TIMEOUT_SEC: "180"
+
+      - name: Generate HTML report
+        if: always()
+        run: |
+          RUN_DIR=$(find experiments -mindepth 1 -maxdepth 1 -type d | head -1)
+          if [ -n "$RUN_DIR" ]; then
+            echo "Generating HTML report for: $RUN_DIR"
+            uv run python -c "
+          from scripts_python.generate_results_html import ResultsHTMLGenerator
+          from pathlib import Path
+          generator = ResultsHTMLGenerator(Path('${RUN_DIR}'))
+          generator.generate_all()
+          "
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.agent }}
+          path: experiments/
+
+      - name: Check results match expectations
+        run: |
+          # Find the results.json file in the run directory
+          RESULTS_FILE=$(find experiments -maxdepth 2 -name "results.json" | head -1)
+          
+          if [ -z "$RESULTS_FILE" ]; then
+            echo "Error: No results.json file found"
+            exit 1
+          fi
+          
+          echo "Checking results in: $RESULTS_FILE"
+          echo "Expecting success: ${{ matrix.expect_success }}"
+          
+          # Check results against expectations
+          python3 << EOF
+          import json
+          import sys
+          
+          EXPECT_SUCCESS = "${{ matrix.expect_success }}" == "true"
+          
+          with open("${RESULTS_FILE}") as f:
+              results = json.load(f)
+          
+          # Tasks that are allowed to pass even for the "none" agent
+          ALLOWED_TO_PASS = {"analytics_engineering001"}
+          
+          failed_tasks = []
+          passed_tasks = []
+          for task in results["results"]:
+              task_id = task["task_id"]
+              if task.get("is_resolved") is True:
+                  passed_tasks.append(task_id)
+              else:
+                  parser_results = task.get("parser_results") or {}
+                  failed_tests = [k for k, v in parser_results.items() if v != "passed"]
+                  failed_tasks.append({
+                      "task_id": task_id,
+                      "failed_tests": failed_tests
+                  })
+          
+          total = len(results["results"])
+          
+          if EXPECT_SUCCESS:
+              if not failed_tasks:
+                  print(f"✅ All {total} task(s) passed successfully (as expected)")
+              else:
+                  print(f"❌ {len(failed_tasks)} task(s) failed (expected all to pass):")
+                  for task in failed_tasks:
+                      print(f"  - {task['task_id']}: {task['failed_tests']}")
+                  sys.exit(1)
+          else:
+              # For "none" agent: fail if any task passes (except allowed ones)
+              unexpected_passes = [t for t in passed_tasks if t not in ALLOWED_TO_PASS]
+              if unexpected_passes:
+                  print(f"❌ {len(unexpected_passes)} task(s) unexpectedly passed:")
+                  for task_id in unexpected_passes:
+                      print(f"  - {task_id}")
+                  sys.exit(1)
+              else:
+                  allowed_passed = [t for t in passed_tasks if t in ALLOWED_TO_PASS]
+                  if allowed_passed:
+                      print(f"✅ {len(failed_tasks)} task(s) failed as expected, {len(allowed_passed)} allowed task(s) passed: {allowed_passed}")
+                  else:
+                      print(f"✅ All {len(failed_tasks)} task(s) failed (as expected)")
+          EOF
