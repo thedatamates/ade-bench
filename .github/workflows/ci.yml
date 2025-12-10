@@ -41,7 +41,7 @@ jobs:
       # Pre-build the Docker image once to avoid race conditions when multiple
       # concurrent trials try to build the same cached image simultaneously
       - name: Pre-build Docker image
-        run: docker compose -f shared/defaults/docker-compose-duckdb-dbt.yaml build
+        run: docker build -t ade-bench-base -f docker/base/Dockerfile.duckdb-dbt .
 
       - name: Run benchmark
         run: uv run ade run all --agent ${{ matrix.agent }} --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 6 --no-rebuild
