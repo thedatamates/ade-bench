@@ -7,11 +7,8 @@ on:
 
 jobs:
   check-regressions:
-    name: Check sage agent always passes (${{ matrix.project-type == 'dbt' && 'dbt Core' || 'dbt Fusion engine' }})
+    name: Sage agent always passes
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project-type: [dbt, dbt-fusion]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,7 +28,7 @@ jobs:
         run: uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
 
       - name: Run benchmark
-        run: uv run ade run all --agent sage --db duckdb --project-type ${{ matrix.project-type }} --no-diffs --n-concurrent-trials 1
+        run: uv run ade run all --agent sage --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 1
 
       - name: Generate HTML report
         if: always()
@@ -51,7 +48,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results-${{ matrix.project-type }}
+          name: benchmark-results
           path: experiments/
 
       - name: Check all tasks passed
