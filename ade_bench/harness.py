@@ -256,6 +256,23 @@ class Harness:
             if trial_handler.task.solution_seeds:
                 self._generate_solution_tests(trial_handler, temp_test_path)
 
+                # Also write the generated tests back to the shared directory as a log
+                # of what was generated (useful for debugging). This is safe because we
+                # copy from temp_test_path to the container, not from the shared directory.
+                # Clear existing AUTO tests first, then copy new ones.
+                shared_test_dir = trial_handler.test_dir
+                shared_test_dir.mkdir(parents=True, exist_ok=True)
+                for auto_test in shared_test_dir.glob("AUTO_*.sql"):
+                    try:
+                        auto_test.unlink()
+                    except OSError:
+                        pass  # Ignore errors if another process deleted it
+                for test_file in temp_test_path.glob("AUTO_*.sql"):
+                    try:
+                        shutil.copy2(test_file, shared_test_dir / test_file.name)
+                    except OSError:
+                        pass  # Ignore errors if another process is writing
+
             # Copy test-related files from temp directory
             terminal.copy_to_container(
                 paths=[
