@@ -29,6 +29,8 @@ jobs:
 
       - name: Run benchmark
         run: uv run ade run all --agent sage --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 1
+        env:
+          USE_DYNAMIC_LOGGING: "FALSE"
 
       - name: Generate HTML report
         if: always()
