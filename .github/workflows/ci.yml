@@ -11,8 +11,15 @@ concurrency:
 
 jobs:
   check-regressions:
-    name: Sage agent always passes
+    name: ${{ matrix.agent == 'sage' && 'Sage agent always passes' || 'None agent always fails' }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - agent: sage
+            expect_success: true
+          - agent: none
+            expect_success: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,7 +39,7 @@ jobs:
         run: uv run --with gdown gdown --folder https://drive.google.com/drive/folders/1CNS_8mf81to02868HA-celmcPEFu4BPE -O shared/databases/duckdb
 
       - name: Run benchmark
-        run: uv run ade run airbnb001 --agent none --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 1
+        run: uv run ade run all --agent ${{ matrix.agent }} --db duckdb --project-type dbt --no-diffs --n-concurrent-trials 1
         env:
           USE_DYNAMIC_LOGGING: "FALSE"
 
@@ -54,10 +61,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results
+          name: benchmark-results-${{ matrix.agent }}
           path: experiments/
 
-      - name: Check all tasks passed
+      - name: Check results match expectations
         run: |
           # Find the results.json file in the run directory
           RESULTS_FILE=$(find experiments -maxdepth 2 -name "results.json" | head -1)
@@ -68,31 +75,57 @@ jobs:
           fi
           
           echo "Checking results in: $RESULTS_FILE"
+          echo "Expecting success: ${{ matrix.expect_success }}"
           
-          # Check that all tasks are resolved
+          # Check results against expectations
           python3 << EOF
           import json
           import sys
           
+          EXPECT_SUCCESS = "${{ matrix.expect_success }}" == "true"
+          
           with open("${RESULTS_FILE}") as f:
               results = json.load(f)
           
+          # Tasks that are allowed to pass even for the "none" agent
+          ALLOWED_TO_PASS = {"analytics_engineering001"}
+          
           failed_tasks = []
+          passed_tasks = []
           for task in results["results"]:
-              if task.get("is_resolved") is not True:
+              task_id = task["task_id"]
+              if task.get("is_resolved") is True:
+                  passed_tasks.append(task_id)
+              else:
                   parser_results = task.get("parser_results") or {}
                   failed_tests = [k for k, v in parser_results.items() if v != "passed"]
                   failed_tasks.append({
-                      "task_id": task["task_id"],
+                      "task_id": task_id,
                       "failed_tests": failed_tests
                   })
           
-          if failed_tasks:
-              print(f"❌ {len(failed_tasks)} task(s) failed:")
-              for task in failed_tasks:
-                  print(f"  - {task['task_id']}: {task['failed_tests']}")
-              sys.exit(1)
+          total = len(results["results"])
+          
+          if EXPECT_SUCCESS:
+              if not failed_tasks:
+                  print(f"✅ All {total} task(s) passed successfully (as expected)")
+              else:
+                  print(f"❌ {len(failed_tasks)} task(s) failed (expected all to pass):")
+                  for task in failed_tasks:
+                      print(f"  - {task['task_id']}: {task['failed_tests']}")
+                  sys.exit(1)
           else:
-              total = len(results["results"])
-              print(f"✅ All {total} task(s) passed successfully")
+              # For "none" agent: fail if any task passes (except allowed ones)
+              unexpected_passes = [t for t in passed_tasks if t not in ALLOWED_TO_PASS]
+              if unexpected_passes:
+                  print(f"❌ {len(unexpected_passes)} task(s) unexpectedly passed:")
+                  for task_id in unexpected_passes:
+                      print(f"  - {task_id}")
+                  sys.exit(1)
+              else:
+                  allowed_passed = [t for t in passed_tasks if t in ALLOWED_TO_PASS]
+                  if allowed_passed:
+                      print(f"✅ {len(failed_tasks)} task(s) failed as expected, {len(allowed_passed)} allowed task(s) passed: {allowed_passed}")
+                  else:
+                      print(f"✅ All {len(failed_tasks)} task(s) failed (as expected)")
           EOF
