@@ -2,15 +2,13 @@
 
 Contributions to the ADE-bench project are welcome. All contributions are equally loved and appreciated—but contributions of new tests, either from new data sources or on top of existing ones, are loved more.
 
-## Contributing new tasks or tests
-
 Most tests require three major components:
 
 - A dbt project. This the environment that the agent will work in.
 - Data. This is set of tables that the dbt project runs against. It can be an anonymized sample of data, but tests need data of some kind to be effective.
 - A question to ask the agent, and an answer key to evaluate their work.
 
-This document describes some of the technical details that are useful for contributing new tasks or tests. For an overview of how ADE-bench works, see the [README](/README.md).
+This document describes some of the technical details that are useful for contributing tasks. For an overview of how ADE-bench works, see the [README](/README.md).
 
 ---
 
