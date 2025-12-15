@@ -23,6 +23,20 @@ def _copy_config_file(terminal, trial_handler, config_filename: str, container_f
         logger.warning(f"Configuration file not found at {config_path}")
 
 
+def _copy_skills_directory(terminal, trial_handler) -> None:
+    """Helper to copy the skills directory to the container's .claude/skills directory."""
+    skills_path = trial_handler.shared_config_path / "skills"
+    if skills_path.exists() and skills_path.is_dir():
+        # Create .claude/skills directory in the container first
+        claude_skills_dir = DockerComposeManager.CONTAINER_APP_DIR / ".claude/skills"
+        terminal.container.exec_run(["mkdir", "-p", str(claude_skills_dir)])
+        
+        # Copy skills directory contents to .claude/skills in the container
+        terminal.copy_to_container(
+            paths=skills_path,
+            container_dir=str(claude_skills_dir)
+        )
+        
 def setup_agent_config(terminal, task_id: str, trial_handler, logger) -> None:
     """Setup agent-specific configuration files and resources."""
 
@@ -32,6 +46,7 @@ def setup_agent_config(terminal, task_id: str, trial_handler, logger) -> None:
 
     if agent_name == AgentName.CLAUDE_CODE:
         _copy_config_file(terminal, trial_handler, "CLAUDE.md")
+        _copy_skills_directory(terminal, trial_handler)
     elif agent_name == AgentName.GEMINI_CLI:
         _copy_config_file(terminal, trial_handler, "GEMINI.md")
     elif agent_name == AgentName.OPENAI_CODEX:
