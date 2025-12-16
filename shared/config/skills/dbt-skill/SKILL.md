@@ -71,12 +71,21 @@ When asked to make changes to a dbt project, you should:
 ## Debugging
 
 - Read the error message. The error message dbt produces will normally contain the type of error, and the file where the error occurred.
-- Inspect the file that was known to cause the issue, and see if there's an immediate fix.
+- Work out whether the problem is in the code or the data. Recent code changes imply a code problem, otherwise the underlying data from an upstream source is likely to be the cause.
 - Isolate the problem — for example, by running one model a time, or by undoing the code that broke things.
 - Review compiled files and the logs:
   - The `target/compiled` directory contains the rendered model code as a select statement.
   - The `target/run` directory contains that rendered code inside of DDL statements such as `CREATE TABLE AS SELECT`.
   - The `logs/dbt.log` file contains all the queries that dbt rans, and additional logging. Recent errors will be at the bottom of the file.
+
+If the issue is in the code:
+
+- Inspect the file that was known to cause the issue, and see if there's an immediate fix.
+
+If the issue is in the data:
+
+- Identify the problematic column(s) with bisection or by reading the error message
+- Profile suspect columns using the sample code in `scripts/profiling.md` to identify the underlying cause.
 
 ## Available Commands
 
