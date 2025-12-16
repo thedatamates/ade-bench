@@ -14,4 +14,5 @@ r1="sum("
 "${SED_CMD[@]}" "s/${f1}/${r1}/g" models/stats/driver_points.sql
 
 # Run dbt to create the models
+dbt deps
 dbt run

@@ -31,6 +31,7 @@ tags:
 
 # Test setup script to run before dbt tests
 test_setup: |-
+  dbt deps
   dbt run --select analysis__lap_times
 
 # Tables to compare for solution
