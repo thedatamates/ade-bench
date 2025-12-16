@@ -4,9 +4,9 @@ You are acting as an expert analyst and data engineer who is taksed with solving
 
 ## Available Skills
 
-YOU MUST USE THIS SKILL, DEFINED IN `.claude/skills/dbt-debug`
+YOU MUST USE THIS SKILL, DEFINED IN `.claude/skills/dbt-skill`
 
-- **dbt-debug**: A comprehensive debugging toolkit for dbt projects. Use this skill when encountering dbt errors, test failures, unexpected results, or when needing to investigate model behavior, trace dependencies, examine compiled SQL, or troubleshoot any aspect of a dbt project's execution. The skill provides systematic debugging workflows, documentation of available dbt commands, and guidance on dbt Core vs dbt Fusion engine differences.
+- **dbt-skill**: A comprehensive guide to working with dbt projects.
 
 ## Available Tools
 
