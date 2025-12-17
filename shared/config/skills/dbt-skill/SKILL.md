@@ -1,6 +1,6 @@
 ---
 name: dbt-skill
-description: Interact with dbt projects. dbt is a data transformation tool.
+description: Interact with dbt projects. dbt is a data transformation tool. This skill helps with creating and modifying dbt resources and their metadata, as well as running CLI commands to retrieve information about the project or apply the state defined in your project to the database.
 ---
 
 # Using dbt for analytics and data engineering
@@ -21,33 +21,29 @@ description: Interact with dbt projects. dbt is a data transformation tool.
 - A **[selector](https://docs.getdbt.com/reference/node-selection/syntax)** is a pattern used to specify which nodes to run (e.g., `model_name`, `+model_name` for upstream, `model_name+` for downstream).
 - A **[resource](https://docs.getdbt.com/reference/configs-and-properties)** is any dbt object defined in your project (models, sources, tests, etc.). Resources are nodes that can be referenced and built.
 - An **[adapter](https://docs.getdbt.com/docs/connect-adapters)** is a plugin that enables dbt to work with different data warehouses (e.g., Snowflake, BigQuery, DuckDB).
+- An **[analysis](https://docs.getdbt.com/docs/build/analyses)** is a SQL file which will not be built as a model. Anything included in this directory will be compiled but not run.
 
-## Core loop
+## Common tasks when fulfilling to a dbt-related request
 
-I have:
+The following list is the primitives you will use when fulfilling a user request. Many requests will require you to do a combination of tasks from this list, in a specific order:
 
-- a dbt project
-- a CLI with dbt installed
-- a database connection
+- work out the cause of an error message and an effective solution
+- create a new dbt model based off of sources or models that currently exist in your project
+- modify an existing model in your dbt project
+- add a new source of data to your dbt project
+- change the settings or configurations of your dbt project, for example adding descriptions or tests to a column, or changing a model's materialization strategy
+- run CLI commands to apply the state defined in your dbt project to your database (for example to build a new table in the database or refresh the existing data)
 
-You are being asked to make changes that will affect the dbt models and resources in the DAG, in the service of producing data artifacts for use in other downstream tools.
+To perform these tasks effectively, you will need to:
 
-This could look like:
+- Build an understanding of the state of the project:
+  - relevant models/sources, their columns and their data types
+  - pre-existing errors and warnings in the project
+- Decide what actions are necessary
+- Take actions in the correct order
+- Validate that your changes are correct after each step of the process
 
-- creating a new dbt model based off of sources or models that currently exist in your project
-- modifying an existing model in your dbt project
-- adding a new source of data to your dbt project
-- changing the settings or configurations of your dbt project, for example adding descriptions or tests to a column, or changing a model's materialization strategy.
-- running CLI commands to apply the state defined in your dbt project to your database (for example to build a new table in the database or refresh the existing data)
-
-These are the primitives you will use when fulfilling a user request. Many requests will require you to do some combination of tasks in that list, in a specific order.
-
-Much of the complexity of this work will boil down to the following:
-
-- Ensuring that you have an understanding of the tables, their columns and their data types
-- Taking actions in the correct order, and validating that you have done the correct thing at each step of the process, instead of waiting until the end to check
-
-The best way to ensure you are correctly following your instructions is to adhere to the below workflow.
+## How to modify existing models
 
 When asked to make changes to a dbt project, you should:
 
@@ -68,15 +64,34 @@ When asked to make changes to a dbt project, you should:
     - Repeat with the next model.
 5. If you encounter compilation errors or warehouse errors during iteration, use the debugging guide.
 
-## Debugging
+## How to create new models
 
-- Read the error message. The error message dbt produces will normally contain the type of error, and the file where the error occurred.
+When asked to create new models, you should:
+
+1. Ensure that there are not pre-existing models that would achieve the goals
+2. Decide what columns will need to exist in the final model
+3. Work backwards from the end state, deciding from where each required column will come. Use as few models as possible and avoid redundant transformations
+4. For each model you create:
+    - Plan out your changes. Which columns need to be brought through as they are, transformed or aggregated? Which rows need to be included or excluded based on joins or filters?
+    - Define success criteria you can use to validate whether your changes were correct.
+    - Apply the changes you planned, by writing dbt code into the model file.
+    - Build the changed model with `dbt build`.
+    - Run `dbt show` to validate that the success criteria you defined have been met.
+    - Carefully validate that there are no subtle issues in the data such as type mismatches.
+    - Repeat with the next model.
+5. If you encounter compilation errors or warehouse errors during iteration, use the debugging guide.
+
+## How to debug errors
+
+- If you are prompted to fix a bug start by reviewing the logs and artifacts. See `scripts/review_run_results.md` for an example.
+  - The `logs/dbt.log` file contains all the queries that dbt rans, and additional logging. Recent errors will be at the bottom of the file.
+  - The `run_results.json` file contains each model which ran in the most recent invocation, and whether they succeeded or not.
+- If the error came from the console, read the error message.
+- The error messages dbt produces will normally contain the type of error, and the file where the error occurred.
 - Work out whether the problem is in the code or the data. Recent code changes imply a code problem, otherwise the underlying data from an upstream source is likely to be the cause.
 - Isolate the problem — for example, by running one model a time, or by undoing the code that broke things.
-- Review compiled files and the logs:
   - The `target/compiled` directory contains the rendered model code as a select statement.
   - The `target/run` directory contains that rendered code inside of DDL statements such as `CREATE TABLE AS SELECT`.
-  - The `logs/dbt.log` file contains all the queries that dbt rans, and additional logging. Recent errors will be at the bottom of the file.
 
 If the issue is in the code:
 
@@ -87,7 +102,12 @@ If the issue is in the data:
 - Identify the problematic column(s) with bisection or by reading the error message
 - Profile suspect columns using the sample code in `scripts/profiling.md` to identify the underlying cause.
 
-## Available Commands
+## How to run dbt commands
+
+- When running commands like `dbt run`, `dbt build`, `dbt compile`, `dbt test`, you must always use dbt's selection syntax to precisely identify resources to be processed. This increases iteration speed and minimises warehouse costs.
+- NEVER write DDL or DML directly to the warehouse; always use dbt for this.
+
+### Available Commands
 
 - `dbt debug` checks that dbt is correctly installed, and can successfully connect to the configured data warehouse. It will not take any project content into consideration beyond core pieces of `profiles.yml` and `dbt_project.yml`
 - `dbt --version` will return the currently installed version of dbt (and adapters, for dbt Core). This is the best way to check whether the project is using dbt Core or the new dbt Fusion engine.
@@ -100,11 +120,3 @@ If the issue is in the data:
 - `dbt run-operation` allows invocation of arbitrary macros. This is unlikely to be relevant unless instructed by the user.
 - `dbt clean` will delete the paths specified in `clean-targets` list of `dbt_project.yml`. It is normally used to delete the target directory and any installed packages.
 - `dbt deps` will install the exact package versions specified in `package-lock.yml` if specified. If there is no `package-lock.yml`, dbt will resolve the requested dependencies (including transitive dependencies) in `packages.yml` or `dependencies.yml`.
-
-## Other warnings
-
-- You should NEVER write DDL or DML directly to the warehouse; always use dbt for this.
-- Do not filter data out of models unless asked to.
-
-<!-- Before making any change to any table, run `dbt show` to have a look at the data. TODO add sample code for fetching count(*) etc.
-        - Come up with up to three questions you can ask of the data before modifying the model, and fetch the results from the existing table (if possible) so that you can compare them afterwards. -->
