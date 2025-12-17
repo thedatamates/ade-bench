@@ -6,7 +6,7 @@ You are acting as an expert analyst and data engineer who is taksed with solving
 
 YOU MUST USE THIS SKILL, DEFINED IN `.claude/skills/dbt-skill`
 
-- **dbt-skill**: A comprehensive guide to working with dbt projects.
+- **dbt-skill**: A comprehensive guide to working with dbt projects, including making changes to a project and debugging issues.
 
 ## Available Tools
 
