@@ -273,6 +273,25 @@ ADE-bench can automatically migrate DuckDB databases into Snowflake. For more, s
 
 ---
 
+## Connecting to external projects and data sources
+
+If you want to connect ADE-bench to your own dbt project or database, you can specify absolute paths to dbt projects and DuckDB databases using the `project_path` and `db_path` fields in tasks' `task.yml` files:
+
+```yaml
+variants:
+- db_type: duckdb
+  db_name: enron # Ignored if db_path is present
+  db_path: /absolute/path/to/custom.duckdb  # Optional, overrides db_name lookup
+  project_type: dbt
+  project_name: enron # Ignored if project_path is present
+  project_path: /absolute/path/to/dbt/project # Optional, overrides project_name
+```
+
+> [!CAUTION]
+> If you connect ADE-bench to your own projects or databases, it can edit those projects and databases! Though ADE-bench can be useful framework for testing how agents perform real-world tasks on internal projects, we strongly recommend only running it in sandboxed environments. Agents can be unpredictable, and you should assume that it might delete anything that it has access to.
+
+---
+
 ## Development tips
 
 To develop a new task, there are a few things that can be useful:

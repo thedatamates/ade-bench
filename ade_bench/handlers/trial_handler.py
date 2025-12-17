@@ -449,12 +449,33 @@ class TrialHandler:
         """Path to the run_sql.sh utility script."""
         return self._shared_path / "scripts" / "run_sql.sh"
 
-    def get_duckdb_file_path(self, db_name: str) -> Path:
-        """Get the path to a specific DuckDB database file."""
+    def get_duckdb_file_path(self, db_name: str, db_path: str | None = None) -> Path:
+        """Get the path to a specific DuckDB database file.
+
+        Args:
+            db_name: Name of the database in shared/databases/duckdb
+            db_path: Optional absolute path that overrides the default lookup
+
+        Returns:
+            Path to the DuckDB database file
+        """
+        if db_path is not None:
+            return Path(db_path)
         return self.shared_duckdb_path / f"{db_name}.duckdb"
 
-    def get_dbt_project_path(self, project_name: str, project_type: str = "dbt") -> Path:
-        """Get the path to a specific dbt project directory."""
+    def get_dbt_project_path(self, project_name: str, project_type: str = "dbt", project_path: str | None = None) -> Path:
+        """Get the path to a specific dbt project directory.
+
+        Args:
+            project_name: Name of the project in shared/projects
+            project_type: Type of project (dbt or dbt-fusion)
+            project_path: Optional absolute path that overrides the default lookup
+
+        Returns:
+            Path to the dbt project directory
+        """
+        if project_path is not None:
+            return Path(project_path)
         project_type_path = 'dbt' if project_type == 'dbt-fusion' else project_type
         return self.shared_projects_path / project_type_path / project_name
 

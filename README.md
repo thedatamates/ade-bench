@@ -267,9 +267,11 @@ solution_seeds:
 # setup.sh script.
 variants:
 - db_type: duckdb
-  db_name: enron
+  db_name: enron # Ignored if db_path is present
+  db_path: /absolute/path/to/custom.duckdb  # Optional, overrides db_name lookup
   project_type: dbt
-  project_name: enron
+  project_name: enron # Ignored if project_path is present
+  project_path: /absolute/path/to/dbt/project # Optional, overrides project_name
 
 - db_type: snowflake
   db_name: enron
@@ -304,6 +306,8 @@ ADE-bench currently supports these database types:
 #### DuckDB
 
 DuckDB databases should be stored in `shared/databases/duckdb`. When a task is run against a DuckDB database, ADE-bench simply copies the `.duckdb` file from the shared directory into the task container.
+
+Alternatively, if you have an existing DuckDB file that you want to reference, you can specify an absolute path to a DuckDB file using the `db_path` field in the variant configuration.
 
 #### Snowflake
 
