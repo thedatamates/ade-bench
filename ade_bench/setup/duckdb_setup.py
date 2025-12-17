@@ -22,9 +22,9 @@ def setup_duckdb(terminal, session, variant: Dict[str, Any], trial_handler) -> T
 
     if not shared_db_path.exists():
         if db_path:
-            return False, f"DuckDB database not found at specified db_path: {shared_db_path}"
+            return False, f"DuckDB database not found at specified db_path: {shared_db_path.resolve()}"
         else:
-            return False, f"DuckDB database '{db_name}' not found at {shared_db_path}"
+            return False, f"DuckDB database '{db_name}' not found at {shared_db_path.resolve()}"
 
     # Use the filename from the path when db_path is specified
     container_filename = shared_db_path.name if db_path else f"{db_name}.duckdb"

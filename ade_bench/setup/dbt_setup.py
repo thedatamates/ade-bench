@@ -77,9 +77,9 @@ def setup_dbt_project(terminal, session, task_id: str, variant: Dict[str, Any], 
 
     if not shared_project_dir.exists():
         if project_path:
-            return False, f"dbt project not found at specified project_path: {shared_project_dir}"
+            return False, f"dbt project not found at specified project_path: {shared_project_dir.resolve()}"
         else:
-            return False, f"dbt project '{project_name}' not found at {shared_project_dir}"
+            return False, f"dbt project '{project_name}' not found at {shared_project_dir.resolve()}"
 
     terminal.copy_to_container(
         paths=shared_project_dir,
