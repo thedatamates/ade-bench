@@ -160,6 +160,7 @@ ade run \
   --no-diffs \ # Optional; disables taking snapshots of diffs for faster performance.
   --persist \ # Optional; keeps the container alive after the trial is over or is aborted.
   --use-mcp \ # Optional; creates an dbt MCP server for the agent. Note: Not all agents and databases are supported.
+  --tasks-dir /absolute/path/to/tasks \ # Optional; path to an external tasks directory. Defaults to 'tasks' in the current directory.
 ```
 
 See also: [complete usage documentation](/docs/CLI.md).

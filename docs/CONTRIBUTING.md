@@ -290,6 +290,12 @@ variants:
 > [!CAUTION]
 > If you connect ADE-bench to your own projects or databases, it can edit those projects and databases! Though ADE-bench can be useful framework for testing how agents perform real-world tasks on internal projects, we strongly recommend only running it in sandboxed environments. Agents can be unpredictable, and you should assume that it might delete anything that it has access to.
 
+You can also use the `--tasks-dir` flag to point to a tasks directory outside the ADE-bench repository:
+
+```bash
+ade run foo001 --db duckdb --project-type dbt --tasks-dir /absolute/path/to/tasks
+```
+
 ---
 
 ## Development tips

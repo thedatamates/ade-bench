@@ -157,6 +157,11 @@ def run(
         False,
         "--with-profiling",
         help="Run the harness with a python profiler",
+    ),
+    tasks_dir: Path = typer.Option(
+        Path("tasks"),
+        "--tasks-dir",
+        help="Path to the tasks directory"
     )
 ):
     """
@@ -192,7 +197,7 @@ def run(
         raise typer.Exit(code=1)
 
     # Setup path variables
-    dataset_path = Path("tasks")
+    dataset_path = tasks_dir
     task_ids = tasks
 
     if len(tasks) == 1 and tasks[0].lower() == "all":
