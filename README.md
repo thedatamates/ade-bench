@@ -268,11 +268,11 @@ solution_seeds:
 # setup.sh script.
 variants:
 - db_type: duckdb
-  db_name: enron # Ignored if db_path is present
-  db_path: /absolute/path/to/custom.duckdb  # Optional, overrides db_name lookup
+  db_name: enron
+  db_dir: /path/to/databases  # Optional, directory containing enron.duckdb
   project_type: dbt
-  project_name: enron # Ignored if project_path is present
-  project_path: /absolute/path/to/dbt/project # Optional, overrides project_name
+  project_name: enron
+  project_dir: /path/to/projects  # Optional, directory containing 'enron' project folder
 
 - db_type: snowflake
   db_name: enron
@@ -308,7 +308,7 @@ ADE-bench currently supports these database types:
 
 DuckDB databases should be stored in `shared/databases/duckdb`. When a task is run against a DuckDB database, ADE-bench simply copies the `.duckdb` file from the shared directory into the task container.
 
-Alternatively, if you have an existing DuckDB file that you want to reference, you can specify an absolute path to a DuckDB file using the `db_path` field in the variant configuration.
+Alternatively, you can use the `db_dir` field in the variant configuration to specify a different directory containing the database file. You can also set the `ADE_DATABASES_DIR` environment variable to change the default location for all tasks.
 
 #### Snowflake
 
@@ -440,6 +440,11 @@ SETUP_TIMEOUT_SEC=120 # How long setup tasks can run
 DEFAULT_AGENT_TIMEOUT_SEC=300 # How long the agent can run
 DEFAULT_TEST_TIMEOUT_SEC=180 # How long test scripts can run
 CLEANUP_TIMEOUT_SEC=60 # How long cleanup scripts can run
+
+# Directory Configuration (optional, defaults shown)
+# ADE_TASKS_DIR=tasks # Path to directory where tasks are located
+# ADE_DATABASES_DIR=shared/databases # Path to directory where DuckDB databases are located
+# ADE_PROJECTS_DIR=shared/projects # Path to directory where dbt projects are located
 
 # Docker Configuration
 DOCKER_DEFAULT_PLATFORM=linux/amd64

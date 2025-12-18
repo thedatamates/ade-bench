@@ -184,8 +184,8 @@ class VariantConfig(BaseModel):
     project_type: str = Field(default="dbt", pattern="^(dbt|dbt-fusion)$")
     project_name: str
     migration_directory: Optional[str] = None  # Name of directory in shared/migrations
-    project_path: Optional[str] = None  # Absolute path to dbt project directory (overrides project_name lookup)
-    db_path: Optional[str] = None  # Absolute path to DuckDB database file (overrides db_name lookup)
+    project_dir: Optional[str] = None  # Directory containing the dbt project (overrides default projects dir)
+    db_dir: Optional[str] = None  # Directory containing the DuckDB database file (overrides default databases dir)
 
 
 

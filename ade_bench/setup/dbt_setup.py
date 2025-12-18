@@ -68,26 +68,26 @@ def setup_dbt_project(terminal, session, task_id: str, variant: Dict[str, Any], 
     """
     project_name = variant.get('project_name')
     project_type = variant.get('project_type')
-    project_path = variant.get('project_path')
+    project_dir = variant.get('project_dir')
 
-    if not project_name and not project_path:
+    if not project_name:
         return True, ""
 
-    shared_project_dir = trial_handler.get_dbt_project_path(project_name, project_type, project_path)
+    project_path = trial_handler.get_dbt_project_path(project_name, project_type, project_dir)
 
-    if not shared_project_dir.exists():
-        if project_path:
-            return False, f"dbt project not found at specified project_path: {shared_project_dir.resolve()}"
+    if not project_path.exists():
+        if project_dir:
+            return False, f"dbt project '{project_name}' not found in directory: {project_path}"
         else:
-            return False, f"dbt project '{project_name}' not found at {shared_project_dir.resolve()}"
+            return False, f"dbt project '{project_name}' not found at {project_path}"
 
     terminal.copy_to_container(
-        paths=shared_project_dir,
+        paths=project_path,
         container_dir=str(DockerComposeManager.CONTAINER_APP_DIR)
     )
 
     if variant.get('db_type') == 'snowflake' and task_id:
-        _update_snowflake_files(session, project_name, task_id, shared_project_dir)
+        _update_snowflake_files(session, project_name, task_id, project_path)
 
     return True, ""
 
