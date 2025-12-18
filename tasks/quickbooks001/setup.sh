@@ -17,7 +17,6 @@ else
     epoch_due_date="DATEDIFF('second', '1970-01-01'::timestamp, created_at::timestamp)::integer"
 fi
 
-# Execute SQL using the run_sql utility.
 /scripts/run_sql.sh "$@" << SQL
 create or replace table ${schema}.refund_receipt_data_temp as
   select * replace (${epoch_txn_date} as transaction_date)
