@@ -66,6 +66,7 @@ class Harness:
         project_type: str | None = None,
         keep_alive: bool = False,
         use_mcp: bool = False,
+        use_skills: bool = False,
         with_profiling: bool = False,
     ):
         """
@@ -95,6 +96,7 @@ class Harness:
             project_type: Project type to filter variants (e.g., dbt, other).
             keep_alive: If True, keep containers alive when tasks fail for debugging.
             use_mcp: If True, start a dbt MCP server after setup completes.
+            use_skills: If True, copy skills directory to container for agent use.
             with_profiling: If True, will enable the cProfiler.
         """
         self._run_uuid = None
@@ -109,6 +111,7 @@ class Harness:
         self._project_type_filter = project_type
         self._keep_alive = keep_alive
         self._use_mcp = use_mcp
+        self._use_skills = use_skills
         self._with_profiling = with_profiling
 
         # Initialize setup orchestrator for variant-specific setup
@@ -559,7 +562,8 @@ class Harness:
                 terminal=terminal,
                 session=session,
                 file_diff_handler=file_diff_handler,
-                trial_handler=trial_handler
+                trial_handler=trial_handler,
+                use_skills=self._use_skills
             )
 
             # Run setup with timeout using asyncio

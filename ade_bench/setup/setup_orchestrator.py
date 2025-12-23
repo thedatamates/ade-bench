@@ -15,12 +15,13 @@ from ..utils.logger import log_harness_info
 class SetupOrchestrator:
     """Simple orchestrator that calls setup functions directly."""
 
-    def __init__(self, logger=None, terminal=None, session=None, file_diff_handler=None, trial_handler=None):
+    def __init__(self, logger=None, terminal=None, session=None, file_diff_handler=None, trial_handler=None, use_skills=False):
         self.logger = logger
         self.terminal = terminal
         self.session = session
         self.file_diff_handler = file_diff_handler
         self.trial_handler = trial_handler
+        self.use_skills = use_skills
 
     def setup_task(self, task_id: str, variant: Dict[str, Any]) -> bool:
         """Setup a task for the given variant."""
@@ -39,7 +40,7 @@ class SetupOrchestrator:
 
         # Setup agent-specific configuration files
         # Logging is in the setup_agent_config function
-        setup_agent_config(self.terminal, task_id, self.trial_handler, self.logger)
+        setup_agent_config(self.terminal, task_id, self.trial_handler, self.logger, self.use_skills)
 
 
         # Set up the database

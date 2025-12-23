@@ -157,6 +157,11 @@ def run(
         "--use-mcp",
         help="Enable MCP (Model Context Protocol) for the agent"
     ),
+    use_skills: bool = typer.Option(
+        False,
+        "--use-skills",
+        help="Enable skills for the agent (e.g., dbt-debugging skill)"
+    ),
     with_profiling: bool = typer.Option(
         False,
         "--with-profiling",
@@ -237,6 +242,7 @@ def run(
         project_type=project_type,
         keep_alive=persist,
         use_mcp=use_mcp,
+        use_skills=use_skills,
         with_profiling=with_profiling
     )
 
