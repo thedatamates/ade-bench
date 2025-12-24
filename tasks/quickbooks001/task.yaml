@@ -6,7 +6,7 @@ notes: |-
 prompts:
   - key: base
     prompt: |-
-      This project is erroring out and needs to be fixed. Fix the issue and update the tables.
+      This project is erroring out and needs to be fixed. Fix the underlying issue and update the tables.
 author_name: test
 author_email: test
 difficulty: easy
@@ -20,6 +20,7 @@ tags:
   - model-refactor
 
 test_setup: |-
+  dbt deps
   dbt run
 
 # Tables to compare for solution

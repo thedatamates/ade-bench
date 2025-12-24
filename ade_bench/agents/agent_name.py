@@ -7,15 +7,15 @@ class AgentName(Enum):
 
     # Non-abstract agents
     NONE = "none"
-    ORACLE = "oracle"
+    SAGE = "sage"
     CLAUDE_CODE = "claude"
     OPENAI_CODEX = "codex"
     GEMINI_CLI = "gemini"
     MACRO = "macro"
 
     def model_name_from_agent_name(model_name, agent_name):
-        if agent_name == AgentName.ORACLE:
-            return "Oracle"
+        if agent_name == AgentName.SAGE:
+            return "Sage"
         elif agent_name == AgentName.NONE:
             return "None"
         else:

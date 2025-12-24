@@ -30,7 +30,9 @@ class GeminiParser(BaseParser):
             "cache_tokens": 0,
             "cost_usd": 0.0,
             "num_turns": 0,
-            "success": False
+            "success": False,
+            "error": None,
+            "model_name": "default"
         }
 
         try:
@@ -77,7 +79,13 @@ class GeminiParser(BaseParser):
                         continue
 
             if not json_str:
-                self._logger.warning("Could not find Gemini stats JSON in output")
+                # No stats found - check for API error
+                # Gemini CLI outputs: "Error when talking to Gemini API Full report available at: /tmp/gemini-client-error-..."
+                if "Error when talking to Gemini API" in content:
+                    self._logger.warning("Gemini API error detected (quota/rate limit)")
+                    default_return["error"] = "quota_exceeded"
+                else:
+                    self._logger.warning("Could not find Gemini stats JSON in output")
                 return default_return
 
             data = json.loads(json_str)
@@ -91,6 +99,8 @@ class GeminiParser(BaseParser):
             total_latency_ms = 0
             total_num_turns = 0
             total_cost_usd = 0.0
+            primary_model_name = None
+            max_output_tokens = 0
 
             for model_name, model_data in models_stats.items():
                 tokens = model_data.get("tokens", {})
@@ -128,6 +138,11 @@ class GeminiParser(BaseParser):
                 total_cache_tokens += cached_tokens
                 total_cost_usd += cost_usd
 
+                # Track the model with the most output tokens as the primary model
+                if output_tokens > max_output_tokens:
+                    max_output_tokens = output_tokens
+                    primary_model_name = model_name
+
                 # Success if we found the stats
                 success = True
 
@@ -138,7 +153,9 @@ class GeminiParser(BaseParser):
                 "cache_tokens": total_cache_tokens,
                 "cost_usd": total_cost_usd,
                 "num_turns": total_num_turns,
-                "success": success
+                "success": success,
+                "error": None,
+                "model_name": primary_model_name or "default"
             }
 
         except Exception as e:

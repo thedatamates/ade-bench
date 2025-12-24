@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -173,7 +174,7 @@ class Harness:
         """
         agent_kwargs = self._agent_kwargs.copy()
 
-        if self._agent_name == AgentName.ORACLE:
+        if self._agent_name == AgentName.SAGE:
             agent_kwargs["task_ids"] = [task_id]
 
         # Pass model_name to agents (if provided)
@@ -204,9 +205,11 @@ class Harness:
 
         self._logger = logger.getChild(__name__)
 
-    def _is_resolved(self, parser_results: dict[str, UnitTestStatus] | None) -> bool:
-        if parser_results is None:
+    def _is_resolved(self, parser_result: ParserResult | None) -> bool:
+        if parser_result is None:
             return False
+
+        parser_results = parser_result.test_results
 
         # Check if compilation failed
         if "dbt_compile" in parser_results and parser_results["dbt_compile"] == UnitTestStatus.FAILED:
@@ -221,52 +224,90 @@ class Harness:
         passing_tests = sum(1 for result in test_results.values() if result == UnitTestStatus.PASSED)
         total_tests = len(test_results)
 
+        # Check if we have fewer parsed tests than expected
+        # This catches cases where tests crashed/panicked before producing output
+        if parser_result.expected_test_count is not None:
+            if total_tests < parser_result.expected_test_count:
+                self._logger.debug(
+                    f"Task failed: only {total_tests} test results found, "
+                    f"but {parser_result.expected_test_count} tests were expected"
+                )
+                return False
+
         # For now, require all tests to pass. This could be made configurable per task
         # if we want to allow partial success thresholds
         return passing_tests == total_tests
 
     def _setup_test_env(self, terminal: Terminal, trial_handler: TrialHandler) -> None:
-        # Generate solution tests if needed
-        if trial_handler.task.solution_seeds:
-            self._generate_solution_tests(trial_handler)
+        # Create a trial-specific temp directory for tests to avoid race conditions
+        # when multiple variants of the same task run concurrently
+        with tempfile.TemporaryDirectory() as temp_test_dir:
+            temp_test_path = Path(temp_test_dir) / "tests"
+            temp_test_path.mkdir()
 
-        # Copy test-related files
-        terminal.copy_to_container(
-            paths=[
-                trial_handler.agent_pane_path,
-                trial_handler.run_tests_path,
-                trial_handler.test_dir,
-            ],
-            container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
-        )
+            # Copy existing tests from the shared test directory (excluding AUTO_* files
+            # which will be regenerated)
+            if trial_handler.test_dir.exists():
+                for test_file in trial_handler.test_dir.iterdir():
+                    if test_file.is_file() and not test_file.name.startswith("AUTO_"):
+                        shutil.copy2(test_file, temp_test_path / test_file.name)
 
-        # Copy test scripts to the scripts directory
-        for script_path in trial_handler.task.test_script_paths:
+            # Generate solution tests in the temp directory
+            if trial_handler.task.solution_seeds:
+                self._generate_solution_tests(trial_handler, temp_test_path)
+
+                # Also write the generated tests back to the shared directory as a log
+                # of what was generated (useful for debugging). This is safe because we
+                # copy from temp_test_path to the container, not from the shared directory.
+                # Clear existing AUTO tests first, then copy new ones.
+                shared_test_dir = trial_handler.test_dir
+                shared_test_dir.mkdir(parents=True, exist_ok=True)
+                for auto_test in shared_test_dir.glob("AUTO_*.sql"):
+                    try:
+                        auto_test.unlink()
+                    except OSError:
+                        pass  # Ignore errors if another process deleted it
+                for test_file in temp_test_path.glob("AUTO_*.sql"):
+                    try:
+                        shutil.copy2(test_file, shared_test_dir / test_file.name)
+                    except OSError:
+                        pass  # Ignore errors if another process is writing
+
+            # Copy test-related files from temp directory
             terminal.copy_to_container(
-                paths=[script_path],
-                container_dir=str(DockerComposeManager.CONTAINER_SCRIPTS_DIR),
-                container_filename=script_path.name
+                paths=[
+                    trial_handler.agent_pane_path,
+                    trial_handler.run_tests_path,
+                    temp_test_path,
+                ],
+                container_dir=str(DockerComposeManager.CONTAINER_TEST_DIR),
             )
 
-        # Copy seeds directory if it exists
-        if trial_handler.seeds_dir.exists():
-            terminal.copy_to_container(
-                paths=[trial_handler.seeds_dir],
-                container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
-            )
+            # Copy test scripts to the scripts directory
+            for script_path in trial_handler.task.test_script_paths:
+                terminal.copy_to_container(
+                    paths=[script_path],
+                    container_dir=str(DockerComposeManager.CONTAINER_SCRIPTS_DIR),
+                    container_filename=script_path.name
+                )
 
-        # Copy solutions directory if it exists
-        if trial_handler.solutions_dir.exists():
-            terminal.copy_to_container(
-                paths=[trial_handler.solutions_dir],
-                container_dir=str(DockerComposeManager.CONTAINER_SOLUTIONS_DIR),
-            )
+            # Copy seeds directory if it exists
+            if trial_handler.seeds_dir.exists():
+                terminal.copy_to_container(
+                    paths=[trial_handler.seeds_dir],
+                    container_dir=str(DockerComposeManager.CONTAINER_SEEDS_DIR),
+                )
 
-        # Handle test_setup script if it exists
-        if trial_handler.task.test_setup:
-            # Create a temporary directory and file
-            with tempfile.TemporaryDirectory() as temp_dir:
-                test_setup_path = Path(temp_dir) / "test-setup.sh"
+            # Copy solutions directory if it exists
+            if trial_handler.solutions_dir.exists():
+                terminal.copy_to_container(
+                    paths=[trial_handler.solutions_dir],
+                    container_dir=str(DockerComposeManager.CONTAINER_SOLUTIONS_DIR),
+                )
+
+            # Handle test_setup script if it exists
+            if trial_handler.task.test_setup:
+                test_setup_path = Path(temp_test_dir) / "test-setup.sh"
 
                 with open(test_setup_path, 'w') as f:
                     f.write("#!/bin/bash\n")
@@ -300,7 +341,7 @@ class Harness:
             time.sleep(2)
 
             # Log that test script is starting to run
-            log_harness_info(self._logger, trial_handler.task_id, "eval", "Executing test script")
+            log_harness_info(self._logger, trial_handler.task_id, "eval", "Executing test script...")
 
             # Build command with optional parameters
             command = f"bash {DockerComposeManager.CONTAINER_TEST_DIR / trial_handler.run_tests_path.name}"
@@ -341,29 +382,25 @@ class Harness:
 
         return FailureMode.NONE
 
-    def _generate_solution_tests(self, trial_handler: TrialHandler) -> None:
+    def _generate_solution_tests(self, trial_handler: TrialHandler, target_dir: Path) -> None:
         """Generate solution tests for tables specified in solution_seeds.
 
         Args:
             trial_handler: The trial handler containing task configuration
+            target_dir: Directory to write generated tests to
         """
         if not trial_handler.task.solution_seeds:
             return
 
-        log_harness_info(self._logger, trial_handler.task_id, "eval", f"Generating solution tests")
+        log_harness_info(self._logger, trial_handler.task_id, "eval", f"Generating solution tests...")
 
-        # Ensure test directory exists
-        test_dir = trial_handler.test_dir
-        test_dir.mkdir(parents=True, exist_ok=True)
-
-        # Remove existing AUTO tests
-        for auto_test in test_dir.glob("AUTO_*.sql"):
-            auto_test.unlink()
+        # Ensure target directory exists
+        target_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate tests for each solution seed
         for config in trial_handler.task.get_solution_seed_configs():
             try:
-                generate_solution_tests(config.table_name, test_dir, config)
+                generate_solution_tests(config.table_name, target_dir, config)
             except Exception as e:
                 self._logger.error(f"Failed to generate tests for {config.table_name}: {e}")
 
@@ -536,8 +573,12 @@ class Harness:
                 )
                 return await asyncio.wait_for(task, timeout=timeouts.setup)
 
-            # Run the async function
-            asyncio.run(run_setup())
+            # Run the async function and check result
+            setup_succeeded = asyncio.run(run_setup())
+            
+            if not setup_succeeded:
+                self._logger.error(f"Setup failed for task {trial_handler.task_id}")
+                return FailureMode.SETUP_FAILED
 
             return FailureMode.NONE
 
@@ -647,7 +688,7 @@ class Harness:
             # Create a fresh agent for this task
             task_agent = self._create_agent_for_task(trial_handler.task_id)
 
-            # Set variant configuration for oracle agent
+            # Set variant configuration for sage agent
             if hasattr(task_agent, 'set_variant_config'):
                 task_agent.set_variant_config(config)
 
@@ -669,7 +710,24 @@ class Harness:
             parts = full_pane.split('=== ADE_BENCH_PHASE_DELIMITER_AGENT_START ===')
             post_agent_pane = parts[-1].strip()
 
-            trial_handler.agent_pane_path.write_text(post_agent_pane)
+            # Try to generate a nicely formatted agent.txt from agent.log
+            agent_log_path = trial_handler.sessions_path / "agent.log"
+            formatted_content = None
+
+            if agent_log_path.exists():
+                try:
+                    # Get formatted content from agent (returns string or None)
+                    formatted_content = task_agent.format_agent_log(agent_log_path)
+                    if formatted_content:
+                        self._logger.debug(f"Generated formatted agent.txt from agent.log using agent's formatter")
+                except Exception as e:
+                    self._logger.warning(f"Failed to format agent.log: {e}. Using raw pane output.")
+
+            # Write to file - either formatted content or fallback to raw pane
+            if formatted_content:
+                trial_handler.agent_pane_path.write_text(formatted_content)
+            else:
+                trial_handler.agent_pane_path.write_text(post_agent_pane)
 
             # Capture snapshot after agent and create agent diff
             if file_diff_handler:
@@ -679,6 +737,7 @@ class Harness:
             if agent_failure_mode == FailureMode.AGENT_SETUP_TIMEOUT:
                 results.failure_mode = agent_failure_mode
                 self._logger.info(f"Task {trial_handler.task_id} halted due to agent setup or installation timeout")
+                log_harness_info(self._logger, trial_handler.task_id, "done", "TIMEOUT - agent setup timed out")
                 # Session should be killed
                 try:
                     session.kill_session()
@@ -701,6 +760,7 @@ class Harness:
                 # Any other agent failure should also halt the task
                 results.failure_mode = agent_failure_mode
                 self._logger.warning(f"Task {trial_handler.task_id} halted due to agent failure: {agent_failure_mode}")
+                log_harness_info(self._logger, trial_handler.task_id, "done", f"ERROR - {agent_failure_mode.value}")
                 # Kill the session to ensure cleanup
                 try:
                     session.kill_session()
@@ -715,6 +775,12 @@ class Harness:
                 results.num_turns = agent_result.num_turns
                 results.runtime_ms = agent_result.runtime_ms
                 results.cost_usd = agent_result.cost_usd
+                # Use parsed model name if harness model_name was not explicitly specified
+                if not results.model_name and agent_result.model_name:
+                    results.model_name = agent_result.model_name
+                    self._logger.debug(
+                        f"Using model name from agent output: {agent_result.model_name}"
+                    )
 
             # Always kill the agent session to ensure cleanup, regardless of success/failure
             try:
@@ -781,8 +847,20 @@ class Harness:
             results.failure_mode = parse_failure_mode
             return results
 
+        # Check for panic in test output (e.g., dbt-fusion panic)
+        # This is a harness failure, not a task failure
+        if "panic:" in post_agent_pane.lower():
+            self._logger.warning(
+                f"Panic detected in test output for task {trial_handler.task_id}. "
+                "This is a harness failure, not a task failure."
+            )
+            log_harness_info(self._logger, trial_handler.task_id, "done", "ERROR - harness_panic")
+            results.failure_mode = FailureMode.HARNESS_PANIC
+            return results
+
         results.parser_results = parser_result.test_results
-        results.is_resolved = self._is_resolved(parser_result.test_results)
+        results.expected_test_count = parser_result.expected_test_count
+        results.is_resolved = self._is_resolved(parser_result)
 
         if results.is_resolved:
             self._logger.debug(f"Resolved task {trial_handler.task_id}")

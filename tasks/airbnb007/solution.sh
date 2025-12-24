@@ -26,7 +26,3 @@ done
 for file in "${files[@]}"; do
     cp $SOLUTIONS_DIR/$file models/$file
 done
-
-## Run dbt
-dbt deps
-dbt run

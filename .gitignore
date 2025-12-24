@@ -39,8 +39,7 @@ ENV/
 .claude
 
 # Experiments and results
-experiments/
-experiments_saved/
+experiments*/
 results/
 outputs/
 profiling/summaries
@@ -54,7 +53,7 @@ target/
 logs/
 *.log
 .user.yml
-package-lock.yml
+shared/projects/dbt/**/dbt_packages/
 
 # Databases
 *.db
@@ -64,10 +63,10 @@ package-lock.yml
 /shared/databases/postgres/images/*.tar
 /shared/databases/postgres/seeds/*.tgz
 /shared/databases/snowflake/**/*.parquet
+/shared/databases/snowflake/**/load.sql
 
 # Temporary and dev files
 dev/
-tmp/
 temp/
 .tmp/
 

@@ -45,12 +45,12 @@ uv run wizard
 
 ### Run benchmarks:
 ```bash
-# With oracle agent
-uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
+# With sage agent
+uv run scripts_python/run_harness.py --agent sage --task-ids task1 task2
 ```
 
 ### Key Parameters:
-- `--agent`: Agent type (oracle, terminus, etc.)
+- `--agent`: Agent type (sage, terminus, etc.)
 - `--model`: LLM model for AI agents
 - `--dataset-config`: YAML file defining task collection
 - `--n-concurrent-trials`: Parallel execution (default: 4)
@@ -67,7 +67,7 @@ uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
    - Define expected results in `expected/`
 
 2. **Testing**:
-   - Run with oracle agent first to validate task
+   - Run with sage agent first to validate task
    - Check logs in `experiments/[run_id]/`
    - Verify SQL test results
 
@@ -75,6 +75,18 @@ uv run scripts_python/run_harness.py --agent oracle --task-ids task1 task2
    - Extend `BaseAgent` class
    - Register in `AgentFactory`
    - Implement `run()` method
+
+## Git Worktrees
+
+This project supports git worktrees for parallel development:
+
+```bash
+git worktree add .worktrees/feature-name -b feature/feature-name
+```
+
+**Database files:** Large database files (`.duckdb`, `.parquet`) are gitignored and only exist in the main repository at `shared/databases/`. The code automatically resolves these from the main repo even when running in a worktree.
+
+**Other shared resources:** Config files (`shared/config/`), scripts (`shared/scripts/`), migrations (`shared/migrations/`), and projects (`shared/projects/`) are worktree-aware and can be modified per worktree.
 
 ## Docker Setup
 

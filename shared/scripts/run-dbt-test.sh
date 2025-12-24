@@ -20,6 +20,7 @@ done
 echo "Filtering for db_type='$db_type', project_type='$project_type'"
 
 # STEP 4: Copy files with filtering
+included_count=0
 for file in /tests/*; do
     [[ -f "$file" ]] || continue
 
@@ -49,10 +50,13 @@ for file in /tests/*; do
     if [[ "$include" == true ]]; then
         echo "Including: $(basename "$file")"
         cp "$file" tests/
+        ((included_count++))
     else
         echo "Excluding: $(basename "$file")"
     fi
 done
+
+echo "[ade-bench] expected_test_count=$included_count"
 
 # STEP 5: Setup seed directlry and run dbt seed
 if [ -d "/seeds" ]; then

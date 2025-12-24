@@ -1,7 +1,6 @@
 """Commands for database migration tasks."""
 
 import typer
-from pathlib import Path
 from typing import Optional, List
 
 app = typer.Typer(help="Database migration tools")
@@ -35,27 +34,6 @@ def duckdb_to_snowflake(
     
     # Call the migration function with the provided arguments
     migrate_main(include, exclude, use_database_export)
-
-
-@app.command()
-def setup_snowflake_task(
-    task_id: str = typer.Argument(..., help="Task ID to set up in Snowflake"),
-    db_name: str = typer.Argument(..., help="Database name to use in Snowflake"),
-    config_path: Path = typer.Option(
-        None,
-        "--config-path",
-        "-c",
-        help="Path to configuration file (optional)"
-    ),
-):
-    """
-    Set up a Snowflake task environment.
-    """
-    # Import the setup script
-    from scripts_python.setup_snowflake_task import main as setup_main
-    
-    # Call the setup function
-    setup_main(task_id, db_name, config_path)
 
 
 if __name__ == "__main__":

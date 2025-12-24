@@ -187,6 +187,13 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 f"SUCCESS: {parsed_metrics.get('success', False)}"
             )
 
+        # Map error string to FailureMode
+        error = parsed_metrics.get("error")
+        failure_mode = FailureMode.NONE
+        if error == "quota_exceeded":
+            failure_mode = FailureMode.QUOTA_EXCEEDED
+            log_harness_info(logger, task_name, "agent", "Quota exceeded error detected")
+
         return AgentResult(
             input_tokens=parsed_metrics["input_tokens"],
             output_tokens=parsed_metrics["output_tokens"],
@@ -194,6 +201,8 @@ class AbstractInstalledAgent(BaseAgent, ABC):
             num_turns=parsed_metrics["num_turns"],
             runtime_ms=parsed_metrics["runtime_ms"],
             cost_usd=parsed_metrics["cost_usd"],
+            model_name=parsed_metrics.get("model_name"),
+            failure_mode=failure_mode,
         )
 
     def _parse_agent_output(self, output: str) -> dict[str, Any]:

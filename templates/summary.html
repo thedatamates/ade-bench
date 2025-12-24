@@ -46,6 +46,39 @@
             color: #9cdcfe;
         }
 
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .info-section {
+            background-color: #252526;
+            padding: 12px 15px;
+            border-radius: 4px;
+            border: 1px solid #3c3c3c;
+        }
+
+        .info-section h3 {
+            color: #569cd6;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #3c3c3c;
+            padding-bottom: 5px;
+        }
+
+        .info-section p {
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .info-timestamp {
+            margin-top: 10px !important;
+            font-size: 11px !important;
+            color: #6a6a6a !important;
+        }
+
         /* Style for tabulate-generated table */
         table {
             width: 100%;
@@ -97,8 +130,8 @@
             font-weight: bold;
         }
 
-        /* Style for status column (second column) */
-        table tbody td:nth-child(2) {
+        /* Style for status column (third column - Result) */
+        table tbody td:nth-child(3) {
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: bold;
@@ -124,8 +157,8 @@
         }
 
         .status-error {
-            background-color: rgba(79, 13, 13, 0.3);
-            color: #f44747;
+            background-color: rgba(79, 79, 13, 0.3);
+            color: #dcdcaa;
         }
 
         .links {
@@ -153,6 +186,95 @@
         .link.results { color: #dcdcaa; }
         .link.panes { color: #569cd6; }
         .link.diffs { color: #f44747; }
+
+        /* Task button styling */
+        .task-btn {
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        /* Modal/Dialog styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #2d2d30;
+            border: 1px solid #569cd6;
+            border-radius: 8px;
+            max-width: 800px;
+            max-height: 80vh;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #569cd6;
+            font-size: 16px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #d4d4d4;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #f44747;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-body pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #d4d4d4;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* YAML syntax highlighting */
+        .yaml-key { color: #9cdcfe; }
+        .yaml-string { color: #ce9178; }
+        .yaml-number { color: #b5cea8; }
+        .yaml-boolean { color: #569cd6; }
+        .yaml-null { color: #569cd6; }
+        .yaml-comment { color: #6a9955; font-style: italic; }
+        .yaml-list-marker { color: #d4d4d4; }
     </style>
 </head>
 <body>
@@ -161,15 +283,32 @@
 
         <div class="experiment-info">
             <h2>{{ experiment_id }}</h2>
-            <p><strong>Started:</strong> {{ start_time }}</p>
-            <p><strong>Duration:</strong> {{ duration }}</p>
-            <p><strong>Total Tasks:</strong> {{ total_tasks }}</p>
-            <p><strong>Successful:</strong> {{ successful_tasks }}</p>
-            <p><strong>Failed:</strong> {{ failed_tasks }}</p>
-            <p><strong>Export:</strong>
-                <a href="results_tsv.txt" class="link results" target="_blank">TSV (with headers)</a>
-                <a href="results_tsv_no_header.txt" class="link results" target="_blank">TSV (no headers)</a>
-            </p>
+            <div class="info-grid">
+                <div class="info-section">
+                    <h3>Run Configuration</h3>
+                    <p><strong>Agent:</strong> {{ agent }}</p>
+                    <p><strong>Model:</strong> {{ model }}</p>
+                    <p><strong>DB Type:</strong> {{ db_type }}</p>
+                    <p><strong>Project Type:</strong> {{ project_type }}</p>
+                    <p><strong>MCP Enabled:</strong> {{ used_mcp }}</p>
+                </div>
+                <div class="info-section">
+                    <h3>Results</h3>
+                    <p><strong>Success Rate:</strong> {{ success_pct }}%</p>
+                    <p><strong>Tasks:</strong> {{ successful_tasks }} passed / {{ failed_tasks }} failed / {{ errored_tasks }} errored</p>
+                    <p><strong>Total Cost:</strong> {{ total_cost }}</p>
+                    <p><strong>Total Runtime:</strong> {{ total_task_runtime }}</p>
+                    <p><strong>Experiment Runtime:</strong> {{ experiment_runtime }}</p>
+                </div>
+                <div class="info-section">
+                    <h3>Export</h3>
+                    <p>
+                        <a href="results_tsv.txt" class="link results" target="_blank">TSV (with headers)</a>
+                        <a href="results_tsv_no_header.txt" class="link results" target="_blank">TSV (no headers)</a>
+                    </p>
+                    <p class="info-timestamp"><strong>Started:</strong> {{ start_time }}</p>
+                </div>
+            </div>
         </div>
 
         <table>
@@ -177,22 +316,160 @@
         </table>
     </div>
 
+    <!-- Modal for task.yaml display -->
+    <div id="taskModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">task.yaml</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="modalContent">Loading...</pre>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Add status classes to the second column based on content
+        // Add status classes to the third column (Result) based on content
         document.addEventListener('DOMContentLoaded', function() {
-            const statusCells = document.querySelectorAll('table tbody td:nth-child(2)');
+            const statusCells = document.querySelectorAll('table tbody td:nth-child(3)');
             statusCells.forEach(cell => {
                 const text = cell.textContent.trim();
                 if (text === 'p') {
                     cell.classList.add('status-success');
-                } else if (text === 'f') {
+                } else if (text === 'FAIL') {
                     cell.classList.add('status-failure');
-                } else if (text === 't') {
-                    cell.classList.add('status-timeout');
-                } else if (text === 'e') {
+                } else if (text === 'ERROR') {
                     cell.classList.add('status-error');
                 }
             });
+        });
+
+        // Simple YAML syntax highlighter
+        function highlightYaml(yaml) {
+            const lines = yaml.split('\n');
+            return lines.map(line => {
+                // Escape HTML first
+                let escaped = line
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                // Comment lines
+                if (/^\s*#/.test(escaped)) {
+                    return `<span class="yaml-comment">${escaped}</span>`;
+                }
+
+                // Process the line for highlighting
+                let result = escaped;
+
+                // Key-value pairs (key: value)
+                result = result.replace(
+                    /^(\s*)([\w_-]+)(:)(\s*)(.*)$/,
+                    (match, indent, key, colon, space, value) => {
+                        let highlightedValue = value;
+
+                        // Inline comment
+                        const commentMatch = value.match(/^(.*?)\s+(#.*)$/);
+                        let inlineComment = '';
+                        if (commentMatch) {
+                            highlightedValue = commentMatch[1];
+                            inlineComment = `<span class="yaml-comment">${commentMatch[2]}</span>`;
+                        }
+
+                        // Highlight value types
+                        if (/^['"].*['"]$/.test(highlightedValue) || /^\|[-+]?\s*$/.test(highlightedValue) || /^>[-+]?\s*$/.test(highlightedValue)) {
+                            // Quoted string or block scalar indicator
+                            highlightedValue = `<span class="yaml-string">${highlightedValue}</span>`;
+                        } else if (/^-?\d+(\.\d+)?$/.test(highlightedValue)) {
+                            // Number
+                            highlightedValue = `<span class="yaml-number">${highlightedValue}</span>`;
+                        } else if (/^(true|false|yes|no|on|off)$/i.test(highlightedValue)) {
+                            // Boolean
+                            highlightedValue = `<span class="yaml-boolean">${highlightedValue}</span>`;
+                        } else if (/^(null|~)$/i.test(highlightedValue) || highlightedValue === '') {
+                            // Null or empty
+                            highlightedValue = highlightedValue ? `<span class="yaml-null">${highlightedValue}</span>` : '';
+                        } else if (highlightedValue) {
+                            // Unquoted string
+                            highlightedValue = `<span class="yaml-string">${highlightedValue}</span>`;
+                        }
+
+                        return `${indent}<span class="yaml-key">${key}</span>${colon}${space}${highlightedValue}${inlineComment}`;
+                    }
+                );
+
+                // List items (- value)
+                result = result.replace(
+                    /^(\s*)(-)(\s+)(.*)$/,
+                    (match, indent, dash, space, value) => {
+                        // Check if it's a key-value in a list item
+                        if (/^[\w_-]+:/.test(value)) {
+                            const kvMatch = value.match(/^([\w_-]+)(:)(\s*)(.*)$/);
+                            if (kvMatch) {
+                                let highlightedValue = kvMatch[4];
+                                if (highlightedValue && !/^['"]/.test(highlightedValue)) {
+                                    if (/^-?\d+(\.\d+)?$/.test(highlightedValue)) {
+                                        highlightedValue = `<span class="yaml-number">${highlightedValue}</span>`;
+                                    } else if (/^(true|false|yes|no|on|off)$/i.test(highlightedValue)) {
+                                        highlightedValue = `<span class="yaml-boolean">${highlightedValue}</span>`;
+                                    } else {
+                                        highlightedValue = `<span class="yaml-string">${highlightedValue}</span>`;
+                                    }
+                                }
+                                return `${indent}<span class="yaml-list-marker">${dash}</span>${space}<span class="yaml-key">${kvMatch[1]}</span>${kvMatch[2]}${kvMatch[3]}${highlightedValue}`;
+                            }
+                        }
+                        // Simple list value
+                        let highlightedValue = value;
+                        if (/^-?\d+(\.\d+)?$/.test(value)) {
+                            highlightedValue = `<span class="yaml-number">${value}</span>`;
+                        } else if (value) {
+                            highlightedValue = `<span class="yaml-string">${value}</span>`;
+                        }
+                        return `${indent}<span class="yaml-list-marker">${dash}</span>${space}${highlightedValue}`;
+                    }
+                );
+
+                return result;
+            }).join('\n');
+        }
+
+        // Modal functions for task.yaml display
+        function showTaskYaml(taskId) {
+            const modal = document.getElementById('taskModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = `${taskId}/task.yaml`;
+
+            // Use embedded TASK_YAMLS object (injected by generate_results_html.py)
+            if (typeof TASK_YAMLS !== 'undefined' && TASK_YAMLS[taskId]) {
+                modalContent.innerHTML = highlightYaml(TASK_YAMLS[taskId]);
+            } else {
+                modalContent.textContent = `Error: task.yaml not found for ${taskId}`;
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('taskModal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('taskModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
         });
     </script>
 

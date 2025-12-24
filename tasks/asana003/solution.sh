@@ -1,26 +1,37 @@
 #!/bin/bash
+## Remove tmp models
+rm -rf dbt_packages/asana_source/models/tmp
 
-## Fix the error by changing the data type of the underlying table. 
-cat > update_task_data_type.sql << 'EOF'
--- Update the id field to be a string.
-create or replace table main.task_data_temp as
-  select 
-    * replace (due_at::timestamp as due_at)
-  from main.task_data;
-
--- Rename the table to the original name.
-drop table main.task_data;
-alter table main.task_data_temp rename to task_data;
+## Remove project variables
+cat > dbt_packages/asana_source/dbt_project.yml << 'EOF'
+config-version: 2
+name: 'asana_source'
+version: 0.8.0
+require-dbt-version: [">=1.3.0", "<2.0.0"]
+models:
+  asana_source:
+    +schema: stg_asana
+    materialized: table
 EOF
 
-# Execute the SQL file using Python and DuckDB
-python3 -c "
-import duckdb
-conn = duckdb.connect('asana.duckdb')
-with open('update_task_data_type.sql', 'r') as f:
-    sql = f.read()
-conn.execute(sql)
-conn.close()
-"
-# Clean up the SQL file
-rm update_task_data_type.sql
+## Copy new files
+files=(
+  "stg_asana__project_task.sql"
+  "stg_asana__project.sql"
+  "stg_asana__section.sql"
+  "stg_asana__story.sql"
+  "stg_asana__tag.sql"
+  "stg_asana__task_follower.sql"
+  "stg_asana__task_section.sql"
+  "stg_asana__task_tag.sql"
+  "stg_asana__task.sql"
+  "stg_asana__team.sql"
+  "stg_asana__user.sql"
+)
+
+SOLUTIONS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE}")")/solutions"
+
+for file in "${files[@]}"; do
+  cp $SOLUTIONS_DIR/$file dbt_packages/asana_source/models/$file
+  cat dbt_packages/asana_source/models/$file
+done

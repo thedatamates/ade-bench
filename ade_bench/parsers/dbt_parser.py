@@ -25,6 +25,10 @@ class DbtParser(BaseParser):
     # "Finished 'test' target 'dev' with 1 error and 2 warnings in 6s 233ms"
     DBT_FUSION_SUMMARY_PATTERN = r"Finished\s+'test'\s+target\s+'(\w+)'\s+with\s+(?:(?:(\d+)\s+errors?(?:\s+and\s+(\d+)\s+warnings?)?)|(?:(\d+)\s+warnings?))\s+in\s+(\d+)s\s+(\d+)ms"
 
+    # Pattern to match the expected test count line from run-dbt-test.sh
+    # Example: "[ade-bench] expected_test_count=2"
+    EXPECTED_TEST_COUNT_PATTERN = r"\[ade-bench\] expected_test_count=(\d+)"
+
     def __init__(self, parser_type: str = "dbt", **kwargs):
         """
         Initialize DbtParser with explicit parser type.
@@ -36,11 +40,23 @@ class DbtParser(BaseParser):
         super().__init__(**kwargs)
         self.parser_type = parser_type
 
-    def _create_status_message(self, results: dict, summary_data: dict | None, has_compilation_error: bool) -> str:
-        """Create the final status message based on parsed results."""
+    def _create_status_message(self, results: dict, summary_data: dict | None, has_compilation_error: bool, expected_test_count: int | None = None) -> str:
+        """
+        Create the final status message based on parsed results.
 
-        def _z(int) -> str:
-            return f"{int:2d}"
+        The PASS/FAIL logic here mirrors harness._is_resolved() exactly:
+        - FAIL if dbt_compile failed
+        - FAIL if no test results (excluding dbt_compile)
+        - FAIL if fewer tests ran than expected_test_count
+        - FAIL if any test failed
+        - PASS otherwise
+
+        The counts shown include dbt_compile in the totals.
+        expected_test_count (from run-tests.sh) does NOT include dbt_compile.
+        """
+
+        def _z(val: int) -> str:
+            return f"{val:2d}"
 
         # Case 1: Compilation error
         if has_compilation_error:
@@ -48,7 +64,7 @@ class DbtParser(BaseParser):
 
         test_results = {k: v for k, v in results.items() if k != "dbt_compile"}
 
-        # Step 1: Get the two types of results
+        # Step 1: Get the two types of results (excluding dbt_compile for comparison)
         individual_results = {
             'pass': sum(1 for status in test_results.values() if status == UnitTestStatus.PASSED),
             'fail': sum(1 for status in test_results.values() if status == UnitTestStatus.FAILED),
@@ -76,48 +92,73 @@ class DbtParser(BaseParser):
         if individual_results['total'] == 0 and (summary_results is None or summary_results['total'] == 0):
             return "ERROR - no dbt test results found"
 
-        # Step 3: Make a pass fail etc message using results if exists, then summary if exists
+        # Step 3: Get counts from individual results or fall back to summary
         if individual_results['total'] > 0:
-            # Use individual results
             pass_count = individual_results['pass']
             fail_count = individual_results['fail']
-            total_count = individual_results['total']
+            test_count = individual_results['total']  # excluding dbt_compile
         elif summary_results is not None:
-            # Fall back to summary results
             pass_count = summary_results['pass']
             fail_count = summary_results['fail']
-            total_count = summary_results['total']
+            test_count = summary_results['total']  # excluding dbt_compile
         else:
             return "ERROR - no dbt test results found"
 
-        # Step 4: If they don't match (or one not found) append a warning saying mismatch between the two
-        mismatch_warning = ""
-        # Both exist - check if they match
+        # Step 4: Build warnings list
+        warnings = []
+
+        # Check if individual and summary results don't match
         if individual_results['total'] > 0 and summary_results is not None:
             if (individual_results['pass'] != summary_results['pass'] or
                 individual_results['fail'] != summary_results['fail'] or
                 individual_results['total'] != summary_results['total']):
-                mismatch_warning = " [ WARNING, mismatch between individual and summary results ]"
+                warnings.append("mismatch between individual and summary results")
 
         # Only summary exists and has results
         elif individual_results['total'] == 0 and summary_results is not None and summary_results['total'] > 0:
-            mismatch_warning = " [ WARNING, no individual results found ]"
+            warnings.append("no individual results found")
 
         # Only individual exists (this is NOT normal for dbt)
         elif individual_results['total'] > 0 and summary_results is None and self.parser_type == 'dbt':
-            mismatch_warning = f" [ WARNING, no summary results found ]"
+            warnings.append("no summary results found")
 
         # Only individual exists (this IS normal for dbt-fusion)
         elif individual_results['total'] > 0 and summary_results is None and self.parser_type == 'dbt-fusion':
             pass  # No warning needed
 
-        # Construct the final message
-        if fail_count == 0:
-            message_lead = "PASS"
-        else:
-            message_lead = "FAIL"
+        # Check if fewer tests ran than expected
+        if expected_test_count is not None and test_count < expected_test_count:
+            missing_count = expected_test_count - test_count
+            warnings.append(f"{missing_count} test result(s) not found")
 
-        return f"{message_lead} - dbt test results - Pass:{_z(pass_count)}, Fail:{_z(fail_count)}, Total:{_z(total_count)}{mismatch_warning}"
+        # Construct warnings string
+        warning_str = ""
+        if warnings:
+            warning_str = " [ WARNING: " + "; ".join(warnings) + " ]"
+
+        # Determine PASS/FAIL using same logic as harness._is_resolved()
+        # This ensures the log message matches the final result
+        is_pass = (
+            fail_count == 0 and
+            (expected_test_count is None or test_count >= expected_test_count)
+        )
+        message_lead = "PASS" if is_pass else "FAIL"
+
+        # Check if dbt_compile is in results (it's added for dbt projects)
+        has_dbt_compile = "dbt_compile" in results
+        compile_offset = 1 if has_dbt_compile else 0
+
+        # Include dbt_compile in the displayed totals if present
+        # dbt_compile always passes if we get here (compilation error handled above)
+        pass_displayed = pass_count + compile_offset
+
+        # Use expected total (plus dbt_compile if present) if available, otherwise use actual
+        if expected_test_count is not None:
+            total_displayed = expected_test_count + compile_offset
+        else:
+            total_displayed = test_count + compile_offset
+
+        return f"{message_lead} - dbt test results - Pass:{_z(pass_displayed)}, Fail:{_z(fail_count)}, Total:{_z(total_displayed)}{warning_str}"
 
     def _has_test_results(self, content: str) -> bool:
         """Check if the content contains actual test results (not just compilation errors)."""
@@ -129,10 +170,18 @@ class DbtParser(BaseParser):
             re.search(self.DBT_FUSION_SUMMARY_PATTERN, content)
         )
 
+    def _get_expected_test_count(self, content: str) -> int | None:
+        """Get the expected test count from the '[ade-bench] expected_test_count=N' line."""
+        match = re.search(self.EXPECTED_TEST_COUNT_PATTERN, content)
+        return int(match.group(1)) if match else None
+
     def parse(self, content: str) -> ParserResult:
         # Check for compilation error - this should only happen when dbt fails to run at all
         # If we see test results, even with failures, compilation succeeded
         has_compilation_error = "Compilation Error" in content and not self._has_test_results(content)
+
+        # Get expected test count from the "[ade-bench] expected_test_count=N" line
+        expected_test_count = self._get_expected_test_count(content)
 
         # Initialize results
         results = {}
@@ -197,6 +246,10 @@ class DbtParser(BaseParser):
                 }
 
         # Now construct the final status message based on the parsed results
-        status_message = self._create_status_message(results, summary_data, has_compilation_error)
+        status_message = self._create_status_message(results, summary_data, has_compilation_error, expected_test_count)
 
-        return ParserResult(test_results=results, status_message=status_message)
+        return ParserResult(
+            test_results=results,
+            status_message=status_message,
+            expected_test_count=expected_test_count
+        )

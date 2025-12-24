@@ -8,26 +8,21 @@ rm models/warehouse/fact_inventory.sql
 # Remove the obt_sales_overview model, which depends on removed models.
 rm models/analytics_obt/obt_sales_overview.sql
 
-# Create a SQL file to create duplicates in the inventory table. 
-cat > create_duplicates.sql << 'EOF'
-insert into main.inventory_transactions
-    select * 
-    from main.inventory_transactions 
-    where mod(product_id,2) = 0;
-EOF
+## Create duplicates in the inventory table
+## Get the schema based on the database type.
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema='main'
+else
+    schema='public'
+fi
 
-# Execute the SQL file using Python and DuckDB
-python3 -c "
-import duckdb
-conn = duckdb.connect('analytics_engineering.duckdb')
-with open('create_duplicates.sql', 'r') as f:
-    sql = f.read()
-conn.execute(sql)
-conn.close()
-print('Duplicates created successfully')
-"
-# Clean up the SQL file
-rm create_duplicates.sql
+## Run the query to duplicate rows
+/scripts/run_sql.sh "$@" << SQL
+insert into ${schema}.inventory_transactions
+    select *
+    from ${schema}.inventory_transactions
+    where mod(product_id,2) = 0;
+SQL
 
 dbt deps
 dbt run

@@ -1,5 +1,6 @@
 """Main entry point for the ADE-bench CLI."""
 
+import os
 import typer
 import logging
 from datetime import datetime
@@ -13,9 +14,44 @@ from ade_bench import Harness
 from ade_bench.agents import AgentName
 from scripts_python.summarize_results import display_detailed_results
 
-from ade_bench.cli.ab import runs, migrate, tasks
+from ade_bench.cli.ab import migrate, check, tasks, view, save, interact as interact_module
+import click
+from typer import rich_utils
 
-app = typer.Typer(help="ADE-bench: Analytics and Data Engineering Benchmark")
+# Default tasks directory - can be overridden via environment variable
+DEFAULT_TASKS_DIR = Path(os.environ.get("ADE_TASKS_DIR", "tasks"))
+
+# Store the original error formatter
+_original_rich_format_error = rich_utils.rich_format_error
+
+
+def _custom_rich_format_error(self: click.ClickException) -> None:
+    """Custom error formatter that adds a blank line before the error output."""
+    from typer.rich_utils import _get_rich_console
+
+    console = _get_rich_console(stderr=True)
+    console.print()  # Add blank line before error output
+    _original_rich_format_error(self)
+
+
+# Override typer's error formatter
+rich_utils.rich_format_error = _custom_rich_format_error
+
+app = typer.Typer(
+    help="ADE-bench: Analytics and Data Engineering Benchmark",
+    invoke_without_command=True,
+    no_args_is_help=False,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+
+
+@app.callback()
+def main(ctx: typer.Context):
+    """ADE-bench: Analytics and Data Engineering Benchmark"""
+    if ctx.invoked_subcommand is None:
+        raise click.UsageError(
+            "Missing command.\n\nTo get help, run:\n\n  ade --help\n  ade <command> --help"
+        )
 
 
 @app.command()
@@ -41,10 +77,10 @@ def run(
         help="Path to the output directory"
     ),
     agent: str = typer.Option(
-        "oracle",
+        "sage",
         "--agent",
         case_sensitive=False,
-        help="The agent to benchmark (e.g., oracle, claude, macro)"
+        help="The agent to benchmark (e.g., sage, claude, macro)"
     ),
     model_name: str = typer.Option(
         "",
@@ -125,13 +161,18 @@ def run(
         False,
         "--with-profiling",
         help="Run the harness with a python profiler",
+    ),
+    tasks_dir: Path = typer.Option(
+        DEFAULT_TASKS_DIR,
+        "--tasks-dir",
+        help="Path to the tasks directory (default: ADE_TASKS_DIR env var or 'tasks')"
     )
 ):
     """
     Run ADE-bench with specified tasks and configuration.
 
     Example:
-    ab run airbnb001 --db duckdb --project-type dbt --agent oracle
+    ab run airbnb001 --db duckdb --project-type dbt --agent sage
     """
     # Convert log level string to int
     log_level_int = getattr(logging, log_level.upper(), logging.INFO)
@@ -146,6 +187,12 @@ def run(
             raise typer.Exit(code=1)
 
     # Convert agent string to AgentName enum
+    # Check for renamed agent
+    if agent.lower() == "oracle":
+        typer.echo("Error: The 'oracle' agent has been renamed to 'sage'.")
+        typer.echo("Please use --agent sage instead.")
+        raise typer.Exit(code=1)
+
     try:
         agent_name = AgentName(agent.lower())
     except ValueError:
@@ -154,7 +201,7 @@ def run(
         raise typer.Exit(code=1)
 
     # Setup path variables
-    dataset_path = Path("tasks")
+    dataset_path = tasks_dir
     task_ids = tasks
 
     if len(tasks) == 1 and tasks[0].lower() == "all":
@@ -162,7 +209,7 @@ def run(
 
     agent_kwargs = {}
 
-    if agent_name == AgentName.ORACLE:
+    if agent_name == AgentName.SAGE:
         agent_kwargs["dataset_path"] = dataset_path
     elif agent_args:
         agent_kwargs["additional_args"] = agent_args
@@ -198,20 +245,85 @@ def run(
 
 
 @app.command()
-def view():
+def interact(
+    task_id: str = typer.Option(
+        ...,
+        "-t", "--task-id",
+        help="The ID of the task to launch."
+    ),
+    db: str = typer.Option(
+        ...,
+        "--db",
+        help="Database type to use (e.g., duckdb, snowflake)"
+    ),
+    project_type: str = typer.Option(
+        ...,
+        "--project-type",
+        help="Project type to use (e.g., dbt)"
+    ),
+    agent: str = typer.Option(
+        None,
+        "--agent",
+        help="Agent to set up (optional)",
+    ),
+    step: str = typer.Option(
+        "post-setup",
+        "--step",
+        help="Point in workflow to start interactive session (post-setup, post-agent, post-eval)",
+        case_sensitive=False
+    ),
+    tasks_dir: Path = typer.Option(
+        DEFAULT_TASKS_DIR,
+        "--tasks-dir",
+        help="Path to the tasks directory (default: ADE_TASKS_DIR env var or 'tasks')"
+    ),
+    include_all: bool = typer.Option(
+        False,
+        "-a", "--include-all",
+        help="Copy test scripts and solution script to container",
+    ),
+    rebuild: bool = typer.Option(
+        True,
+        "--rebuild/--no-rebuild",
+        help="Whether to rebuild the client container."
+    ),
+    run_id: str = typer.Option(
+        None,
+        "--run-id",
+        help="Optional run ID for output directory"
+    ),
+):
     """
-    View the results of previous benchmark runs.
+    Launch an interactive shell into a task environment.
 
-    Opens the results HTML viewer in your default browser.
+    This command sets up the task environment exactly like the harness would,
+    then drops you into an interactive shell for debugging.
+
+    The --step option allows controlling how far into the process to run before
+    launching the interactive session:
+    - post-setup: Start after environment setup (default)
+    - post-agent: Start after the agent has run on the task
+    - post-eval: Start after tests have been run to evaluate the agent
     """
-    from scripts_python.view_results import main as view_results_main
-    view_results_main()
+    # Delegate to the interact module
+    interact_module.interact(
+        task_id=task_id,
+        db=db,
+        project_type=project_type,
+        agent=agent,
+        step=step,
+        tasks_dir=tasks_dir,
+        include_all=include_all,
+        rebuild=rebuild,
+        run_id=run_id,
+    )
 
 
 if __name__ == "__main__":
     app()
 
 # Add sub-commands
-app.add_typer(runs.app, name="runs")
 app.add_typer(migrate.app, name="migrate")
-app.add_typer(tasks.tasks_app, name="tasks", help="Manage ADE-bench tasks")
+app.add_typer(view.app, name="view")
+app.add_typer(save.app, name="save")
+app.add_typer(check.app, name="check")

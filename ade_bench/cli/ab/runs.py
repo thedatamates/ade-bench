@@ -81,6 +81,12 @@ def open(
         "-o",
         help="Path to the output directory"
     ),
+    regenerate: bool = typer.Option(
+        False,
+        "--regenerate",
+        "-r",
+        help="Regenerate HTML dashboard even if it already exists"
+    ),
 ):
     """
     Open a specific run in your browser.
@@ -108,14 +114,21 @@ def open(
         
         run_path = runs[0]
     
-    # Look for the results HTML file
-    html_file = run_path / "index.html"
-    if not html_file.exists():
-        typer.echo(f"Results HTML not found for run {run_path.name}.")
-        raise typer.Exit(code=1)
-    
-    # Open the HTML file in the default browser
+    # Generate HTML if needed and open in browser
+    from scripts_python.generate_results_html import ResultsHTMLGenerator
     import webbrowser
+
+    html_file = run_path / "html" / "index.html"
+
+    if regenerate or not html_file.exists():
+        typer.echo(f"Generating HTML dashboard for {run_path.name}...")
+        generator = ResultsHTMLGenerator(run_path)
+        success = generator.generate_all()
+        if not success:
+            typer.echo(f"Failed to generate HTML dashboard for run {run_path.name}.")
+            raise typer.Exit(code=1)
+        html_file = generator.html_dir / "index.html"
+
     webbrowser.open(f"file://{html_file.absolute()}")
     typer.echo(f"Opened {html_file} in your browser.")
 

@@ -1,24 +1,33 @@
 #!/bin/bash
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_CMD=(sed -i '')
+
+## Introduce an error by changing the data type of the underlying table.
+
+## Get the schema based on the database type.
+if [[ "$*" == *"--db-type=duckdb"* ]]; then
+    schema='main'
 else
-  SED_CMD=(sed -i)
+    schema='public'
 fi
 
+# Execute SQL using the run_sql utility.
+/scripts/run_sql.sh "$@" << SQL
+create or replace table ${schema}.refund_receipt_data_temp as
+  select * replace (transaction_date::date as transaction_date)
+  from ${schema}.refund_receipt_data;
 
-## Update estimate stg model
-f1="cast( {{ dbt.date_trunc('day', 'due_date') }} as date) as due_date,"
-r1="cast( {{ dbt.date_trunc('day', 'cast(due_date as date)') }} as date) as due_date,"
+create or replace table ${schema}.sales_receipt_data_temp as
+  select * replace (transaction_date::date as transaction_date)
+  from ${schema}.sales_receipt_data;
 
-"${SED_CMD[@]}" "s/${f1}/${r1}/g" dbt_packages/quickbooks_source/models/stg_quickbooks__estimate.sql
+create or replace table ${schema}.estimate_data_temp as
+  select * replace (due_date::date as due_date)
+  from ${schema}.estimate_data;
 
+drop table ${schema}.sales_receipt_data;
+drop table ${schema}.refund_receipt_data;
+drop table ${schema}.estimate_data;
 
-## Update sales receipt and refund receipt stg models
-f2="cast( {{ dbt.date_trunc('day', 'transaction_date') }} as date) as transaction_date,"
-r2="cast( {{ dbt.date_trunc('day', 'cast(transaction_date as date)') }} as date) as transaction_date,"
-
-"${SED_CMD[@]}" "s/${f2}/${r2}/g" dbt_packages/quickbooks_source/models/stg_quickbooks__sales_receipt.sql
-"${SED_CMD[@]}" "s/${f2}/${r2}/g" dbt_packages/quickbooks_source/models/stg_quickbooks__refund_receipt.sql
-
-# Run dbt to create the models
-dbt run
+alter table ${schema}.sales_receipt_data_temp rename to sales_receipt_data;
+alter table ${schema}.refund_receipt_data_temp rename to refund_receipt_data;
+alter table ${schema}.estimate_data_temp rename to estimate_data;
+SQL

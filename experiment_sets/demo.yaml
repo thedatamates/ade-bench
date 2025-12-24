@@ -1,0 +1,8 @@
+experiment_name: "demo"
+description: "Demo tasks for webinar"
+
+task_ids:
+- f1003.hard
+- analytics_engineering002.medium
+- airbnb005
+- intercom002

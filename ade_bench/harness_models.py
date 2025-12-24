@@ -16,16 +16,36 @@ class FailureMode(Enum):
     UNSET = "unset"
     NONE = "none"
     UNKNOWN = "unknown"
+    SETUP_FAILED = "setup_failed"
     SETUP_TIMEOUT = "setup_timeout"
     AGENT_SETUP_TIMEOUT = "agent_setup_timeout"
     AGENT_TIMEOUT = "agent_timeout"
     TEST_TIMEOUT = "test_timeout"
     UNKNOWN_AGENT_ERROR = "unknown_agent_error"
     UNKNOWN_HARNESS_ERROR = "unknown_harness_error"
+    HARNESS_PANIC = "harness_panic"  # dbt-fusion or other tool panicked during test execution
     PARSE_ERROR = "parse_error"
     FATAL_LLM_PARSE_ERROR = "fatal_llm_parse_error"
     CONTEXT_LENGTH_EXCEEDED = "context_length_exceeded"
+    QUOTA_EXCEEDED = "quota_exceeded"  # API quota/rate limit exceeded
     BREAKPOINT = "breakpoint"
+
+    def is_error(self) -> bool:
+        """Check if this failure mode is an infrastructure/harness error vs a task failure."""
+        return self in {
+            FailureMode.SETUP_FAILED,
+            FailureMode.SETUP_TIMEOUT,
+            FailureMode.AGENT_SETUP_TIMEOUT,
+            FailureMode.AGENT_TIMEOUT,
+            FailureMode.TEST_TIMEOUT,
+            FailureMode.UNKNOWN_AGENT_ERROR,
+            FailureMode.UNKNOWN_HARNESS_ERROR,
+            FailureMode.HARNESS_PANIC,
+            FailureMode.PARSE_ERROR,
+            FailureMode.FATAL_LLM_PARSE_ERROR,
+            FailureMode.CONTEXT_LENGTH_EXCEEDED,
+            FailureMode.QUOTA_EXCEEDED,
+        }
 
 class RunMetadata(BaseModel):
     run_id: str
@@ -60,6 +80,7 @@ class TrialResults(BaseModel):
     is_resolved: bool | None = None
     failure_mode: FailureMode = FailureMode.UNSET
     parser_results: dict[str, UnitTestStatus] | None = None
+    expected_test_count: int | None = None  # Expected number of tests (excluding dbt_compile)
     input_tokens: int | None = None
     output_tokens: int | None = None
     cache_tokens: int | None = None
@@ -163,6 +184,8 @@ class VariantConfig(BaseModel):
     project_type: str = Field(default="dbt", pattern="^(dbt|dbt-fusion)$")
     project_name: str
     migration_directory: Optional[str] = None  # Name of directory in shared/migrations
+    project_dir: Optional[str] = None  # Directory containing the dbt project (overrides default projects dir)
+    db_dir: Optional[str] = None  # Directory containing the DuckDB database file (overrides default databases dir)
 
 
 

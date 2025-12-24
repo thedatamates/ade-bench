@@ -3,6 +3,7 @@
 
 import json
 import sys
+import html
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -68,13 +69,16 @@ class ResultsHTMLGenerator:
                 # Results are already in the correct format, just use them directly
                 tasks.append(result)
 
+            # Note: Most summary stats are now computed in summarize_results()
+            # and passed via the 'summary' key. We only compute experiment-level
+            # metadata here that isn't available from the results.
+
             return {
                 'experiment_id': self.experiment_dir.name,
                 'start_time': metadata.get('start_time', 'Unknown'),
-                'duration': self._calculate_duration(metadata),
-                'total_tasks': len(tasks),
-                'successful_tasks': sum(1 for t in tasks if t.get('is_resolved', False)),
-                'failed_tasks': sum(1 for t in tasks if not t.get('is_resolved', False)),
+                'experiment_runtime': self._calculate_duration(metadata),
+                'agent_from_metadata': metadata.get('agent_name', 'Unknown'),
+                'model_from_metadata': metadata.get('model_name'),
                 'tasks': tasks
             }
 
@@ -92,6 +96,16 @@ class ResultsHTMLGenerator:
             minutes = int(seconds // 60)
             secs = seconds % 60
             return f"{minutes}m {secs:.1f}s"
+
+    def _format_duration_seconds(self, seconds: float) -> str:
+        """Format duration in seconds to H:MM:SS format."""
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        if hours > 0:
+            return f"{hours}:{minutes:02d}:{secs:02d}"
+        else:
+            return f"{minutes}:{secs:02d}"
 
     def _calculate_duration(self, metadata: Dict[str, Any]) -> str:
         """Calculate total experiment duration."""
@@ -122,21 +136,49 @@ class ResultsHTMLGenerator:
         # Use the results directly - they're already in the correct format
         benchmark_results = BenchmarkResults(results=experiment_data['tasks'])
 
-        # Generate HTML table using centralized logic
+        # Generate HTML table and get summary stats (computed once in summarize_results)
+        from scripts_python.summarize_results import summarize_results
+        summary_data = summarize_results(benchmark_results)
         html_table = generate_html_table(benchmark_results)
 
-        # Simple template replacement (we'll use Jinja2 later if needed)
-        html_content = template_content.replace('{{ experiment_id }}', experiment_data['experiment_id'])
-        html_content = html_content.replace('{{ start_time }}', experiment_data['start_time'])
-        html_content = html_content.replace('{{ duration }}', experiment_data['duration'])
-        html_content = html_content.replace('{{ total_tasks }}', str(experiment_data['total_tasks']))
-        html_content = html_content.replace('{{ successful_tasks }}', str(experiment_data['successful_tasks']))
-        html_content = html_content.replace('{{ failed_tasks }}', str(experiment_data['failed_tasks']))
+        # Extract summary stats
+        summary = summary_data['summary']
+
+        # Use model from metadata if available, otherwise use inferred model
+        model = experiment_data.get('model_from_metadata') or summary['inferred_model'] or 'Unknown'
+
+        # Use agent from metadata if available, otherwise use from results
+        agent = experiment_data.get('agent_from_metadata') or summary['agent'] or 'Unknown'
+
+        # Simple template replacement
+        html_content = template_content.replace('{{ experiment_id }}', html.escape(experiment_data['experiment_id']))
+        html_content = html_content.replace('{{ start_time }}', html.escape(experiment_data['start_time']))
+        html_content = html_content.replace('{{ experiment_runtime }}', html.escape(experiment_data['experiment_runtime']))
+        html_content = html_content.replace('{{ total_task_runtime }}', html.escape(self._format_duration_seconds(summary['total_runtime_seconds'])))
+        html_content = html_content.replace('{{ total_tasks }}', html.escape(str(summary['total_tasks'])))
+        html_content = html_content.replace('{{ successful_tasks }}', html.escape(str(summary['passed_count'])))
+        html_content = html_content.replace('{{ failed_tasks }}', html.escape(str(summary['failed_count'])))
+        html_content = html_content.replace('{{ errored_tasks }}', html.escape(str(summary['errored_count'])))
+        html_content = html_content.replace('{{ success_pct }}', html.escape(f"{summary['success_rate']:.1f}"))
+        html_content = html_content.replace('{{ total_cost }}', html.escape(f"${summary['total_cost']:.4f}"))
+        html_content = html_content.replace('{{ agent }}', html.escape(agent))
+        html_content = html_content.replace('{{ model }}', html.escape(model))
+        html_content = html_content.replace('{{ db_type }}', html.escape(summary['db_type'] or 'Unknown'))
+        html_content = html_content.replace('{{ project_type }}', html.escape(summary['project_type'] or 'Unknown'))
+        html_content = html_content.replace('{{ used_mcp }}', 'Yes' if summary['used_mcp'] else 'No')
 
         # Replace the entire table section with the generated HTML table
         import re
         pattern = r'<table[^>]*>.*?</table>'
         html_content = re.sub(pattern, html_table, html_content, flags=re.DOTALL)
+
+        # Load task.yaml contents and embed as JavaScript object
+        task_yamls = self._load_task_yaml_contents(experiment_data)
+        task_yamls_js = json.dumps(task_yamls, indent=2)
+        task_yamls_script = f"<script>\n        const TASK_YAMLS = {task_yamls_js};\n    </script>"
+
+        # Insert the task yamls script before the closing </head> tag
+        html_content = html_content.replace('</head>', f'{task_yamls_script}\n</head>')
 
         # Write the HTML file
         output_path = self.html_dir / "index.html"
@@ -171,6 +213,45 @@ class ResultsHTMLGenerator:
                 f.writelines(lines[1:])
         else:
             dest_tsv_no_header.touch()
+
+    def _get_base_task_id(self, task_id: str) -> str:
+        """Extract base task ID from variant task ID.
+
+        e.g., 'foo.hard.1-of-1' -> 'foo'
+              'foo.base.2-of-3' -> 'foo'
+              'foo' -> 'foo'
+        """
+        # Task variants follow pattern: base_task_id.variant_name.n-of-m
+        # Split and check if it looks like a variant
+        parts = task_id.split('.')
+        if len(parts) >= 2:
+            # Check if last part matches n-of-m pattern
+            if len(parts) >= 2 and '-of-' in parts[-1]:
+                # Return everything except the last two parts (variant name and n-of-m)
+                return '.'.join(parts[:-2]) if len(parts) > 2 else parts[0]
+            # Check if second-to-last part is a known variant name
+            # and return the base
+            return parts[0]
+        return task_id
+
+    def _load_task_yaml_contents(self, experiment_data: Dict[str, Any]) -> Dict[str, str]:
+        """Load task.yaml contents for each task and return as a dictionary."""
+        tasks_dir = Path(__file__).parent.parent / "tasks"
+        task_yamls = {}
+
+        for task_data in experiment_data['tasks']:
+            task_id = task_data['task_id']
+            base_task_id = self._get_base_task_id(task_id)
+            source_yaml = tasks_dir / base_task_id / "task.yaml"
+
+            if source_yaml.exists():
+                with open(source_yaml, 'r') as f:
+                    task_yamls[task_id] = f.read()
+            else:
+                task_yamls[task_id] = f"# task.yaml not found for {task_id} (base: {base_task_id})"
+                print(f"Warning: task.yaml not found for {task_id} at {source_yaml}")
+
+        return task_yamls
 
     def _generate_task_detail_pages(self, task_data: Dict[str, Any]):
         """Generate detail pages for a specific task."""
@@ -298,10 +379,10 @@ class ResultsHTMLGenerator:
             template_content = f.read()
 
         # Simple template replacement
-        html_content = template_content.replace('{{ title }}', title)
-        html_content = html_content.replace('{{ task_id }}', task_id)
-        html_content = html_content.replace('{{ content }}', content)
-        html_content = html_content.replace('{{ content_type }}', content_type)
+        html_content = template_content.replace('{{ title }}', html.escape(title))
+        html_content = html_content.replace('{{ task_id }}', html.escape(task_id))
+        html_content = html_content.replace('{{ content }}', html.escape(content))
+        html_content = html_content.replace('{{ content_type }}', html.escape(content_type))
 
         with open(output_path, 'w') as f:
             f.write(html_content)

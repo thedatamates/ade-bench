@@ -16,6 +16,7 @@ class ParserResult:
     """Result from parsing test output, containing both test results and status messages."""
     test_results: dict[str, UnitTestStatus]
     status_message: Optional[str] = None
+    expected_test_count: Optional[int] = None  # Number of tests expected (from "[ade-bench] expected_test_count=N" line)
 
 
 class BaseParser(ABC):
